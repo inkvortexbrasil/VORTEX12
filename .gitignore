@@ -1,0 +1,21 @@
+# === CHAVES E SEGREDOS — NUNCA SUBIR ===
+api-server/.env
+.env
+*.env
+
+# === DEPENDÊNCIAS NODE — REGENERÁVEIS ===
+node_modules/
+api-server/node_modules/
+
+# === ARQUIVOS DE SISTEMA ===
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# === BACKUPS LOCAIS ===
+*.json.bak
+*-BACKUP-*.json
+
+# === LOGS ===
+*.log
+logs/

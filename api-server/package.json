@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "diff": "^9.0.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "node-edge-tts": "^1.2.10",
+    "ws": "^8.21.1"
+  }
+}
