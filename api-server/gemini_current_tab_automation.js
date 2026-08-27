@@ -550,14 +550,46 @@ async function inspectGeminiState(page) {
       const label = normalize([element.getAttribute('aria-label'), element.getAttribute('title'), element.textContent].filter(Boolean).join(' '));
       return label.includes('download') || label.includes('baixar');
     });
-    const imageKeys = controls.map((control, index) => {
+
+    const generatedImages = Array.from(document.querySelectorAll(
+      'model-response img, [data-test-id*="response"] img, .response-container img, article img, section img, .generated-image img'
+    )).filter(img => {
+      const src = img.currentSrc || img.src || '';
+      if (!src || src.startsWith('data:image/svg')) return false;
+      const rect = img.getBoundingClientRect();
+      const isAvatar = (rect.width > 0 && rect.width < 80) || (rect.height > 0 && rect.height < 80)
+        || /avatar|sparkle|icon|logo/i.test(img.className || '')
+        || /avatar|sparkle|icon|logo/i.test(img.getAttribute('aria-label') || '');
+      return !isAvatar;
+    });
+
+    const imageKeySet = new Set();
+    const imageKeys = [];
+
+    controls.forEach((control, index) => {
       const response = control.closest('model-response, [data-test-id*="response"], .response-container, article, section');
       const image = (response && response.querySelector('img[src]')) || control.closest('div')?.querySelector('img[src]');
       const source = image && (image.currentSrc || image.src);
-      return (response && (response.getAttribute('data-response-id') || response.getAttribute('data-test-id') || response.id))
+      const key = (response && (response.getAttribute('data-response-id') || response.getAttribute('data-test-id') || response.id))
         || control.getAttribute('data-test-id')
         || `gemini-image-${fingerprint(`${source || ''}|${index}`)}`;
+      if (!imageKeySet.has(key)) {
+        imageKeySet.add(key);
+        imageKeys.push(key);
+      }
     });
+
+    generatedImages.forEach((image, index) => {
+      const response = image.closest('model-response, [data-test-id*="response"], .response-container, article, section');
+      const source = image.currentSrc || image.src;
+      const key = (response && (response.getAttribute('data-response-id') || response.getAttribute('data-test-id') || response.id))
+        || `gemini-image-${fingerprint(`${source || ''}|${index}`)}`;
+      if (!imageKeySet.has(key)) {
+        imageKeySet.add(key);
+        imageKeys.push(key);
+      }
+    });
+
     const busy = Array.from(document.querySelectorAll('button, [role="button"]')).some(element => {
       const label = normalize([element.getAttribute('aria-label'), element.textContent].filter(Boolean).join(' '));
       const rect = element.getBoundingClientRect();
@@ -567,7 +599,7 @@ async function inspectGeminiState(page) {
         && element.getAttribute('aria-hidden') !== 'true'
         && style.display !== 'none'
         && style.visibility !== 'hidden'
-        && Number.parseFloat(style.opacity || '1') > 0
+        && Number.parseFloat(style.opacity || '1') > 0;
       const busyLabels = [
         'parar', 'parar resposta', 'parar de responder', 'parar de gerar', 'interromper', 
         'stop', 'stop response', 'stop generating', 'cancelar', 'cancel'
@@ -575,7 +607,7 @@ async function inspectGeminiState(page) {
       return visibleAndActive && (
         busyLabels.some(value => label === value || label.startsWith(`${value} `)) ||
         element.getAttribute('data-test-id') === 'stop-button' ||
-        (element.querySelector('svg') && label.includes('parar'))
+        (element.querySelector('svg') && /\b(?:parar|stop|interromper)\b/i.test(label) && !label.includes('comparar'))
       );
     });
     const sendButtonActive = Array.from(document.querySelectorAll('button, [role="button"]')).some(element => {
@@ -628,6 +660,8 @@ async function composerText(page) {
 
 async function waitForGeminiComposerIdle(page, shouldCancel) {
   let readySince = null;
+  const started = Date.now();
+  const maxWaitMs = 15000;
   while (true) {
     if (shouldCancel && shouldCancel()) throw new Error('__GEMINI_CANCELLED__');
     const state = await inspectGeminiState(page);
@@ -635,6 +669,8 @@ async function waitForGeminiComposerIdle(page, shouldCancel) {
     if (!state.busy && point) {
       if (readySince === null) readySince = Date.now();
       if (Date.now() - readySince >= 1000) return true;
+    } else if (point && Date.now() - started >= maxWaitMs) {
+      return true;
     } else {
       readySince = null;
     }
@@ -652,12 +688,6 @@ async function insertPrompt(page, prompt) {
   await page.keyboard.press('Backspace');
   const client = page._client();
   await client.send('Input.insertText', { text: String(prompt || '') });
-  
-  await delay(100);
-  await page.keyboard.press('Space');
-  await delay(100);
-  await page.keyboard.press('Backspace');
-  await delay(100);
   await page.keyboard.press('End');
 }
 
