@@ -340,6 +340,7 @@ async function startNewGeminiChat(page, onProgress) {
   if (!clicked) throw new Error('O comando Nova conversa não foi encontrado no Gemini.');
   await delay(1200);
   await waitForComposer(page);
+  await page.evaluate(() => { window.__vortexSessionKeys = []; }).catch(() => {});
   if (onProgress) onProgress(4, 'Nova conversa do Gemini aberta na conta atual.');
 }
 
@@ -563,6 +564,7 @@ async function inspectGeminiState(page) {
       return !isAvatar;
     });
 
+    window.__vortexSessionKeys = window.__vortexSessionKeys || [];
     const imageKeySet = new Set();
     const imageKeys = [];
 
@@ -577,6 +579,9 @@ async function inspectGeminiState(page) {
         imageKeySet.add(key);
         imageKeys.push(key);
       }
+      if (!window.__vortexSessionKeys.includes(key)) {
+        window.__vortexSessionKeys.push(key);
+      }
     });
 
     generatedImages.forEach((image, index) => {
@@ -584,6 +589,18 @@ async function inspectGeminiState(page) {
       const source = image.currentSrc || image.src;
       const key = (response && (response.getAttribute('data-response-id') || response.getAttribute('data-test-id') || response.id))
         || `gemini-image-${fingerprint(`${source || ''}|${index}`)}`;
+      if (!imageKeySet.has(key)) {
+        imageKeySet.add(key);
+        imageKeys.push(key);
+      }
+      if (!window.__vortexSessionKeys.includes(key)) {
+        window.__vortexSessionKeys.push(key);
+      }
+    });
+
+    // Imunidade ao scroll virtual: garante que chaves já vistas na sessão nunca diminuam
+    // mesmo quando o Angular remove do DOM as mensagens do topo.
+    window.__vortexSessionKeys.forEach(key => {
       if (!imageKeySet.has(key)) {
         imageKeySet.add(key);
         imageKeys.push(key);
