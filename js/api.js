@@ -134,11 +134,26 @@ const API = {
     };
 
     campaign.generatedGPT = true;
-    campaign.generatedGemini = false;
-    campaign.generatedFlow = false;
-    campaign.flow = {};
-    campaign.geminiScenes = [];
-    campaign.motionScenes = [];
+
+    if (payloadResult.flowMaster || (Array.isArray(payloadResult.motionScenes) && payloadResult.motionScenes.length)) {
+      campaign.generatedGemini = true;
+      campaign.generatedFlow = true;
+      campaign.flow = payloadResult.flowMaster || { prompt: 'Create a clip using the images selected above, in that order.' };
+      const rawMotions = payloadResult.motionScenes || [];
+      campaign.geminiScenes = rawMotions.map((s, idx) => ({
+        no: s.number || idx + 1,
+        prompt: s.motionPrompt || s.prompt || '',
+        assembledPrompt: s.assembledPrompt || s.motionPrompt || s.prompt || '',
+        ...s
+      }));
+      campaign.motionScenes = campaign.geminiScenes;
+    } else {
+      campaign.generatedGemini = false;
+      campaign.generatedFlow = false;
+      campaign.flow = {};
+      campaign.geminiScenes = [];
+      campaign.motionScenes = [];
+    }
     
     // Auto-create folders on disk
     fetch('/api/init-render-folders', {

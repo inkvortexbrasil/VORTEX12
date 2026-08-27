@@ -157,7 +157,10 @@ function readFinalChatGPTQueue(ROOT, numStr) {
 }
 
 function readFlowChatGPTQueue(ROOT, numStr) {
-  const geminiJson = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `5_prompts_gemini_motions_${numStr}.json`);
+  const geminiJson7 = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `7_prompts_gemini_motions_${numStr}.json`);
+  const geminiJson10 = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `10_prompts_gemini_motions_${numStr}.json`);
+  const geminiJson5 = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `5_prompts_gemini_motions_${numStr}.json`);
+  const geminiJson = fs.existsSync(geminiJson7) ? geminiJson7 : (fs.existsSync(geminiJson10) ? geminiJson10 : geminiJson5);
   const flowJson = path.join(ROOT, 'minisseries', String(numStr), 'flow', `flow_master_prompts_${numStr}.json`);
   let scenes = [];
   if (fs.existsSync(geminiJson)) {
@@ -172,7 +175,7 @@ function readFlowChatGPTQueue(ROOT, numStr) {
       scenes = Array.isArray(parsed.scenes) ? parsed.scenes : (Array.isArray(parsed) ? parsed : []);
     } catch (_) {}
   }
-  const queue = scenes.slice(0, 5).map((item, index) => {
+  const queue = scenes.slice(0, 7).map((item, index) => {
     const sequence = index + 1;
     const promptText = sanitizePromptText(item.motionPrompt || item.prompt || item.visualPrompt || item.referenceFrame || '');
     return {
@@ -255,7 +258,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
         const url = new URL(req.url, 'http://127.0.0.1');
         const numStr = sanitizeNumericId(url.searchParams.get('number') || '01');
         const mode = url.searchParams.get('mode') === 'flow' ? 'flow' : 'minisseries';
-        const total = mode === 'flow' ? 5 : 50;
+        const total = mode === 'flow' ? 7 : 50;
         const manifest = robotManifest.reconcileManifest({ numStr, mode, total, rootDir: ROOT });
         const scenes = Object.values(manifest.scenes || {});
         send(res, 200, {
@@ -524,7 +527,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
         const numStr = sanitizeNumericId(payload.number || payload.campaignId || '01');
         const accountId = normalizeAccountId(payload.accountId);
         const mode = payload.mode === 'flow' ? 'flow' : 'minisseries';
-        const total = Math.min(50, Math.max(1, Number.parseInt(payload.total, 10) || (mode === 'flow' ? 5 : 50)));
+        const total = Math.min(50, Math.max(1, Number.parseInt(payload.total, 10) || (mode === 'flow' ? 7 : 50)));
 
         const jobId = `chatgpt-download-${numStr}-${Date.now()}`;
         activeChatGPTWebJobs[jobId] = {
@@ -596,7 +599,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
           mode,
           status: 'running',
           progress: 5,
-          message: `Iniciando Resgate GPT no Chrome (${mode === 'flow' ? 'Flow 5 Cenas' : 'Minissérie ' + numStr})...`
+          message: `Iniciando Resgate GPT no Chrome (${mode === 'flow' ? 'Flow 7 Cenas' : 'Minissérie ' + numStr})...`
         };
 
         send(res, 200, { jobId, status: 'running' });

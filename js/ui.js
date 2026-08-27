@@ -1,4 +1,19 @@
 
+const FLOW_7_IMAGE_REFS = Object.freeze(['img_001', 'img_011', 'img_016', 'img_021', 'img_031', 'img_041', 'img_046']);
+
+const GPT_10_SCENES_META = Object.freeze([
+  { sceneNo: 1, imageFile: 'img_001', masterVideo: 'MASTER 1 (10s)', masterFile: 'master_1.mp4' },
+  { sceneNo: 2, imageFile: 'img_006', masterVideo: 'MASTER 1 (10s)', masterFile: 'master_1.mp4' },
+  { sceneNo: 3, imageFile: 'img_011', masterVideo: 'MASTER 1 (10s)', masterFile: 'master_1.mp4' },
+  { sceneNo: 4, imageFile: 'img_016', masterVideo: 'MASTER 1 (10s)', masterFile: 'master_1.mp4' },
+  { sceneNo: 5, imageFile: 'img_021', masterVideo: 'MASTER 1 (10s)', masterFile: 'master_1.mp4' },
+  { sceneNo: 6, imageFile: 'img_026', masterVideo: 'MASTER 2 (10s)', masterFile: 'master_2.mp4' },
+  { sceneNo: 7, imageFile: 'img_031', masterVideo: 'MASTER 2 (10s)', masterFile: 'master_2.mp4' },
+  { sceneNo: 8, imageFile: 'img_036', masterVideo: 'MASTER 2 (10s)', masterFile: 'master_2.mp4' },
+  { sceneNo: 9, imageFile: 'img_041', masterVideo: 'MASTER 2 (10s)', masterFile: 'master_2.mp4' },
+  { sceneNo: 10, imageFile: 'img_046', masterVideo: 'MASTER 2 (10s)', masterFile: 'master_2.mp4' }
+]);
+
 function getRichContextDescription(topic) {
   if (!topic) return "";
   const title = (topic.title || "").trim();
@@ -161,14 +176,13 @@ const UI = {
 
     const activePanel = document.getElementById('activeCampaignPanel');
     const rightArea   = document.getElementById('multiversePromptsArea');
-
-    const hideCampaignPanel = () => {
-      if (activePanel) activePanel.style.display = 'none';
-      if (rightArea)   rightArea.style.display   = 'none';
-    };
+    const controlPanel = document.getElementById('multiverseControlPanel');
+    const orbitLeft = document.getElementById('orbitLeft');
 
     if (AppState.isGeneratingSubjects) {
-      hideCampaignPanel();
+      if (activePanel) activePanel.style.display = 'flex';
+      if (rightArea)   rightArea.style.display   = 'flex';
+      
       this.subjectsGrid.style.display = 'flex';
       const nums = AppState.generatingNumbers && AppState.generatingNumbers.length > 0 ? AppState.generatingNumbers.join(', ') : '';
       const numLabel = nums ? `Minissérie #${nums}` : 'Nova Minissérie';
@@ -247,7 +261,8 @@ const UI = {
     }
 
     if (AppState.suggestedSubjects && AppState.suggestedSubjects.length > 0) {
-      hideCampaignPanel();
+      if (activePanel) activePanel.style.display = 'flex';
+      if (rightArea)   rightArea.style.display   = 'flex';
       this.subjectsGrid.style.display = 'flex';
       this.subjectsGrid.style.flexDirection = 'column';
       this.subjectsGrid.style.gap = '16px';
@@ -290,6 +305,13 @@ const UI = {
       return;
     }
 
+    if (controlPanel) {
+      controlPanel.style.background = 'rgba(255, 255, 255, 0.02)';
+      controlPanel.style.border = '1px solid rgba(0, 174, 239, 0.25)';
+      controlPanel.style.boxShadow = 'inset 0 0 15px rgba(0,174,239,0.06), 0 0 20px rgba(0,174,239,0.1)';
+      controlPanel.style.backdropFilter = 'blur(1px)';
+    }
+
     this.subjectsGrid.style.display = 'none';
     this.subjectsGrid.innerHTML = '';
   },
@@ -329,18 +351,23 @@ const UI = {
 Object.assign(UI, {
 
 
+  renderMiniseriesNotGenerated(campaign) {
+    const num = String(campaign.number || campaign.no || campaign.id || '').padStart(2, '0') || '15';
+    return `
+      <div style="padding: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <button class="actionBtn" style="background: var(--brandGrad); padding: 18px 36px; font-size: 1.15rem; font-weight: 800; font-family: var(--uiRounded); border: none; border-radius: 12px; box-shadow: 0 0 25px rgba(0, 174, 239, 0.45); cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s ease;" onclick="this.innerText='⏳ GERANDO MINISSÉRIE ${num}...'; this.style.opacity='0.7'; this.style.pointerEvents='none'; handleGenerateAction('minisserie', '${campaign.id}')">
+          ✨ GERAR MINISSÉRIE ${num}
+        </button>
+      </div>
+    `;
+  },
+
   renderGPTArea() {
     const campaign = AppState.getSelectedCampaign();
     if(!campaign) return;
 
     if (!campaign.generatedGPT) {
-      this.contentArea.innerHTML = `
-        <div style="padding: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-          <h2 style="color: #fff; font-family: var(--uiRounded); margin-bottom: 16px;">Direção de Arte (GPT)</h2>
-          <p style="color: var(--ivTextSecondary); margin-bottom: 32px; max-width: 500px;">Gere as dez cenas do GPT e a Legenda Social em uma única composição para esta minissérie.</p>
-          <button class="actionBtn" style="background:var(--brandGrad); padding:16px 32px; font-size:1.1rem; border:none;" onclick="this.innerText='⏳ GERANDO GPT + LEGENDA...'; this.style.opacity='0.7'; this.style.pointerEvents='none'; handleGenerateAction('gpt', '${campaign.id}')">✨ GERAR GPT + LEGENDA SOCIAL</button>
-        </div>
-      `;
+      this.contentArea.innerHTML = this.renderMiniseriesNotGenerated(campaign);
       return;
     }
 
@@ -384,15 +411,22 @@ Object.assign(UI, {
       `;
     } else if (scenes.length > 0 && scenes[activeIdx]) {
       const s = scenes[activeIdx];
+      const meta = GPT_10_SCENES_META[activeIdx] || { imageFile: `img_${String(activeIdx * 5 + 1).padStart(3, '0')}`, masterVideo: activeIdx < 5 ? 'MASTER 1 (10s)' : 'MASTER 2 (10s)' };
+      const titleHtml = s.title ? `<div style="color: #fff; font-family: var(--uiRounded); font-size: 0.94rem; font-weight: 800; margin-bottom: 8px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid var(--cyan); text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${s.title}</div>` : '';
       contentHtml = `
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-shrink: 0; width: 100%;">
-          <button id="btnTabCapa" class="badge actionBtn" style="cursor: pointer; background: rgba(4,12,31,0.58); color: rgba(226,232,240,0.82); border: 1px solid rgba(148,163,184,0.2); padding: 6px 18px; font-size: 0.8rem; font-weight: 800; border-radius: 8px; transition: all 0.2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); letter-spacing: 0.05em;" onclick="window.switchSceneTab('capa', 'gpt')">
-            CAPA
-          </button>
-          <button class="badge actionBtn" style="cursor: pointer; background: ${s.copiedGPT ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.25)'}; color: #fff; border: 1px solid ${s.copiedGPT ? 'transparent' : 'var(--cyan)'}; padding: 6px 18px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3);" onclick="window.copyExpandedContent('gpt', ${activeIdx}, this)">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-shrink: 0; width: 100%; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="btnTabCapa" class="badge actionBtn" style="cursor: pointer; background: rgba(4,12,31,0.58); color: rgba(226,232,240,0.82); border: 1px solid rgba(148,163,184,0.2); padding: 5px 14px; font-size: 0.76rem; font-weight: 800; border-radius: 8px; transition: all 0.2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); letter-spacing: 0.05em;" onclick="window.switchSceneTab('capa', 'gpt')">
+              CAPA
+            </button>
+            <span style="font-size: 0.74rem; color: #fff; font-weight: 700;">Esteira: <code style="background: rgba(0, 174, 239, 0.15); padding: 2px 6px; border-radius: 4px; color: #67e8f9;">${meta.imageFile}.png</code></span>
+            <span style="font-size: 0.72rem; color: #c084fc; font-weight: 800; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 2px 6px; border-radius: 4px;">🎬 ${meta.masterVideo}</span>
+          </div>
+          <button class="badge actionBtn" style="cursor: pointer; background: ${s.copiedGPT ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.25)'}; color: #fff; border: 1px solid ${s.copiedGPT ? 'transparent' : 'var(--cyan)'}; padding: 5px 16px; font-size: 0.76rem; font-weight: bold; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3);" onclick="window.copyExpandedContent('gpt', ${activeIdx}, this)">
             ${s.copiedGPT ? '✓ COPIADO' : '📋 COPIAR'}
           </button>
         </div>
+        ${titleHtml}
         <div class="show-scroll" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 6px; ">
           <p id="gptPromptText_${activeIdx}" style="color: #e2e8f0; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.86rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.55; white-space: pre-wrap; text-shadow: 0 1px 3px rgba(0,0,0,0.9); margin: 0; padding: 4px 8px 75px 8px;">
             ${s.assembledPrompt || s.prompt}
@@ -415,19 +449,8 @@ Object.assign(UI, {
     const campaign = AppState.getSelectedCampaign();
     if(!campaign) return;
 
-    if (!campaign.generatedGPT) {
-      this.contentArea.innerHTML = `<div style="padding:40px; text-align:center; color:var(--ivTextSecondary);">Gere primeiro as Cenas GPT.</div>`;
-      return;
-    }
-    
-    if (!campaign.generatedGemini) {
-      this.contentArea.innerHTML = `
-        <div style="padding: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-          <h2 style="color: var(--magenta); font-family: var(--uiRounded); margin-bottom: 16px;">Movimentos Dinâmicos (Gemini)</h2>
-          <p style="color: var(--ivTextSecondary); margin-bottom: 32px; max-width: 500px;">Gere o Flow e os cinco movimentos do Gemini em conjunto, com cada movimento alinhado à sua cena e transição.</p>
-          <button class="actionBtn" style="background:rgba(232,0,109,0.2); color:var(--magenta); border:1px solid var(--magenta); padding:16px 32px; font-size:1.1rem;" onclick="this.innerText='⏳ GERANDO FLOW + GEMINI...'; this.style.opacity='0.7'; this.style.pointerEvents='none'; handleGenerateAction('gemini', '${campaign.id}')">🎥 GERAR FLOW + GEMINI</button>
-        </div>
-      `;
+    if (!campaign.generatedGPT || !campaign.generatedGemini) {
+      this.contentArea.innerHTML = this.renderMiniseriesNotGenerated(campaign);
       return;
     }
 
@@ -440,9 +463,11 @@ Object.assign(UI, {
     
     const tabsHtml = geminiScenes.map((s, idx) => {
       const isActive = activeIdx === idx;
+      const refImg = s.referenceImage || FLOW_7_IMAGE_REFS[idx] || `img_${String(idx + 1).padStart(3, '0')}`;
       return `
-        <button style="min-width: 44px; height: 28px; background: ${isActive ? 'linear-gradient(135deg, rgba(0,174,239,0.95), rgba(126,34,206,0.95))' : 'rgba(4,12,31,0.58)'}; color: ${isActive ? '#fff' : 'rgba(226,232,240,0.82)'}; border: 1px solid ${isActive ? 'rgba(103,232,249,0.9)' : 'rgba(148,163,184,0.2)'}; padding: 0 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; font-size: 0.72rem; letter-spacing: 0.04em; text-align: center; box-shadow: ${isActive ? '0 0 12px rgba(0,174,239,0.45)' : 'inset 0 1px 0 rgba(255,255,255,0.04)'};" onclick="window.switchSceneTab(${idx}, 'gemini')">
-          ${String(s.no).padStart(2, '0')}
+        <button style="min-width:0; width:100%; height:34px; overflow:hidden; white-space:nowrap; background: ${isActive ? 'linear-gradient(135deg, rgba(0,174,239,0.95), rgba(126,34,206,0.95))' : 'rgba(4,12,31,0.58)'}; color: ${isActive ? '#fff' : 'rgba(226,232,240,0.82)'}; border: 1px solid ${isActive ? 'rgba(103,232,249,0.9)' : 'rgba(148,163,184,0.2)'}; padding: 1px 0; border-radius: 8px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: ${isActive ? '0 0 12px rgba(0,174,239,0.45)' : 'inset 0 1px 0 rgba(255,255,255,0.04)'};" onclick="window.switchSceneTab(${idx}, 'gemini')">
+          <span style="font-size: 0.74rem; font-weight: 900; line-height: 1.1;">${String(s.no || idx + 1).padStart(2, '0')}</span>
+          <span style="font-size: 0.58rem; color: ${isActive ? '#fff' : 'var(--cyan)'}; opacity: 0.9; line-height: 1; margin-top: 1px;">${refImg}</span>
         </button>
       `;
     }).join('');
@@ -450,12 +475,25 @@ Object.assign(UI, {
     let contentHtml = '';
     if (geminiScenes.length > 0 && geminiScenes[activeIdx]) {
       const s = geminiScenes[activeIdx];
+      const refImg = s.referenceImage || FLOW_7_IMAGE_REFS[activeIdx] || `img_${String(activeIdx + 1).padStart(3, '0')}`;
+      const titleHtml = s.title ? `<div style="color: #fff; font-family: var(--uiRounded); font-size: 0.88rem; font-weight: 800; margin-bottom: 6px; padding: 2px 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${s.title}</div>` : '';
+      
       contentHtml = `
-        <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; flex-shrink: 0; flex-wrap: wrap;">
-          <button class="badge actionBtn" style="cursor: pointer; background: ${s.copiedGemini ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.25)'}; color: #fff; border: 1px solid ${s.copiedGemini ? 'transparent' : 'var(--cyan)'}; padding: 6px 18px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3);" onclick="window.copyExpandedContent('gemini', ${activeIdx}, this)">
-            ${s.copiedGemini ? '✓ COPIADO' : '📋 COPIAR'}
-          </button>
+        <div style="background: rgba(0, 174, 239, 0.08); border: 1px solid rgba(0, 174, 239, 0.25); border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+          <div>
+            <span style="color: var(--cyan); font-size: 0.76rem; font-weight: 800; text-transform: uppercase;">Cena #${String(s.no || activeIdx + 1).padStart(2, '0')}</span>
+            <span style="color: #fff; font-size: 0.76rem; font-weight: 700; margin-left: 8px;">Imagem Esteira: <code style="background: rgba(0, 174, 239, 0.2); padding: 2px 6px; border-radius: 4px; color: #67e8f9;">${refImg}.png</code></span>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="badge actionBtn" style="cursor: pointer; background: rgba(0, 255, 128, 0.15); color: #00ff80; border: 1px solid rgba(0, 255, 128, 0.4); padding: 5px 12px; font-size: 0.74rem; font-weight: bold; border-radius: 6px;" onclick="window.syncFlowImages('${campaign.id}')" title="Copia as 7 imagens padronizadas para a pasta flow">
+              🔄 SINCRONIZAR PARA FLOW
+            </button>
+            <button class="badge actionBtn" style="cursor: pointer; background: ${s.copiedGemini ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.25)'}; color: #fff; border: 1px solid ${s.copiedGemini ? 'transparent' : 'var(--cyan)'}; padding: 5px 12px; font-size: 0.74rem; font-weight: bold; border-radius: 6px; transition: all 0.2s ease;" onclick="window.copyExpandedContent('gemini', ${activeIdx}, this)">
+              ${s.copiedGemini ? '✓ COPIADO' : '📋 COPIAR'}
+            </button>
+          </div>
         </div>
+        ${titleHtml}
         <div class="show-scroll" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 6px; ">
           <p id="geminiPromptText_${activeIdx}" style="color: #e2e8f0; display: block; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.86rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.55; white-space: pre-wrap; text-shadow: 0 1px 3px rgba(0,0,0,0.9); margin: 0; padding: 4px 8px 75px 8px;">
             ${s.geminiMotion || s.prompt || ''}
@@ -466,7 +504,7 @@ Object.assign(UI, {
 
     this.contentArea.innerHTML = `
       <div style="padding: 0 8px 16px 8px; height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box;">
-        <div style="display: flex; gap: 5px; justify-content: center; width: 100%; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; flex-shrink: 0; box-sizing: border-box;">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 1px 7px; flex-shrink: 0; box-sizing: border-box;">
           ${tabsHtml}
         </div>
         ${contentHtml}
@@ -478,14 +516,8 @@ Object.assign(UI, {
     const campaign = AppState.getSelectedCampaign();
     if (!campaign) return;
 
-    if (!campaign.social || (!campaign.social.caption && !campaign.social.baseCaption)) {
-      this.contentArea.innerHTML = `
-        <div style="padding: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-          <h2 style="color: var(--cyan); font-family: var(--uiRounded); margin-bottom: 12px; font-size: 1.3rem;">Legendas Social (Instagram / LinkedIn)</h2>
-          <p style="color: var(--ivTextSecondary); margin-bottom: 18px; max-width: 440px; font-size: 0.88rem; line-height: 1.5;">A Legenda Social é gerada obrigatoriamente junto com o GPT.</p>
-          <div style="background: rgba(0,174,239,0.12); color: var(--cyan); border: 1px solid rgba(0,174,239,0.35); padding: 9px 16px; border-radius: 9px; font-size: 0.8rem; font-weight: 800;">VINCULADA A GPT + LEGENDA SOCIAL</div>
-        </div>
-      `;
+    if (!campaign.generatedGPT || !campaign.social || (!campaign.social.caption && !campaign.social.baseCaption)) {
+      this.contentArea.innerHTML = this.renderMiniseriesNotGenerated(campaign);
       return;
     }
 
@@ -498,21 +530,20 @@ Object.assign(UI, {
         <div style="display: flex; align-items: center; margin-bottom: 8px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
           <div>
             <h2 style="color: #fff; font-family: var(--uiRounded); margin: 0 0 2px 0; font-size: 1rem;">Legendas (Social)</h2>
-            <p style="color: rgba(255,255,255,0.45); margin: 0; font-size: 0.75rem;">Instagram, LinkedIn & Redes Sociais</p>
+            <p style="color: rgba(255,255,255,0.45); margin: 0; font-size: 0.75rem;">Instagram, LinkedIn e Redes Sociais</p>
           </div>
         </div>
 
-        <!-- Botão Fixo COPIAR Centralizado Abaixo do Cabeçalho -->
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
-          <button class="badge actionBtn" style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.25)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'var(--cyan)'}; padding: 6px 18px; font-size: 0.8rem; font-weight: bold; border-radius: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3);" onclick="window.copyExpandedContent('social', 0, this)">
-            ${isCopied ? 'COPIADO ✓' : '📋 COPIAR LEGENDA'}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
+          <h3 style="color: rgba(255,255,255,0.7); margin: 0; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1.5px;">Legenda Completa</h3>
+          <button class="badge actionBtn" style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'transparent'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(255,255,255,0.2)'}; padding: 5px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 6px;" onclick="window.copyExpandedContent('social', 0, this)">
+            ${isCopied ? 'COPIADO' : 'COPIAR'}
           </button>
         </div>
 
-        <!-- Área de Texto Rolável Independente -->
-        <div class="show-scroll" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 6px; ">
-          <p id="socialCaptionText" style="color: #e2e8f0; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.88rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.6; white-space: pre-wrap; text-shadow: 0 1px 3px rgba(0,0,0,0.9); margin: 0; padding: 4px 8px 75px 8px;">
-            ${campaign.social.caption || campaign.social.baseCaption || ''}
+        <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0;">
+          <p id="socialCaptionText" style="color: #e2e8f0; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.86rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.55; white-space: pre-wrap; margin: 0; padding: 4px 8px 75px 8px;">
+            ${(campaign.social && (campaign.social.caption || campaign.social.baseCaption)) ? (campaign.social.caption || campaign.social.baseCaption) : 'Legenda ainda não gerada.'}
           </p>
         </div>
       </div>
@@ -523,18 +554,11 @@ Object.assign(UI, {
     const campaign = AppState.getSelectedCampaign();
     if (!campaign) return;
 
-    if (!campaign.flow || !campaign.flow.prompt) {
-      this.contentArea.innerHTML = `
-        <div style="padding: 32px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-          <h2 style="color: var(--cyan); font-family: var(--uiRounded); margin-bottom: 12px; font-size: 1.3rem;">Estrutura Master (Flow)</h2>
-          <p style="color: var(--ivTextSecondary); margin-bottom: 18px; max-width: 440px; font-size: 0.88rem; line-height: 1.5;">A Estrutura Master do Flow é gerada obrigatoriamente junto com o Gemini.</p>
-          <div style="background: rgba(232,0,109,0.12); color: var(--magenta); border: 1px solid rgba(232,0,109,0.35); padding: 9px 16px; border-radius: 9px; font-size: 0.8rem; font-weight: 800;">VINCULADA A FLOW + GEMINI</div>
-        </div>
-      `;
+    if (!campaign.generatedGPT || !campaign.flow || !campaign.flow.prompt) {
+      this.contentArea.innerHTML = this.renderMiniseriesNotGenerated(campaign);
       return;
     }
 
-    // Sempre expandido — sem toggle, sem película
     this.contentArea.innerHTML = `
       <div style="padding:12px 16px 12px 8px;height:100%;display:flex;flex-direction:column;overflow:hidden;">
         <div style="display:flex;align-items:center;margin-bottom:8px;">
@@ -558,21 +582,12 @@ Object.assign(UI, {
         </div>
       </div>
     `;
-
   },
-
 
   renderLibrary() {
     const grid = document.getElementById('libraryGrid');
     const countEl = document.getElementById('libraryResultCount');
     if (!grid) return;
-
-    if (AppState.campaigns.length === 0) {
-      if (countEl) countEl.textContent = '0 minisséries';
-      grid.innerHTML = `<div style="text-align: center; color: var(--ivTextSecondary); padding: 40px;">A Biblioteca está vazia. Gere assuntos na aba de Centro de Comando para começar.</div>`;
-      grid.className = "";
-      return;
-    }
 
     const searchInput = document.getElementById('librarySearch');
     const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -934,122 +949,97 @@ window.renderMultiverseControlPanel = function() {
 
   const t = AppState.studioActiveTab || 'gpt';
   
-  // Status de Telemetria das 4 Etapas
+  // Status de Telemetria: Direção de Arte e Legenda Social
   const hasGpt = Array.isArray(campaign.scenes) && campaign.scenes.length >= 10;
-  const hasGemini = Array.isArray(campaign.geminiScenes) && campaign.geminiScenes.length >= 5;
-  const hasFlow = !!(campaign.flow && campaign.flow.prompt);
-  const hasSocial = !!(campaign.social && campaign.social.caption);
-
-  // O campo Minisséries Afins foi removido do dashboard central e será tratado no módulo de Documentários.
+  const hasSocial = !!(campaign.social && (campaign.social.caption || campaign.social.baseCaption));
 
   panel.innerHTML = `
-    <div class="cockpit-console" style="flex-shrink: 0; padding: 0; display: flex; flex-direction: column; gap: 6px;">
+    <!-- cockpit-robot-station aposentado por ordem do Diretor -->
+    <div class="cockpit-console" style="flex: 1; height: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
 
-      <!-- Título Principal Compacto -->
-      <div class="cockpit-hero" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 8px 12px; text-align: center; overflow: hidden;">
-        <strong style="color: #fff; font-size: 1.1rem; line-height: 1.4; font-family: var(--uiRounded); font-weight: 900; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 4px 12px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;">
+      <!-- Título Principal Compacto e Nobre -->
+      <div class="cockpit-hero" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; padding: 12px 14px; text-align: left; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+        <strong style="color: #fff; font-size: 1.02rem; line-height: 1.35; font-family: var(--uiRounded); font-weight: 900; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 10px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.6px;">
           ${campaign.title || campaign.topic?.title || campaign.assuntoPrincipal || 'SEM TÍTULO DEFINIDO'}
         </strong>
       </div>
 
-      <!-- Grade de Telemetria dos Motores -->
-      <div class="cockpit-status-grid" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;">
-        <div class="cockpit-status-pill" style="display:flex; align-items:center; gap:8px; font-size:0.95rem; color: #fff; font-family: var(--uiRounded); font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px rgba(0,0,0,0.8); opacity: ${hasGpt ? '1' : '0.4'};">
-          <span style="font-size: 1.1rem;">${hasGpt ? '✅' : '⏳'}</span> <span>GPT (IMAGENS)</span>
-        </div>
-        <div class="cockpit-status-pill" style="display:flex; align-items:center; gap:8px; font-size:0.95rem; color: #fff; font-family: var(--uiRounded); font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px rgba(0,0,0,0.8); opacity: ${hasGemini ? '1' : '0.4'};">
-          <span style="font-size: 1.1rem;">${hasGemini ? '✅' : '⏳'}</span> <span>GEMINI (VÍDEO)</span>
-        </div>
-        <div class="cockpit-status-pill" style="display:flex; align-items:center; gap:8px; font-size:0.95rem; color: #fff; font-family: var(--uiRounded); font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px rgba(0,0,0,0.8); opacity: ${hasFlow ? '1' : '0.4'};">
-          <span style="font-size: 1.1rem;">${hasFlow ? '✅' : '⏳'}</span> <span>FLOW (MASTER)</span>
-        </div>
-        <div class="cockpit-status-pill" style="display:flex; align-items:center; gap:8px; font-size:0.95rem; color: #fff; font-family: var(--uiRounded); font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px rgba(0,0,0,0.8); opacity: ${hasSocial ? '1' : '0.4'};">
-          <span style="font-size: 1.1rem;">${hasSocial ? '✅' : '⏳'}</span> <span>LEGENDA SOCIAL</span>
-        </div>
-      </div>
+      <!-- Abas Ampliadas de Comando: Direção de Arte e Legenda Social preenchendo de cima a baixo -->
+      <div class="cockpit-module-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; height: 100%; min-height: 0; margin-top: 2px;">
 
-      <!-- SELETOR DE CENAS DO ROBÔ GEMINI WEB -->
-      <div class="cockpit-robot-station" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 8px 10px; margin-top: 2px;">
-        
-        <!-- Indicador de Destino das Imagens -->
-        <div class="cockpit-destination" style="background: rgba(0, 174, 239, 0.15); border: 1px solid rgba(0, 174, 239, 0.4); border-radius: 6px; padding: 5px 10px; margin-bottom: 6px; text-align: center; font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">
-          📁 DESTINO DO ROBÔ: /minisseries/${cNum}/flow/
-        </div>
+        <!-- ABA 1: DIREÇÃO DE ARTE -->
+        <div class="cockpit-tab-card tab-gpt ${t !== 'social' ? 'active' : ''}" 
+             onclick="AppState.studioActiveTab='gpt'; UI.renderWorkspace();"
+             title="Clique para alternar para a Direção de Arte (10 Cenas do GPT)">
+          
+          ${t !== 'social' ? '<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan)); box-shadow: 0 0 10px var(--cyan);"></div>' : ''}
 
-        <div class="cockpit-scene-selector" style="background: rgba(255,255,255,0.02); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 8px;">
-          <div style="font-size: 0.95rem; font-family: var(--uiRounded); font-weight: 900; color: #fff; margin-bottom: 6px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(0,0,0,0.8);">
-            GEMINI WEB (5 MOVIMENTOS)
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 6px; align-items: center;">
-            <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; cursor: pointer; text-transform: uppercase;">
-              <input type="checkbox" id="geminiTodas" checked onchange="document.querySelectorAll('.gemini-scene-chk').forEach(cb => cb.checked = this.checked)" style="transform: scale(1.2);"> SELECIONAR TODAS AS CENAS
-            </label>
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 3px;">
-              <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
-                <input type="checkbox" class="gemini-scene-chk" value="01" checked style="transform: scale(1.1); margin-bottom: 4px;"> 01
-              </label>
-              <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
-                <input type="checkbox" class="gemini-scene-chk" value="02" checked style="transform: scale(1.1); margin-bottom: 4px;"> 02
-              </label>
-              <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
-                <input type="checkbox" class="gemini-scene-chk" value="03" checked style="transform: scale(1.1); margin-bottom: 4px;"> 03
-              </label>
-              <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
-                <input type="checkbox" class="gemini-scene-chk" value="04" checked style="transform: scale(1.1); margin-bottom: 4px;"> 04
-              </label>
-              <label style="font-size: 0.85rem; font-family: var(--uiRounded); font-weight: 800; color: #fff; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
-                <input type="checkbox" class="gemini-scene-chk" value="05" checked style="transform: scale(1.1); margin-bottom: 4px;"> 05
-              </label>
+          <!-- Topo do Card -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
+            <span style="font-size: 1.85rem; line-height: 1; filter: drop-shadow(0 0 10px rgba(0,174,239,0.7));">🎨</span>
+            <div style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.8px; font-family: var(--uiRounded); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2;">
+              DIREÇÃO<br>DE ARTE
             </div>
+            ${t !== 'social' 
+              ? '<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:900; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(0,174,239,0.25); color:#00e5ff; border:1px solid rgba(0,174,239,0.8); box-shadow:0 0 10px rgba(0,174,239,0.3);"><span style="width:5px; height:5px; border-radius:50%; background:#00e5ff; box-shadow:0 0 6px #00e5ff;"></span> ATIVO</span>' 
+              : '<span style="font-size:0.65rem; font-weight:800; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);">10 CENAS</span>'}
+          </div>
+
+          <!-- Meio do Card: Micro-Chips e Informações -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin: 6px 0;">
+            <span style="background: rgba(0,174,239,0.14); border: 1px solid rgba(0,174,239,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #d0f4ff; font-weight: 700; width: 94%; text-align: center;">🎬 Master 1 (10s)</span>
+            <span style="background: rgba(0,174,239,0.14); border: 1px solid rgba(0,174,239,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #d0f4ff; font-weight: 700; width: 94%; text-align: center;">🎬 Master 2 (10s)</span>
+            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #fff; font-weight: 700; width: 94%; text-align: center;">🎞️ Esteira (50 Img)</span>
+          </div>
+
+          <!-- Base do Card -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; width: 100%;">
+            <span style="font-size: 0.60rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--uiRounded); font-weight: 700;">Prompts 16:9</span>
+            <span style="font-size: 0.75rem; color: ${t !== 'social' ? '#00e5ff' : 'rgba(255,255,255,0.65)'}; font-weight: 900; font-family: var(--uiRounded);">${hasGpt ? '✓ 10 Prontos' : 'Aguardando'}</span>
           </div>
         </div>
 
-        <!-- Botões Disparo Robô e Resgate (NEON) -->
-        <div class="cockpit-robot-actions" style="display: flex; gap: 6px; width: 100%; align-items: stretch; box-sizing: border-box;">
-          <button id="btnAutomateGeminiWeb" class="neonBtn" style="padding: 4px 8px; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.startGeminiWebAutomation('${campaign.id}')">
-            <span style="font-size: 1.15rem; line-height: 1; flex-shrink: 0;">⚡</span>
-            <span style="font-size: 0.86rem; font-weight: 800; letter-spacing: 0.6px; font-family: var(--uiRounded); white-space: nowrap;">ROBÔ GEMINI</span>
-          </button>
-          <button id="btnRescueGeminiWeb" class="neonBtn" style="padding: 0; width: 38px; min-width: 38px; max-width: 38px; height: 38px; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px;" title="Resgatar Downloads: Extrai as imagens que já estão prontas no chat ativo sem gerar novos prompts." onclick="window.rescueGeminiWebDownloads('${campaign.id}')">
-            <span style="font-size: 1.15rem; line-height: 1; text-shadow: 0 0 8px rgba(0,255,128,0.8);">📥</span>
-          </button>
+        <!-- ABA 2: LEGENDA SOCIAL -->
+        <div class="cockpit-tab-card tab-social ${t === 'social' ? 'active' : ''}" 
+             onclick="AppState.studioActiveTab='social'; UI.renderWorkspace();"
+             title="Clique para alternar para a Legenda Social (Mistral)">
+          
+          ${t === 'social' ? '<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--pink), #fff, var(--pink)); box-shadow: 0 0 10px var(--pink);"></div>' : ''}
+
+          <!-- Topo do Card -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
+            <span style="font-size: 1.85rem; line-height: 1; filter: drop-shadow(0 0 10px rgba(236,0,140,0.7));">📝</span>
+            <div style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.8px; font-family: var(--uiRounded); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2;">
+              LEGENDA<br>SOCIAL
+            </div>
+            ${t === 'social' 
+              ? '<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:900; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(236,0,140,0.25); color:#ff66cc; border:1px solid rgba(236,0,140,0.8); box-shadow:0 0 10px rgba(236,0,140,0.3);"><span style="width:5px; height:5px; border-radius:50%; background:#ff66cc; box-shadow:0 0 6px #ff66cc;"></span> ATIVO</span>' 
+              : '<span style="font-size:0.65rem; font-weight:800; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);">10 LINHAS</span>'}
+          </div>
+
+          <!-- Meio do Card: Micro-Chips e Informações -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin: 6px 0;">
+            <span style="background: rgba(236,0,140,0.14); border: 1px solid rgba(236,0,140,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #ffd0ec; font-weight: 700; width: 94%; text-align: center;">📱 Instagram</span>
+            <span style="background: rgba(236,0,140,0.14); border: 1px solid rgba(236,0,140,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #ffd0ec; font-weight: 700; width: 94%; text-align: center;">💼 LinkedIn</span>
+            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #fff; font-weight: 700; width: 94%; text-align: center;">🏷️ 4 Hashtags</span>
+          </div>
+
+          <!-- Base do Card -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; width: 100%;">
+            <span style="font-size: 0.60rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--uiRounded); font-weight: 700;">Copywriting</span>
+            <span style="font-size: 0.75rem; color: ${t === 'social' ? '#ff66cc' : 'rgba(255,255,255,0.65)'}; font-weight: 900; font-family: var(--uiRounded);">${hasSocial ? '✓ Concluída' : 'Aguardando'}</span>
+          </div>
         </div>
+
       </div>
-      
-      <div class="cockpit-module-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
-        <button class="neonBtn ${t === 'gpt' ? 'active' : ''}" onclick="AppState.studioActiveTab='gpt'; UI.renderWorkspace();" title="Direção de Arte (50 Cenas GPT)">
-          <span style="font-size: 1.05rem; line-height: 1; flex-shrink: 0;">📝</span>
-          <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2px; font-family: var(--uiRounded); white-space: nowrap;">DIREÇÃO DE ARTE</span>
-        </button>
-        <button class="neonBtn ${t === 'gemini' ? 'active' : ''}" onclick="AppState.studioActiveTab='gemini'; UI.renderWorkspace();" title="Movimentos (5 Cenas Gemini)">
-          <span style="font-size: 1.05rem; line-height: 1; flex-shrink: 0;">🚀</span>
-          <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2px; font-family: var(--uiRounded); white-space: nowrap;">MOVIMENTOS</span>
-        </button>
-        <button class="neonBtn ${t === 'flow' ? 'active' : ''}" onclick="AppState.studioActiveTab='flow'; UI.renderWorkspace();" title="Estrutura Master (Flow Prompts)">
-          <span style="font-size: 1.05rem; line-height: 1; flex-shrink: 0;">🌊</span>
-          <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2px; font-family: var(--uiRounded); white-space: nowrap;">ESTRUTURA MASTER</span>
-        </button>
-        <button class="neonBtn ${t === 'social' ? 'active' : ''}" onclick="AppState.studioActiveTab='social'; UI.renderWorkspace();" title="Legenda Social (Feed e Hashtags)">
-          <span style="font-size: 1.05rem; line-height: 1; flex-shrink: 0;">📱</span>
-          <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2px; font-family: var(--uiRounded); white-space: nowrap;">LEGENDA SOCIAL</span>
-        </button>
-      </div>
-      
+
       <!-- Fim do Painel Central -->
     </div>
   `;
 
-  // O painel visual continua sendo o mesmo painel do Gemini; o seletor GEM/GPT
-  // apenas alterna seu conteúdo depois que o markup original foi montado.
-  if (typeof window.mountVisualRobotSwitcher === 'function') {
-    window.mountVisualRobotSwitcher(campaign.id);
-  }
-
-  // Renderiza a aba ativa na coluna direita
-  if(t === 'gpt') UI.renderGPTArea();
-  else if(t === 'gemini') UI.renderGeminiArea();
-  else if(t === 'flow') UI.renderFlowArea();
-  else if(t === 'social') UI.renderSocialArea();
+  // Renderiza a aba ativa na coluna direita (somente Direção de Arte ou Legenda Social)
+  if (t === 'social') UI.renderSocialArea();
+  else UI.renderGPTArea();
 };
 
 
@@ -1434,184 +1424,328 @@ UI.renderFontOptions = function(fonts) {
 };
 
 /**
- * BANCO DE 22 EIXOS TECNOLÓGICOS DE VANGUARDA (InkVortex Brasil)
+ * BANCO DE 40 EIXOS TECNOLÓGICOS DE VANGUARDA (InkVortex Brasil)
  */
 window.VORTEX_TECH_THEMES = [
   {
     id: 'theme_01',
     number: 1,
-    title: 'Eletrônica Impressa & Sensores Híbridos',
-    category: 'Eletrônica Funcional',
-    summary: 'Eletrônica Impressa & Sensores Híbridos [Eletrônica Funcional]',
-    briefing: 'Eletrônica Impressa & Sensores Híbridos [Eletrônica Funcional]'
-  },
-  {
-    id: 'theme_02',
-    number: 2,
-    title: 'Passaporte Digital de Produto & Embalagens Conectadas',
-    category: 'Rastreabilidade & Smart Packaging',
-    summary: 'Passaporte Digital de Produto & Embalagens Conectadas [Rastreabilidade & Smart Packaging]',
-    briefing: 'Passaporte Digital de Produto & Embalagens Conectadas [Rastreabilidade & Smart Packaging]'
-  },
-  {
-    id: 'theme_03',
-    number: 3,
-    title: 'Cura Fotônica Avançada',
-    category: 'Processos Fotoquímicos',
-    summary: 'Cura Fotônica Avançada [Processos Fotoquímicos]',
-    briefing: 'Cura Fotônica Avançada [Processos Fotoquímicos]'
-  },
-  {
-    id: 'theme_04',
-    number: 4,
-    title: 'Cores Estruturais & Biomimética Fotônica',
-    category: 'Nanotecnologia Óptica',
-    summary: 'Cores Estruturais & Biomimética Fotônica [Nanotecnologia Óptica]',
-    briefing: 'Cores Estruturais & Biomimética Fotônica [Nanotecnologia Óptica]'
-  },
-  {
-    id: 'theme_05',
-    number: 5,
-    title: 'Direct-to-Shape & Impressão Industrial de Geometrias Complexas',
-    category: 'Robótica & Impressão 3D',
-    summary: 'Direct-to-Shape & Impressão Industrial de Geometrias Complexas [Robótica & Impressão 3D]',
-    briefing: 'Direct-to-Shape & Impressão Industrial de Geometrias Complexas [Robótica & Impressão 3D]'
-  },
-  {
-    id: 'theme_06',
-    number: 6,
-    title: 'Inteligência Artificial Preditiva & Controle Espectral Inline',
-    category: 'Automação & Visão Computacional',
-    summary: 'Inteligência Artificial Preditiva & Controle Espectral Inline [Automação & Visão Computacional]',
-    briefing: 'Inteligência Artificial Preditiva & Controle Espectral Inline [Automação & Visão Computacional]'
-  },
-  {
-    id: 'theme_07',
-    number: 7,
-    title: 'Substratos de Barreira Biodegradáveis & Celulose Nanofibrilada',
-    category: 'Materiais Sustentáveis',
-    summary: 'Substratos de Barreira Biodegradáveis & Celulose Nanofibrilada [Materiais Sustentáveis]',
-    briefing: 'Substratos de Barreira Biodegradáveis & Celulose Nanofibrilada [Materiais Sustentáveis]'
-  },
-  {
-    id: 'theme_08',
-    number: 8,
-    title: 'Nanopontos Quânticos & Tintas de Alta Fidelidade Espectral',
-    category: 'Nanomateriais & Segurança',
-    summary: 'Nanopontos Quânticos & Tintas de Alta Fidelidade Espectral [Nanomateriais & Segurança]',
-    briefing: 'Nanopontos Quânticos & Tintas de Alta Fidelidade Espectral [Nanomateriais & Segurança]'
-  },
-  {
-    id: 'theme_09',
-    number: 9,
-    title: 'Telas Transparentes & Displays Flexíveis Impressos',
-    category: 'Optoeletrônica Impressa',
-    summary: 'Telas Transparentes & Displays Flexíveis Impressos [Optoeletrônica Impressa]',
-    briefing: 'Telas Transparentes & Displays Flexíveis Impressos [Optoeletrônica Impressa]'
-  },
-  {
-    id: 'theme_10',
-    number: 10,
-    title: 'Decoração Cerâmica Digital & Tintas Inorgânicas Fundíveis em Vidro',
-    category: 'Vidros & Cerâmicas Industriais',
-    summary: 'Decoração Cerâmica Digital & Tintas Inorgânicas Fundíveis em Vidro [Vidros & Cerâmicas Industriais]',
-    briefing: 'Decoração Cerâmica Digital & Tintas Inorgânicas Fundíveis em Vidro [Vidros & Cerâmicas Industriais]'
-  },
-  {
-    id: 'theme_11',
-    number: 11,
-    title: 'Eletrônica Efêmera & Dispositivos Biodegradáveis Impressos',
-    category: 'Eletrônica Verde',
-    summary: 'Eletrônica Efêmera & Dispositivos Biodegradáveis Impressos [Eletrônica Verde]',
-    briefing: 'Eletrônica Efêmera & Dispositivos Biodegradáveis Impressos [Eletrônica Verde]'
-  },
-  {
-    id: 'theme_12',
-    number: 12,
-    title: 'Microfluídica Impressa & Dispositivos Lab-on-a-Chip Descartáveis',
-    category: 'Biotecnologia & Saúde',
-    summary: 'Microfluídica Impressa & Dispositivos Lab-on-a-Chip Descartáveis [Biotecnologia & Saúde]',
-    briefing: 'Microfluídica Impressa & Dispositivos Lab-on-a-Chip Descartáveis [Biotecnologia & Saúde]'
-  },
-  {
-    id: 'theme_13',
-    number: 13,
-    title: 'Manufatura Aditiva Funcional & Texturização Háptica',
-    category: 'Acabamento Tátil & Braille',
-    summary: 'Manufatura Aditiva Funcional & Texturização Háptica [Acabamento Tátil & Braille]',
-    briefing: 'Manufatura Aditiva Funcional & Texturização Háptica [Acabamento Tátil & Braille]'
-  },
-  {
-    id: 'theme_14',
-    number: 14,
-    title: 'Tintas Dinâmicas & Resposta a Estímulos',
-    category: 'Tintas Inteligentes',
-    summary: 'Tintas Dinâmicas & Resposta a Estímulos [Tintas Inteligentes]',
-    briefing: 'Tintas Dinâmicas & Resposta a Estímulos [Tintas Inteligentes]'
-  },
-  {
-    id: 'theme_15',
-    number: 15,
-    title: 'Colheita de Energia Impressa & Painéis Fotovoltaicos Orgânicos',
-    category: 'Energia Renovável',
-    summary: 'Colheita de Energia Impressa & Painéis Fotovoltaicos Orgânicos [Energia Renovável]',
-    briefing: 'Colheita de Energia Impressa & Painéis Fotovoltaicos Orgânicos [Energia Renovável]'
-  },
-  {
-    id: 'theme_16',
-    number: 16,
-    title: 'Nanoimprint Lithography Industrial para Óptica e Microholografia',
-    category: 'Nanoestruturação de Superfície',
-    summary: 'Nanoimprint Lithography Industrial para Óptica e Microholografia [Nanoestruturação de Superfície]',
-    briefing: 'Nanoimprint Lithography Industrial para Óptica e Microholografia [Nanoestruturação de Superfície]'
-  },
-  {
-    id: 'theme_17',
-    number: 17,
-    title: 'Cura por Feixe de Elétrons sem Fotoiniciadores',
-    category: 'Embalagens Alimentícias',
-    summary: 'Cura por Feixe de Elétrons sem Fotoiniciadores [Embalagens Alimentícias]',
-    briefing: 'Cura por Feixe de Elétrons sem Fotoiniciadores [Embalagens Alimentícias]'
-  },
-  {
-    id: 'theme_18',
-    number: 18,
-    title: 'Tintas à Base de Grafeno, MXenes e Nanotubos de Carbono',
-    category: 'Nanomateriais Condutivos',
-    summary: 'Tintas à Base de Grafeno, MXenes e Nanotubos de Carbono [Nanomateriais Condutivos]',
-    briefing: 'Tintas à Base de Grafeno, MXenes e Nanotubos de Carbono [Nanomateriais Condutivos]'
-  },
-  {
-    id: 'theme_19',
-    number: 19,
-    title: 'Desentintagem & Reciclagem Circular de Embalagens Multicamada',
-    category: 'Economia Circular',
-    summary: 'Desentintagem & Reciclagem Circular de Embalagens Multicamada [Economia Circular]',
-    briefing: 'Desentintagem & Reciclagem Circular de Embalagens Multicamada [Economia Circular]'
-  },
-  {
-    id: 'theme_20',
-    number: 20,
-    title: 'Gêmeo Digital & Indústria Gráfica 5.0',
-    category: 'Indústria 4.0 / 5.0',
-    summary: 'Gêmeo Digital & Indústria Gráfica 5.0 [Indústria 4.0 / 5.0]',
-    briefing: 'Gêmeo Digital & Indústria Gráfica 5.0 [Indústria 4.0 / 5.0]'
-  },
-  {
-    id: 'theme_21',
-    number: 21,
-    title: 'Impressão Têxtil Digital & Estamparia de Vanguarda',
-    category: 'Impressão Têxtil Industrial',
-    summary: 'Impressão Têxtil Digital & Estamparia de Vanguarda [Impressão Têxtil Industrial]',
-    briefing: 'Impressão Têxtil Digital & Estamparia de Vanguarda [Impressão Têxtil Industrial]'
-  },
-  {
-    id: 'theme_22',
-    number: 22,
     title: 'Tema Livre / Personalizado',
     category: 'Tema Livre',
     summary: 'Tema Livre / Personalizado [Tema Livre]',
     briefing: 'Tema Livre / Personalizado [Tema Livre]'
+  },
+  {
+    id: 'theme_02',
+    number: 2,
+    title: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]',
+    briefing: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_03',
+    number: 3,
+    title: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água',
+    category: 'Indústria Têxtil',
+    summary: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]',
+    briefing: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_04',
+    number: 4,
+    title: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas',
+    category: 'Indústria Têxtil',
+    summary: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]',
+    briefing: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_05',
+    number: 5,
+    title: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]',
+    briefing: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_06',
+    number: 6,
+    title: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes',
+    category: 'Indústria Têxtil',
+    summary: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]',
+    briefing: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_07',
+    number: 7,
+    title: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes',
+    category: 'Indústria Têxtil',
+    summary: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]',
+    briefing: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_08',
+    number: 8,
+    title: 'Inteligência Artificial no Design Têxtil & Otimização Automática',
+    category: 'Indústria Têxtil',
+    summary: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]',
+    briefing: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_09',
+    number: 9,
+    title: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]',
+    briefing: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_10',
+    number: 10,
+    title: 'Tintas Reativas Digitais & Fixação Contínua em Algodão',
+    category: 'Indústria Têxtil',
+    summary: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]',
+    briefing: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_11',
+    number: 11,
+    title: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio',
+    category: 'Indústria Têxtil',
+    summary: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]',
+    briefing: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_12',
+    number: 12,
+    title: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos',
+    category: 'Indústria Têxtil',
+    summary: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]',
+    briefing: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_13',
+    number: 13,
+    title: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll',
+    category: 'Indústria Têxtil',
+    summary: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]',
+    briefing: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_14',
+    number: 14,
+    title: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]',
+    briefing: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_15',
+    number: 15,
+    title: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos',
+    category: 'Indústria Têxtil',
+    summary: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]',
+    briefing: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_16',
+    number: 16,
+    title: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa',
+    category: 'Indústria Têxtil',
+    summary: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]',
+    briefing: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_17',
+    number: 17,
+    title: 'Rastreabilidade Têxtil & Passaporte Digital Impresso',
+    category: 'Indústria Têxtil',
+    summary: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]',
+    briefing: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_18',
+    number: 18,
+    title: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica',
+    category: 'Indústria Têxtil',
+    summary: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]',
+    briefing: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_19',
+    number: 19,
+    title: 'Tintas Termocrômicas Digitais & Estamparia Responsiva',
+    category: 'Indústria Têxtil',
+    summary: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]',
+    briefing: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_20',
+    number: 20,
+    title: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos',
+    category: 'Indústria Têxtil',
+    summary: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]',
+    briefing: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_21',
+    number: 21,
+    title: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil)',
+    category: 'Indústria Têxtil',
+    summary: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]',
+    briefing: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_22',
+    number: 22,
+    title: 'Impressão Digital Single-Pass & Substituição da Rotativa',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]',
+    briefing: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_23',
+    number: 23,
+    title: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica',
+    category: 'Indústria Têxtil',
+    summary: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]',
+    briefing: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_24',
+    number: 24,
+    title: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem',
+    category: 'Indústria Têxtil',
+    summary: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]',
+    briefing: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_25',
+    number: 25,
+    title: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas',
+    category: 'Indústria Têxtil',
+    summary: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]',
+    briefing: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_26',
+    number: 26,
+    title: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas',
+    category: 'Indústria Têxtil',
+    summary: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]',
+    briefing: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_27',
+    number: 27,
+    title: 'Tintas Condutivas Transparentes para Vestuário Eletrônico',
+    category: 'Indústria Têxtil',
+    summary: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]',
+    briefing: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_28',
+    number: 28,
+    title: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance',
+    category: 'Indústria Têxtil',
+    summary: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]',
+    briefing: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_29',
+    number: 29,
+    title: 'Impressão Sublimática de Grande Formato para Decoração e Moda',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]',
+    briefing: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_30',
+    number: 30,
+    title: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas',
+    category: 'Indústria Têxtil',
+    summary: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]',
+    briefing: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_31',
+    number: 31,
+    title: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia',
+    category: 'Indústria Têxtil',
+    summary: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]',
+    briefing: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_32',
+    number: 32,
+    title: 'Personalização em Massa Algorítmica na Estamparia de Vestuário',
+    category: 'Indústria Têxtil',
+    summary: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]',
+    briefing: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_33',
+    number: 33,
+    title: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada',
+    category: 'Indústria Têxtil',
+    summary: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]',
+    briefing: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_34',
+    number: 34,
+    title: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta',
+    category: 'Indústria Têxtil',
+    summary: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]',
+    briefing: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_35',
+    number: 35,
+    title: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica',
+    category: 'Indústria Têxtil',
+    summary: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]',
+    briefing: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_36',
+    number: 36,
+    title: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital',
+    category: 'Indústria Têxtil',
+    summary: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]',
+    briefing: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_37',
+    number: 37,
+    title: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água',
+    category: 'Indústria Têxtil',
+    summary: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]',
+    briefing: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_38',
+    number: 38,
+    title: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume',
+    category: 'Indústria Têxtil',
+    summary: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]',
+    briefing: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_39',
+    number: 39,
+    title: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil)',
+    category: 'Indústria Têxtil',
+    summary: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]',
+    briefing: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]'
+  },
+  {
+    id: 'theme_40',
+    number: 40,
+    title: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital',
+    category: 'Indústria Têxtil',
+    summary: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]',
+    briefing: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]'
   }
 ];
 
@@ -1627,7 +1761,17 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
 
   const numFormatted = String(nextNumber).padStart(2, '0');
   const themes = window.VORTEX_TECH_THEMES || [];
-  let selectedIndex = 0;
+  
+  if (typeof window.VORTEX_LAST_THEME_INDEX === 'undefined') {
+    const storedTheme = localStorage.getItem('VORTEX_LAST_THEME_INDEX');
+    window.VORTEX_LAST_THEME_INDEX = storedTheme !== null ? parseInt(storedTheme, 10) : 0;
+  }
+  
+  let selectedIndex = window.VORTEX_LAST_THEME_INDEX + 1;
+  // Nunca sugere o Tema Livre (índice 0) automaticamente
+  if (selectedIndex >= themes.length || selectedIndex === 0) {
+    selectedIndex = 1;
+  }
 
   overlay.innerHTML = `
     <div style="background: linear-gradient(135deg, rgba(14,20,38,0.96), rgba(8,12,24,0.98)); border: 1px solid rgba(0,174,239,0.35); border-radius: 18px; width: 100%; max-width: 720px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(0,174,239,0.15); font-family: var(--uiRounded); overflow: hidden;">
@@ -1654,20 +1798,20 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
         
         <div>
           <label style="display: block; color: var(--cyan); font-size: 0.85rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;">
-            🔬 1. Escolha o Eixo Tecnológico (${themes.length} Bancos de Dados)
+            🔬 1. Escolha o Eixo Tecnológico (${themes.length} Eixos Têxteis)
           </label>
           <select id="themeSelectorDropdown" style="width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.6); border: 1px solid rgba(0,174,239,0.45); border-radius: 10px; color: #fff; font-family: var(--uiRounded); font-size: 0.95rem; font-weight: bold; outline: none; cursor: pointer; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);">
             ${themes.map((t, idx) => {
-              const label = t.number === 22 
-                ? '22. ✨ TEMA LIVRE / PERSONALIZADO' 
-                : `${String(t.number).padStart(2, '0')}. ${t.title} [${t.category}]`;
-              return `<option value="${idx}" ${idx === 0 ? 'selected' : ''} style="background: #0b1120; color: #fff;">${label}</option>`;
+              const label = t.number === 1 
+                ? '01. ✨ TEMA LIVRE / PERSONALIZADO' 
+                : String(t.number).padStart(2, '0') + '. ' + t.title + ' [' + t.category + ']';
+              return '<option value="' + idx + '" ' + (idx === selectedIndex ? 'selected' : '') + ' style="background: #0b1120; color: #fff;">' + label + '</option>';
             }).join('')}
           </select>
         </div>
 
-        <!-- Campo Dinâmico Exclusivo para Tema Livre 22 -->
-        <div id="customThemeContainer" style="display: none; flex-direction: column; gap: 8px;">
+        <!-- Campo Dinâmico Exclusivo para Tema Livre -->
+        <div id="customThemeContainer" style="display: ${selectedIndex === 0 ? 'flex' : 'none'}; flex-direction: column; gap: 8px;">
           <label style="color: var(--cyan); font-size: 0.82rem; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase;">
             ✍️ Digite seu Tema Livre / Tópico Personalizado
           </label>
@@ -1701,7 +1845,7 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
   const onSelectionChange = () => {
     selectedIndex = parseInt(selectEl.value, 10) || 0;
     const selectedTheme = themes[selectedIndex];
-    if (selectedTheme && selectedTheme.number === 22) {
+    if (selectedTheme && selectedTheme.number === 1) {
       customContainer.style.display = 'flex';
       if (customInput) customInput.focus();
     } else {
@@ -1725,12 +1869,12 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
     if (e.target === overlay) closeModal();
   };
 
-  if (confirmBtn) {
+    if (confirmBtn) {
     confirmBtn.onclick = () => {
       const selectedTheme = themes[selectedIndex];
       let finalBrief = '';
 
-      if (selectedTheme && selectedTheme.number === 22) {
+      if (selectedTheme && selectedTheme.number === 1) {
         finalBrief = customInput ? customInput.value.trim() : '';
         if (!finalBrief) {
           alert('Por favor, digite o tema livre desejado para a minissérie.');
@@ -1745,6 +1889,10 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
         alert('Por favor, selecione um eixo tecnológico válido.');
         return;
       }
+
+      // Salva a escolha atual na janela para sugerir o próximo
+      window.VORTEX_LAST_THEME_INDEX = selectedIndex;
+      localStorage.setItem('VORTEX_LAST_THEME_INDEX', selectedIndex.toString());
 
       closeModal();
       if (typeof onConfirm === 'function') {

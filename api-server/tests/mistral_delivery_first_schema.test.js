@@ -30,7 +30,7 @@ for (const name of expectedSchemas) {
   assert.equal(format.json_schema.schema.type, 'object');
 }
 
-assert.equal((serverSource.match(/responseSchema:\s*STRUCTURED_OUTPUT_SCHEMAS\./g) || []).length, 9);
+assert.equal((serverSource.match(/responseSchema:\s*STRUCTURED_OUTPUT_SCHEMAS\./g) || []).length, 8);
 assert.doesNotMatch(serverSource, /responseSchema:\s*true/);
 assert.match(llmSource, /type:\s*'json_schema'/);
 assert.match(llmSource, /Math\.min\(1, Number\(validationRetries\)/);

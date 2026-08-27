@@ -27,7 +27,7 @@ function resolveDocumentaryVideoPath(root, videoUrl) {
   const isFlowMaster = parts.length === 3
     && /^\d+$/.test(parts[0])
     && parts[1].toLowerCase() === 'flow'
-    && parts[2].toLowerCase() === 'master.mp4';
+    && (parts[2].toLowerCase() === 'master.mp4' || parts[2].toLowerCase() === 'master_1.mp4' || parts[2].toLowerCase() === 'master_2.mp4');
 
   if (relative.startsWith('..') || path.isAbsolute(relative) || (!isFinalVideo && !isFlowMaster)) {
     throw new Error('Vídeo fora do Acervo oficial.');

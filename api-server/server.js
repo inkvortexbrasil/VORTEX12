@@ -186,16 +186,50 @@ function writeEnv(updates) {
 
 function apiProfileMode(){return String(env('INKVORTEX_API_PROFILE','adaptive')).trim().toLowerCase()==='fixed'?'fixed':'adaptive';}
 
+const FLOW_7_SCENES_MAPPING = Object.freeze([
+  { flowIndex: 1, flowScene: 'cena_01', gptIndex: 1, gptSceneNum: '01', imageFile: 'img_001' },
+  { flowIndex: 2, flowScene: 'cena_02', gptIndex: 3, gptSceneNum: '03', imageFile: 'img_011' },
+  { flowIndex: 3, flowScene: 'cena_03', gptIndex: 4, gptSceneNum: '04', imageFile: 'img_016' },
+  { flowIndex: 4, flowScene: 'cena_04', gptIndex: 5, gptSceneNum: '05', imageFile: 'img_021' },
+  { flowIndex: 5, flowScene: 'cena_05', gptIndex: 7, gptSceneNum: '07', imageFile: 'img_031' },
+  { flowIndex: 6, flowScene: 'cena_06', gptIndex: 9, gptSceneNum: '09', imageFile: 'img_041' },
+  { flowIndex: 7, flowScene: 'cena_07', gptIndex: 10, gptSceneNum: '10', imageFile: 'img_046' }
+]);
+
+function syncFlowImagesFromEsteira(root, rawCampaignNumber) {
+  const numStr = sanitizeNumericId(rawCampaignNumber);
+  const mDir = path.join(root, 'minisseries', numStr, `M${numStr}`);
+  const flowDir = path.join(root, 'minisseries', numStr, 'flow');
+  if (!fs.existsSync(mDir)) return { copied: 0, files: [] };
+  fs.mkdirSync(flowDir, { recursive: true });
+
+  const extensions = ['.png', '.jpg', '.jpeg', '.webp'];
+  const copiedFiles = [];
+
+  FLOW_7_SCENES_MAPPING.forEach(mapItem => {
+    for (const ext of extensions) {
+      const srcFile = path.join(mDir, `${mapItem.imageFile}${ext}`);
+      if (fs.existsSync(srcFile) && fs.statSync(srcFile).size > 0) {
+        const destFile = path.join(flowDir, `${mapItem.flowScene}${ext}`);
+        fs.copyFileSync(srcFile, destFile);
+        copiedFiles.push({ src: `${mapItem.imageFile}${ext}`, dest: `${mapItem.flowScene}${ext}` });
+        break;
+      }
+    }
+  });
+
+  return { copied: copiedFiles.length, files: copiedFiles };
+}
 
 const STAGE_PROFILES = Object.freeze({
   themes:{label:'Uma ideia nova',initialOutputTokens:2500,maxOutputTokens:4000,timeoutMs:180000,gemini:{temperature:0.85,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
   scenes45:{label:'10 cenas-âncora cinematográficas 16:9',initialOutputTokens:8000,maxOutputTokens:12000,timeoutMs:240000,gemini:{temperature:1.00,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
-  scenes916:{label:'5 movimentos Gemini estáticos 16:9 conectados ao Flow',initialOutputTokens:8000,maxOutputTokens:12000,timeoutMs:240000,gemini:{temperature:0.90,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
+  scenes916:{label:'7 movimentos Gemini estáticos 16:9 conectados ao Flow',initialOutputTokens:8000,maxOutputTokens:12000,timeoutMs:240000,gemini:{temperature:0.90,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
   scenes50:{label:'50 Prompts CinematogrÃ¡ficos de MinissÃ©rie',initialOutputTokens:8000,maxOutputTokens:16000,timeoutMs:240000,gemini:{temperature:1.00,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
   caption:{label:'Legenda Social final da Mistral',initialOutputTokens:5000,maxOutputTokens:8000,timeoutMs:240000,gemini:{temperature:0.76,thinkingLevel:'high'},mistral:{temperature:0.82,reasoningEffort:'none'}},
-  audio:{label:'Roteiro SinfÃ´nico',initialOutputTokens:8000,maxOutputTokens:8192,timeoutMs:240000,gemini:{temperature:1.0,topP:0.95},mistral:{temperature:0.75,reasoningEffort:'none'}},
+  audio:{label:'Roteiro SinfÃ´nico',initialOutputTokens:8000,maxOutputTokens:8192,timeoutMs:240000,gemini:{temperature:1.0,topP:0.95},mistral:{temperature:0.82,reasoningEffort:'none'}},
   flowMaster:{label:'Plano técnico de vídeo (Omni Flash)',initialOutputTokens:2048,maxOutputTokens:4096,timeoutMs:60000,gemini:{temperature:0.90,thinkingLevel:'low'},mistral:{temperature:0.82,reasoningEffort:'none'}},
-  documentaryAudio:{label:'Roteiro SinfÃ´nico de DocumentÃ¡rio (3min)',initialOutputTokens:8000,maxOutputTokens:8192,timeoutMs:240000,gemini:{temperature:1.0,topP:0.95},mistral:{temperature:0.75,reasoningEffort:'none'}},
+  documentaryAudio:{label:'Roteiro SinfÃ´nico de DocumentÃ¡rio (3min)',initialOutputTokens:8000,maxOutputTokens:8192,timeoutMs:240000,gemini:{temperature:1.0,topP:0.95},mistral:{temperature:0.82,reasoningEffort:'none'}},
   flowMusic:{label:'Identidade Musical Flow',initialOutputTokens:2000,maxOutputTokens:3000,timeoutMs:120000,gemini:{temperature:0.78,topP:0.95},mistral:{temperature:0.82,reasoningEffort:'none'}}
 });
 
@@ -870,7 +904,7 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
       type: 'object',
       properties: {
         motionScenes: {
-          type: 'array', minItems: 5, maxItems: 5,
+          type: 'array', minItems: 7, maxItems: 7,
           items: {
             type: 'object',
             properties: {
@@ -891,7 +925,6 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
     schema: {
       type: 'object',
       properties: {
-        globalDirective: REQUIRED_TEXT_SCHEMA,
         scenes: {
           type: 'array', minItems: 5, maxItems: 5,
           items: {
@@ -900,19 +933,14 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
               number: { type: 'integer' },
               imageReference: REQUIRED_TEXT_SCHEMA,
               timeRange: REQUIRED_TEXT_SCHEMA,
-              referenceFrame: REQUIRED_TEXT_SCHEMA,
-              camera: REQUIRED_TEXT_SCHEMA,
-              subjectMotion: REQUIRED_TEXT_SCHEMA,
-              environmentMotion: REQUIRED_TEXT_SCHEMA,
-              endFrame: REQUIRED_TEXT_SCHEMA,
-              transition: REQUIRED_TEXT_SCHEMA
+              omniFlashPrompt: REQUIRED_TEXT_SCHEMA
             },
-            required: ['number', 'imageReference', 'timeRange', 'referenceFrame', 'camera', 'subjectMotion', 'environmentMotion', 'endFrame', 'transition'],
+            required: ['number', 'imageReference', 'timeRange', 'omniFlashPrompt'],
             additionalProperties: false
           }
         }
       },
-      required: ['globalDirective', 'scenes'],
+      required: ['scenes'],
       additionalProperties: false
     }
   },
@@ -1032,9 +1060,9 @@ function validateScenes45Output(rawScenes) {
 const SCENES916_REQUIRED_FIELDS = Object.freeze(['motionPrompt', 'number']);
 
 function validateScenes916Output(rawScenes) {
-  if (!Array.isArray(rawScenes) || rawScenes.length !== 5) {
+  if (!Array.isArray(rawScenes) || rawScenes.length !== 7) {
     const received = Array.isArray(rawScenes) ? rawScenes.length : 0;
-    throw new Error(`Scenes916 inválido: a Mistral retornou ${received} movimentos; o contrato exige exatamente 5.`);
+    throw new Error(`Scenes916 inválido: a Mistral retornou ${received} movimentos; o contrato exige exatamente 7.`);
   }
 
   return rawScenes.map((scene, arrayIndex) => {
@@ -1061,17 +1089,12 @@ function validateScenes916Output(rawScenes) {
   });
 }
 
-const FLOWMASTER_ROOT_FIELDS = Object.freeze(['globalDirective', 'scenes']);
+const FLOWMASTER_ROOT_FIELDS = Object.freeze(['scenes']);
 const FLOWMASTER_SCENE_FIELDS = Object.freeze([
-  'camera',
-  'endFrame',
-  'environmentMotion',
   'imageReference',
   'number',
-  'referenceFrame',
-  'subjectMotion',
-  'timeRange',
-  'transition'
+  'omniFlashPrompt',
+  'timeRange'
 ]);
 const FLOWMASTER_TIME_RANGES = Object.freeze([
   '0.0-2.0s',
@@ -1099,12 +1122,10 @@ function validateFlowMasterOutput(rawFlowMaster) {
   }
 
   const rootFields = Object.keys(rawFlowMaster).sort();
-  if (rootFields.length !== FLOWMASTER_ROOT_FIELDS.length
-    || rootFields.some((field, index) => field !== FLOWMASTER_ROOT_FIELDS[index])) {
-    throw new Error('FlowMaster inválido: a raiz deve conter somente globalDirective e scenes.');
+  if (!rootFields.includes('scenes') || rootFields.some(f => f !== 'scenes')) {
+    throw new Error('FlowMaster inválido: a raiz deve conter somente a chave scenes.');
   }
 
-  const globalDirective = validateFlowMasterText(rawFlowMaster.globalDirective, 'globalDirective', 35, 90);
 
   if (!Array.isArray(rawFlowMaster.scenes) || rawFlowMaster.scenes.length !== 5) {
     const received = Array.isArray(rawFlowMaster.scenes) ? rawFlowMaster.scenes.length : 0;
@@ -1134,26 +1155,16 @@ function validateFlowMasterOutput(rawFlowMaster) {
       throw new Error(`FlowMaster inválido: a Scene ${number} deve usar timeRange "${timeRange}".`);
     }
 
-    const referenceFrame = validateFlowMasterText(scene.referenceFrame, `referenceFrame da Scene ${number}`, 12, 35);
-    const camera = validateFlowMasterText(scene.camera, `camera da Scene ${number}`, 6, 25);
-    const subjectMotion = validateFlowMasterText(scene.subjectMotion, `subjectMotion da Scene ${number}`, 5, 25);
-    const environmentMotion = validateFlowMasterText(scene.environmentMotion, `environmentMotion da Scene ${number}`, 4, 20);
-    const endFrame = validateFlowMasterText(scene.endFrame, `endFrame da Scene ${number}`, 5, 20);
-    const transition = validateFlowMasterText(scene.transition, `transition da Scene ${number}`, 3, 15);
+    const omniFlashPrompt = validateFlowMasterText(scene.omniFlashPrompt, `omniFlashPrompt da Scene ${number}`, 20, 70);
     return {
       number,
       imageReference: reference,
       timeRange,
-      referenceFrame,
-      camera,
-      subjectMotion,
-      environmentMotion,
-      endFrame,
-      transition
+      omniFlashPrompt
     };
   });
 
-  return { globalDirective, scenes };
+  return { scenes };
 }
 
 const FLOW_MUSIC_ROOT_FIELDS = Object.freeze(['coverPrompt', 'lyrics', 'musicalComposition']);
@@ -2316,8 +2327,9 @@ async function runCompleteGenerationJob(job, payload) {
 TÍTULO EXATO DA MINISSÉRIE: ${title}
 CONTEXTO MESTRE: ${description}${topic.socialNarrative && typeof topic.socialNarrative === 'object' ? `${Array.isArray(topic.socialNarrative.keyFacts) && topic.socialNarrative.keyFacts.length > 0 ? `\nFATOS TÉCNICOS CHAVE (PROGRESSÃO DAS 10 LINHAS):\n${topic.socialNarrative.keyFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')}` : ''}${Array.isArray(topic.socialNarrative.keywords) && topic.socialNarrative.keywords.length > 0 ? `\nPALAVRAS-CHAVE / TEMAS PARA HASHTAGS: ${topic.socialNarrative.keywords.join(', ')}` : ''}` : ''}`;
 
-    job.stage = 'DIREÇÃO DE ARTE (GPT)';
+    job.stage = 'FASE 1: DIREÇÃO DE ARTE (GPT)';
     job.step = 1;
+    job.total = 3;
     job.detail = 'Gerando 10 cenas estáticas e prompts em inglês...';
 
     const scenesRes = await generateStage({
@@ -2364,8 +2376,9 @@ CONTEXTO MESTRE: ${description}${topic.socialNarrative && typeof topic.socialNar
     }
     job.result = { scenes: scenes45, socialCaption: '' };
 
-    job.stage = 'LEGENDA SOCIAL';
+    job.stage = 'FASE 2: LEGENDA SOCIAL';
     job.step = 2;
+    job.total = 2;
     job.detail = 'Redigindo Legenda Instagram/LinkedIn em 10 Linhas...';
 
     let socialCaption = '';
@@ -2397,7 +2410,7 @@ CONTEXTO MESTRE: ${description}${topic.socialNarrative && typeof topic.socialNar
 
     job.status = 'done';
     job.stage = 'CONCLUÍDO';
-    job.detail = 'Geração da Minissérie finalizada com sucesso!';
+    job.detail = 'Geração da Minissérie finalizada com sucesso! (10 Cenas de Direção de Arte e Legenda Social prontas)';
     job.result = {
       scenes: scenes45,
       socialCaption: socialCaption
@@ -2423,15 +2436,10 @@ function parseGeneratedJSON(result) {
 function formatFlowPrompt(flowMaster) {
   const parsed = parseGeneratedJSON(flowMaster);
   const validated = validateFlowMasterOutput(parsed);
-  const scenePlan = validated.scenes.map(scene => [
-    `REFERENCE ${scene.imageReference} -> SCENE ${scene.number} | ${scene.timeRange}`,
-    `Camera: ${scene.camera}`,
-    `Subject motion: ${scene.subjectMotion}`,
-    `Environmental motion: ${scene.environmentMotion}`,
-    `End frame: ${scene.endFrame}`,
-    `Transition: ${scene.transition}`
-  ].join('\n')).join('\n\n');
-  const prompt = `[GLOBAL VIDEO DIRECTIVE]\n${validated.globalDirective}\n\n[TIMED SHOT PLAN]\n${scenePlan}`;
+  const parts = validated.scenes.map(scene =>
+    scene.omniFlashPrompt.replace(/\s*\(no subtitles\)\s*$/i, '').trim()
+  );
+  const prompt = `${parts.join(' ')} (no subtitles)`;
   return { ...validated, prompt };
 }
 
@@ -2455,16 +2463,13 @@ async function runFlowGeminiJob(job, payload) {
 
     job.stage = 'ESTRUTURA MASTER (FLOW)';
     job.step = 1;
-    job.detail = 'Consolidando o roteiro de cinco cenas do Flow...';
+    job.detail = 'Aplicando a diretriz universal aprovada do Flow...';
 
-    const flowRes = await generateStage({
-      taskName: 'flowMaster',
-      profileName: 'flowMaster',
-      prompt: sourcePrompt,
-      responseSchema: STRUCTURED_OUTPUT_SCHEMAS.flowMaster,
-      contract: API_CONTRACTS.flowMaster
-    });
-    const flowMaster = formatFlowPrompt(flowRes);
+    const flowMaster = {
+      prompt: 'Create a clip using the images selected above, in that order.',
+      globalDirective: '',
+      scenes: []
+    };
     try {
       miniseriesWorkspaceService.saveMiniseriesFlowMaster(ROOT, campaignNumber, flowMaster);
     } catch (errFlow) {
@@ -2473,15 +2478,9 @@ async function runFlowGeminiJob(job, payload) {
     job.result = { flowMaster, motionScenes: [] };
     job.stage = 'MOVIMENTOS (GEMINI)';
     job.step = 2;
-    job.detail = 'Criando cinco prompts de movimento alinhados ao Flow...';
+    job.detail = 'Criando sete prompts de movimento alinhados ao Flow (limite de 7 imagens)...';
 
-    const motionPrompt = `${sourcePrompt}
-
-DIRETRIZ GLOBAL E MAPA DE REFERÊNCIAS DO FLOWMASTER:
-${flowMaster.globalDirective}
-
-ESTRUTURA AUTORITATIVA DAS CINCO CENAS DO FLOWMASTER:
-${JSON.stringify(flowMaster.scenes, null, 2)}`;
+    const motionPrompt = sourcePrompt;
     let motionScenes = [];
     try {
       const motionRes = await generateStage({
@@ -2512,7 +2511,7 @@ ${JSON.stringify(flowMaster.scenes, null, 2)}`;
 
     job.status = 'done';
     job.stage = 'CONCLUÍDO';
-    job.detail = 'Flow e Gemini concluídos com cinco cenas alinhadas.';
+    job.detail = 'Flow e Gemini concluídos com dez cenas alinhadas.';
     job.result = { flowMaster, motionScenes };
   } catch(err) {
     console.error('Erro na geração Flow + Gemini:', err);
@@ -2716,6 +2715,18 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
   }
 
 
+  if (req.url === '/api/sync-flow-images' && req.method === 'POST') {
+    try {
+      const payload = await readBody(req);
+      const numStr = sanitizeNumericId(payload.number || payload.campaignNumber || payload.campaignId || '01');
+      const result = syncFlowImagesFromEsteira(ROOT, numStr);
+      send(res, 200, { ok: true, number: numStr, ...result });
+    } catch(err) {
+      sendApiError(res, err);
+    }
+    return;
+  }
+
   if (req.url === '/api/generate-complete/start' && req.method === 'POST') {
     try {
       const payload = await readBody(req);
@@ -2726,7 +2737,7 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
         status: 'processing',
         stage: 'Iniciando',
         step: 1,
-        total: 2,
+        total: 3,
         detail: 'Conectando aos motores neurais V8...',
         result: null,
         error: null

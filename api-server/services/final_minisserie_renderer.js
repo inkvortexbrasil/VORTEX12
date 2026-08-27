@@ -67,7 +67,15 @@ function resolveFinalMinisserieAssets(root, campaignNumber, selectedM4aFile) {
   const sonoplastiaDir = path.join(campaignDir, 'sonoplastia');
   const m4aDir = path.join(sonoplastiaDir, 'm4a');
   const assDir = path.join(sonoplastiaDir, 'ass');
-  const introPath = path.join(flowDir, 'master.mp4');
+  const resolveMaster = (num) => {
+    const candidate1 = path.join(flowDir, `master_${num}.mp4`);
+    const candidate2 = path.join(flowDir, `master${num}.mp4`);
+    if (fs.existsSync(candidate1)) return candidate1;
+    if (fs.existsSync(candidate2)) return candidate2;
+    return candidate1;
+  };
+  const intro1Path = resolveMaster(1);
+  const intro2Path = resolveMaster(2);
   const logoPath = path.join(root, 'minisseries', 'logo', 'logo.mp4');
   const videoSocialDir = path.join(root, 'minisseries', 'video social');
 
@@ -121,7 +129,8 @@ function resolveFinalMinisserieAssets(root, campaignNumber, selectedM4aFile) {
     sonoplastiaDir,
     m4aDir,
     assDir,
-    introPath,
+    intro1Path,
+    intro2Path,
     logoPath,
     videoSocialDir,
     imageFiles,
@@ -140,7 +149,8 @@ function resolveFinalMinisserieAssets(root, campaignNumber, selectedM4aFile) {
 function buildMissingAssetList(assets) {
   const missing = [];
   if (!fs.existsSync(assets.campaignDir)) missing.push(`pasta minisseries/${assets.number}`);
-  if (!fs.existsSync(assets.introPath)) missing.push(`flow/master.mp4`);
+  if (!fs.existsSync(assets.intro1Path)) missing.push(`flow/master_1.mp4`);
+  if (!fs.existsSync(assets.intro2Path)) missing.push(`flow/master_2.mp4`);
   if (assets.imagePaths.length === 0) missing.push(`ao menos uma imagem em M${assets.number}/`);
   if (assets.duplicateStems.length > 0) missing.push(`imagens duplicadas: ${assets.duplicateStems.join(', ')}`);
   if (!assets.audioPath) missing.push('arquivo M4A em sonoplastia/m4a/');
@@ -220,7 +230,8 @@ function buildImageConcatFile(imagePaths, perImageSeconds) {
 
 function buildSinglePassCommand({
   ffmpegPath,
-  introPath,
+  intro1Path,
+  intro2Path,
   middleMp4Path,
   imageListPath,
   logoPath,
@@ -228,30 +239,35 @@ function buildSinglePassCommand({
   assPath,
   fontsDir,
   outputPath,
-  introSeconds,
+  intro1Seconds,
+  intro2Seconds,
   middleSeconds,
   outroSeconds,
   totalSeconds
 }) {
-  const introDuration = introSeconds.toFixed(6);
+  const intro1Duration = intro1Seconds.toFixed(6);
+  const intro2Duration = intro2Seconds.toFixed(6);
   const middleDuration = middleSeconds.toFixed(6);
   const outroDuration = outroSeconds.toFixed(6);
   const totalDuration = totalSeconds.toFixed(6);
+  const intro2DelayMs = Math.max(0, Math.round(intro1Seconds * 1000));
   const outroDelayMs = Math.max(0, Math.round((totalSeconds - outroSeconds) * 1000));
   const escapedAss = escapeFilterPath(assPath);
   const escapedFonts = escapeFilterPath(fontsDir);
   const normalizeVideo = 'scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,fps=24,format=yuv420p';
 
   const filters = [
-    `[0:v:0]trim=duration=${introDuration},setpts=PTS-STARTPTS,${normalizeVideo}[intro_v]`,
-    `[1:v:0]trim=duration=${middleDuration},setpts=PTS-STARTPTS,${normalizeVideo}[images_v]`,
-    `[2:v:0]trim=duration=${outroDuration},setpts=PTS-STARTPTS,${normalizeVideo}[outro_v]`,
-    `[intro_v][images_v][outro_v]concat=n=3:v=1:a=0[visual]`,
+    `[0:v:0]trim=duration=${intro1Duration},setpts=PTS-STARTPTS,${normalizeVideo}[intro1_v]`,
+    `[1:v:0]trim=duration=${intro2Duration},setpts=PTS-STARTPTS,${normalizeVideo}[intro2_v]`,
+    `[2:v:0]trim=duration=${middleDuration},setpts=PTS-STARTPTS,${normalizeVideo}[images_v]`,
+    `[3:v:0]trim=duration=${outroDuration},setpts=PTS-STARTPTS,${normalizeVideo}[outro_v]`,
+    `[intro1_v][intro2_v][images_v][outro_v]concat=n=4:v=1:a=0[visual]`,
     `[visual]subtitles='${escapedAss}':fontsdir='${escapedFonts}'[video_out]`,
-    `[3:a:0]atrim=duration=${totalDuration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1[m4a_audio]`,
-    `[0:a:0]atrim=duration=${introDuration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1[intro_audio]`,
-    `[2:a:0]atrim=duration=${outroDuration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1,adelay=${outroDelayMs}:all=1[outro_audio]`,
-    `[m4a_audio][intro_audio][outro_audio]amix=inputs=3:duration=first:dropout_transition=0:weights='1 1 1':normalize=0,alimiter=limit=0.98:level=false:latency=true[audio_out]`
+    `[4:a:0]atrim=duration=${totalDuration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1[m4a_audio]`,
+    `[0:a:0]atrim=duration=${intro1Duration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1[intro1_audio]`,
+    `[1:a:0]atrim=duration=${intro2Duration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1,adelay=${intro2DelayMs}:all=1[intro2_audio]`,
+    `[3:a:0]atrim=duration=${outroDuration},asetpts=PTS-STARTPTS,aresample=48000,aformat=channel_layouts=stereo,volume=1,adelay=${outroDelayMs}:all=1[outro_audio]`,
+    `[m4a_audio][intro1_audio][intro2_audio][outro_audio]amix=inputs=4:duration=first:dropout_transition=0:weights='1 1 1 1':normalize=0,alimiter=limit=0.98:level=false:latency=true[audio_out]`
   ].join(';');
 
   const middleSource = middleMp4Path || imageListPath;
@@ -260,7 +276,7 @@ function buildSinglePassCommand({
     ? `-r 25 -f concat -safe 0 -i "${middleSource}"`
     : `-i "${middleSource}"`;
 
-  return `${ffmpegPath} -y -i "${introPath}" ${middleInputArg} -i "${logoPath}" -i "${audioPath}" -filter_complex "${filters}" -map "[video_out]" -map "[audio_out]" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 192k -t ${totalDuration} -movflags +faststart "${outputPath}"`;
+  return `${ffmpegPath} -y -i "${intro1Path}" -i "${intro2Path}" ${middleInputArg} -i "${logoPath}" -i "${audioPath}" -filter_complex "${filters}" -map "[video_out]" -map "[audio_out]" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 192k -t ${totalDuration} -movflags +faststart "${outputPath}"`;
 }
 
 function createFinalMinisserieRenderer({ root, videoService }) {
@@ -281,22 +297,25 @@ function createFinalMinisserieRenderer({ root, videoService }) {
       throw new Error(`O vídeo final da minissérie ${assets.number} já existe. Confirme a substituição no Acervo.`);
     }
 
-    const [audioProbe, introProbe, logoProbe] = await Promise.all([
+    const [audioProbe, intro1Probe, intro2Probe, logoProbe] = await Promise.all([
       videoService.probeMediaFile(assets.audioPath),
-      videoService.probeMediaFile(assets.introPath),
+      videoService.probeMediaFile(assets.intro1Path),
+      videoService.probeMediaFile(assets.intro2Path),
       videoService.probeMediaFile(assets.logoPath)
     ]);
 
     if (!audioProbe.hasAudio) throw new Error('O M4A não possui fluxo de áudio válido.');
-    if (!introProbe.hasVideo || !introProbe.hasAudio) throw new Error('flow/master.mp4 precisa conter vídeo e áudio.');
+    if (!intro1Probe.hasVideo || !intro1Probe.hasAudio) throw new Error('flow/master_1.mp4 precisa conter vídeo e áudio.');
+    if (!intro2Probe.hasVideo || !intro2Probe.hasAudio) throw new Error('flow/master_2.mp4 precisa conter vídeo e áudio.');
     if (!logoProbe.hasVideo || !logoProbe.hasAudio) throw new Error('logo/logo.mp4 precisa conter vídeo e áudio.');
 
     const totalSeconds = audioProbe.duration;
-    const introSeconds = introProbe.duration;
+    const intro1Seconds = intro1Probe.duration;
+    const intro2Seconds = intro2Probe.duration;
     const outroSeconds = logoProbe.duration;
-    const middleSeconds = totalSeconds - introSeconds - outroSeconds;
+    const middleSeconds = totalSeconds - intro1Seconds - intro2Seconds - outroSeconds;
     if (!(middleSeconds > 0)) {
-      throw new Error('O M4A precisa ser maior que a soma do vídeo Master e da logo.');
+      throw new Error('O M4A precisa ser maior que a soma dos vídeos Master (1 e 2) e da logo.');
     }
     const perImageSeconds = middleSeconds / assets.imagePaths.length;
 
@@ -342,14 +361,16 @@ function createFinalMinisserieRenderer({ root, videoService }) {
 
     const command = buildSinglePassCommand({
       ffmpegPath,
-      introPath: assets.introPath,
+      intro1Path: assets.intro1Path,
+      intro2Path: assets.intro2Path,
       middleMp4Path,
       logoPath: assets.logoPath,
       audioPath: assets.audioPath,
       assPath: assets.assPath,
       fontsDir,
       outputPath: stagingOutputPath,
-      introSeconds,
+      intro1Seconds,
+      intro2Seconds,
       middleSeconds,
       outroSeconds,
       totalSeconds
@@ -383,7 +404,8 @@ function createFinalMinisserieRenderer({ root, videoService }) {
         mode: 'final-minisserie-single-pass',
         imageCount: assets.imagePaths.length,
         totalAudioSec: totalSeconds,
-        introSec: introSeconds,
+        intro1Sec: intro1Seconds,
+        intro2Sec: intro2Seconds,
         outroSec: outroSeconds,
         middleSec: middleSeconds,
         perImageSec: perImageSeconds,

@@ -1447,7 +1447,7 @@ async function runChatGPTAutomation({
   if (!Array.isArray(prompts) || prompts.length === 0) throw new Error('Nenhum prompt foi enviado ao robô ChatGPT.');
 
   const requestedPrompts = prompts.slice();
-  const expectedTotal = mode === 'flow' ? 5 : 50;
+  const expectedTotal = mode === 'flow' ? 7 : 50;
   const manifestRun = robotManifest.beginRun({
     numStr,
     mode,
@@ -2484,7 +2484,7 @@ async function recoverGPTImageMetadataFromChat(page, sourcePrompts, shouldCancel
 }
 
 async function recoverChatGPTDownloadsCurrentTab({ numStr, mode = 'minisseries', runId = `chatgpt-recovery-${String(numStr)}-${Date.now()}`, sequences, prompts = [], onProgress, shouldCancel }) {
-  const total = mode === 'flow' ? 5 : 50;
+  const total = mode === 'flow' ? 7 : 50;
   const requestedFilter = sequences === 'auto'
     ? []
     : (Array.isArray(sequences)

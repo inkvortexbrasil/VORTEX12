@@ -105,7 +105,7 @@ module.exports = function createAutomationRouter(ctx) {
         const numStr = sanitizeNumericId(payload.number || payload.campaignId || '06');
         const jobId = `gemini-rescue-${numStr}-${Date.now()}`;
         const mode = payload.mode || 'minisseries';
-        const total = mode === 'flow' ? 5 : 50;
+        const total = mode === 'flow' ? 7 : 50;
         const lastSelection = readLastRobotSelection(ROOT, numStr, 'gemini', total);
         const scenes = Array.isArray(payload.scenes) && payload.scenes.length
           ? payload.scenes

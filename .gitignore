@@ -1,21 +1,40 @@
-# === CHAVES E SEGREDOS — NUNCA SUBIR ===
+# === CHAVES E SEGREDOS — NUNCA SUBIR AO GITHUB ===
 api-server/.env
+api-server/.env.local
 .env
+.env.*
+!.env.example
+!api-server/.env.example
 *.env
+push_to_github.js
 
 # === DEPENDÊNCIAS NODE — REGENERÁVEIS ===
 node_modules/
 api-server/node_modules/
 
-# === ARQUIVOS DE SISTEMA ===
+# === ARQUIVOS DE SISTEMA E AMBIENTE ===
 Thumbs.db
 desktop.ini
 .DS_Store
+.gemini/
+.vscode/
+.idea/
 
-# === BACKUPS LOCAIS ===
+# === PASTAS DE MÍDIA PESADA E RASCUNHOS LOCAIS ===
+minisseries/
+scratch/
+*.zip
+*.mp4
+*.m4a
+*.mp3
+
+# === BACKUPS LOCAIS E TEMPORÁRIOS ===
 *.json.bak
 *-BACKUP-*.json
+*.tmp
 
 # === LOGS ===
 *.log
 logs/
+
+test_ffmpeg.txt

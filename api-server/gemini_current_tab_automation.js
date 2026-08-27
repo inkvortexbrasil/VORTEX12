@@ -1326,7 +1326,7 @@ function ordinalTo0Based(ordinal) {
 }
 
 async function recoverGeminiFlowDownloadsCurrentTab({ numStr, mode = 'minisseries', runId = `gemini-recovery-${String(numStr)}-${Date.now()}`, expectedCount, sequences, onProgress, shouldCancel }) {
-  const total = mode === 'flow' ? 5 : 50;
+  const total = mode === 'flow' ? 7 : 50;
   const manifest = robotManifest.reconcileManifest({ numStr, mode, total });
   let requestedSequences = [];
   if (sequences === 'auto' || !sequences || (Array.isArray(sequences) && sequences.length === 0)) {

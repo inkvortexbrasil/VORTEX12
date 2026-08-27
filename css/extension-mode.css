@@ -105,6 +105,11 @@ body {
 }
 
 .cockpit-console {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 0 !important;
   gap: 8px !important;
 }
 
@@ -308,8 +313,48 @@ body {
 .cockpit-module-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 6px !important;
+  gap: 8px !important;
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 0 !important;
   margin-top: 4px !important;
+}
+
+.cockpit-tab-card {
+  height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 14px 10px !important;
+  border-radius: 14px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.04) 0%, rgba(4, 10, 27, 0.45) 100%) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+.cockpit-tab-card:hover {
+  transform: translateY(-2px) !important;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.07) 0%, rgba(4, 10, 27, 0.5) 100%) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35) !important;
+}
+
+.cockpit-tab-card.active.tab-gpt {
+  border-color: rgba(0, 174, 239, 0.85) !important;
+  background: linear-gradient(155deg, rgba(0, 174, 239, 0.22) 0%, rgba(4, 18, 48, 0.6) 100%) !important;
+  box-shadow: 0 8px 30px rgba(0, 174, 239, 0.28), inset 0 0 20px rgba(0, 174, 239, 0.12) !important;
+}
+
+.cockpit-tab-card.active.tab-social {
+  border-color: rgba(236, 0, 140, 0.85) !important;
+  background: linear-gradient(155deg, rgba(236, 0, 140, 0.22) 0%, rgba(45, 10, 35, 0.6) 100%) !important;
+  box-shadow: 0 8px 30px rgba(236, 0, 140, 0.28), inset 0 0 20px rgba(236, 0, 140, 0.12) !important;
 }
 
 .cockpit-module-grid .neonBtn {
@@ -641,15 +686,14 @@ body {
   z-index: 75 !important;
   overflow: hidden !important;
   pointer-events: auto !important;
-  border: 1px solid rgba(98, 220, 255, 0.24);
-  border-radius: 18px;
-  background: linear-gradient(155deg, rgba(4, 10, 27, 0.14), rgba(7, 10, 26, 0.035)) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 22px 55px rgba(0, 0, 0, 0.18);
+  box-shadow: none !important;
 }
 
-/* O estado provisório não desmonta as duas torres homologadas. */
 #multiverseWelcome:has(#subjectsGrid[style*="display: flex"]) #activeCampaignPanel,
 #multiverseWelcome:has(#subjectsGrid[style*="display: flex"]) #multiversePromptsArea {
   display: flex !important;

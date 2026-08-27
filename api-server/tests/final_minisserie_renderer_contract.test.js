@@ -20,7 +20,8 @@ function createProjectFixture() {
   const assDir = path.join(campaignDir, 'sonoplastia', 'ass');
   const logoDir = path.join(root, 'minisseries', 'logo');
   for (const dir of [flowDir, imageDir, m4aDir, assDir, logoDir]) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(flowDir, 'master.mp4'), 'intro');
+  fs.writeFileSync(path.join(flowDir, 'master_1.mp4'), 'intro1');
+  fs.writeFileSync(path.join(flowDir, 'master_2.mp4'), 'intro2');
   fs.writeFileSync(path.join(imageDir, 'img_001.jpg'), 'image-1');
   fs.writeFileSync(path.join(imageDir, 'img_002.png'), 'image-2');
   fs.writeFileSync(path.join(m4aDir, 'Faixa.m4a'), 'audio');
@@ -83,25 +84,27 @@ test('lista de imagens aceita quantidade dinâmica e preserva a duração calcul
   assert.equal((content.match(/^file /gm) || []).length, 21);
 });
 
-test('comando final usa uma passagem, ASS existente e mixagem nominal dos três áudios', () => {
+test('comando final usa uma passagem, ASS existente e mixagem nominal dos quatro áudios', () => {
   const command = buildSinglePassCommand({
     ffmpegPath: '"F:/VORTEX11/ffmpeg/bin/ffmpeg.exe"',
-    introPath: 'F:/VORTEX11/minisseries/01/flow/master.mp4',
+    intro1Path: 'F:/VORTEX11/minisseries/01/flow/master_1.mp4',
+    intro2Path: 'F:/VORTEX11/minisseries/01/flow/master_2.mp4',
     imageListPath: 'F:/VORTEX11/minisseries/video social/.render-staging/images.txt',
     logoPath: 'F:/VORTEX11/minisseries/logo/logo.mp4',
     audioPath: 'F:/VORTEX11/minisseries/01/sonoplastia/m4a/Faixa.m4a',
     assPath: 'F:/VORTEX11/minisseries/01/sonoplastia/ass/Faixa legendado.ass',
     fontsDir: 'F:/VORTEX11/fonts/Space_Grotesk',
     outputPath: 'F:/VORTEX11/minisseries/video social/.render-staging/output.mp4',
-    introSeconds: 10,
-    middleSeconds: 160,
+    intro1Seconds: 10,
+    intro2Seconds: 10,
+    middleSeconds: 150,
     outroSeconds: 10,
     totalSeconds: 180
   });
 
   assert.ok(command.includes("subtitles='F\\:/VORTEX11/minisseries/01/sonoplastia/ass/Faixa legendado.ass'"));
-  assert.match(command, /amix=inputs=3:duration=first/);
-  assert.match(command, /weights='1 1 1':normalize=0/);
+  assert.match(command, /amix=inputs=4:duration=first/);
+  assert.match(command, /weights='1 1 1 1':normalize=0/);
   assert.match(command, /alimiter=limit=0\.98:level=false/);
   assert.match(command, /-map "\[video_out\]" -map "\[audio_out\]"/);
   assert.match(command, /-t 180\.000000/);

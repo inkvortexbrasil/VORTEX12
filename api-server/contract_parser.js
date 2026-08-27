@@ -57,11 +57,11 @@ function parseContracts(markdown) {
     }
 
     if (rawId) {
-      // rawId já vem normalizado em lowercase (linha acima), então não há
-      // necessidade de nenhum ajuste adicional de capitalização aqui.
+      // rawId já vem normalizado em lowercase (linha acima)
       const cleanId = rawId;
+      const isRetired = block.includes('Status:** APOSENTADO') || idLine.toLowerCase().includes('aposentado');
 
-      if (!prompt) {
+      if (!prompt && !isRetired) {
         // Falha catastrófica e silenciosa no passado: um contrato sem texto
         // faz a IA cair no fallback genérico sem nenhuma instrução real de
         // formato/esquema JSON. Isso NUNCA deve passar despercebido de novo.
@@ -72,7 +72,8 @@ function parseContracts(markdown) {
         id: cleanId,
         motor: motor,
         parameters: parameters,
-        prompt: prompt
+        prompt: prompt,
+        retired: isRetired
       };
     }
   }
@@ -91,10 +92,11 @@ function loadContracts(isHotReload = false) {
       
       if (Object.keys(newContracts).length > 0) {
         cachedContracts = newContracts;
+        const activeCount = Object.values(cachedContracts).filter(c => !c.retired).length;
         if (isHotReload) {
-           console.log(`[Contratos] HOT RELOAD: Arquivo atualizado! ${Object.keys(cachedContracts).length} contratos sincronizados do Multiverso Central.`);
+           console.log(`[Contratos] HOT RELOAD: Arquivo atualizado! ${activeCount} contratos sincronizados do Multiverso Central.`);
         } else {
-           console.log(`[Contratos] INICIALIZAÇÃO: ${Object.keys(cachedContracts).length} contratos carregados com sucesso.`);
+           console.log(`[Contratos] INICIALIZAÇÃO: ${activeCount} contratos carregados com sucesso.`);
         }
       }
     } else {

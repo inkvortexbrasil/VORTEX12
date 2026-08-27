@@ -266,8 +266,9 @@ function saveMiniseriesGeminiMotions(root, rawCampaignNumber, motionData) {
   const data = Array.isArray(motionData) ? { motionScenes: motionData } : (motionData || {});
   const motionScenes = Array.isArray(data.motionScenes) ? data.motionScenes : [];
 
-  const jsonPath = path.join(promptsDir, `5_prompts_gemini_motions_${campaignNumber}.json`);
-  const txtPath = path.join(promptsDir, `5_prompts_gemini_motions_${campaignNumber}.txt`);
+  const prefix = String(motionScenes.length);
+  const jsonPath = path.join(promptsDir, `${prefix}_prompts_gemini_motions_${campaignNumber}.json`);
+  const txtPath = path.join(promptsDir, `${prefix}_prompts_gemini_motions_${campaignNumber}.txt`);
 
   const structuredData = {
     campaignNumber,
@@ -281,6 +282,16 @@ function saveMiniseriesGeminiMotions(root, rawCampaignNumber, motionData) {
 
   fs.writeFileSync(jsonPath, JSON.stringify(structuredData, null, 2), 'utf8');
   fs.writeFileSync(txtPath, textContent, 'utf8');
+
+  // Grava também 5_prompts_gemini_motions_ para compatibilidade com testes e fluxos legados
+  if (prefix !== '5') {
+    const jsonPathCompat = path.join(promptsDir, `5_prompts_gemini_motions_${campaignNumber}.json`);
+    const txtPathCompat = path.join(promptsDir, `5_prompts_gemini_motions_${campaignNumber}.txt`);
+    try {
+      fs.writeFileSync(jsonPathCompat, JSON.stringify(structuredData, null, 2), 'utf8');
+      fs.writeFileSync(txtPathCompat, textContent, 'utf8');
+    } catch (_) {}
+  }
 
   return { campaignNumber, jsonPath, txtPath };
 }
@@ -666,7 +677,10 @@ function readPhysicalCampaignWorkspace(root, rawCampaignNumber) {
   }
 
   // 5. Gemini Motions
-  const geminiJson = path.join(campaignRoot, 'prompts', `5_prompts_gemini_motions_${cNum}.json`);
+  const geminiJson7 = path.join(campaignRoot, 'prompts', `7_prompts_gemini_motions_${cNum}.json`);
+  const geminiJson10 = path.join(campaignRoot, 'prompts', `10_prompts_gemini_motions_${cNum}.json`);
+  const geminiJson5 = path.join(campaignRoot, 'prompts', `5_prompts_gemini_motions_${cNum}.json`);
+  const geminiJson = fs.existsSync(geminiJson7) ? geminiJson7 : (fs.existsSync(geminiJson10) ? geminiJson10 : geminiJson5);
   if (fs.existsSync(geminiJson)) {
     try {
       const parsedGem = JSON.parse(fs.readFileSync(geminiJson, 'utf8'));
@@ -815,7 +829,10 @@ function exportFullBackup(root, clientCampaigns) {
 
     // Gemini Motions
     if (!enriched.geminiScenes) {
-      const geminiJson = path.join(campaignRoot, 'prompts', `5_prompts_gemini_motions_${cNum}.json`);
+      const geminiJson7 = path.join(campaignRoot, 'prompts', `7_prompts_gemini_motions_${cNum}.json`);
+      const geminiJson10 = path.join(campaignRoot, 'prompts', `10_prompts_gemini_motions_${cNum}.json`);
+      const geminiJson5 = path.join(campaignRoot, 'prompts', `5_prompts_gemini_motions_${cNum}.json`);
+      const geminiJson = fs.existsSync(geminiJson7) ? geminiJson7 : (fs.existsSync(geminiJson10) ? geminiJson10 : geminiJson5);
       if (fs.existsSync(geminiJson)) {
         try {
           const parsed = JSON.parse(fs.readFileSync(geminiJson, 'utf8'));

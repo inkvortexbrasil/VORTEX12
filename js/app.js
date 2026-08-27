@@ -685,6 +685,20 @@ window.setGlobalGptMode = function(mode) {
   }
 };
 
+window.isSelfContainedFlowPrompt = function(prompt) {
+  const text = String(prompt || '').trim();
+  if (!text) return false;
+  if (text.includes('[INTRODUCTION]')) return false;
+  if (text.includes('Reference image content:')) return false;
+  if (text.toLowerCase().includes('create a clip using the images selected above')) return true;
+  // Formato unificado: parágrafo único terminando com (no subtitles)
+  // Formato legado estruturado: também aceito se contiver os marcadores de cena
+  const hasUnifiedFormat = text.toLowerCase().includes('(no subtitles)');
+  const hasStructuredFormat = text.includes('[TIMED SHOT PLAN]') &&
+    [1, 2, 3, 4, 5].every(n => text.includes(`REFERENCE [${String(n).padStart(2,'0')}] -> SCENE ${n}`));
+  return hasUnifiedFormat || hasStructuredFormat;
+};
+
 window.buildGptPromptForExpanded = async function(index) {
   const campaign = AppState.getSelectedCampaign();
   if(!campaign) return;
@@ -695,14 +709,7 @@ window.buildGptPromptForExpanded = async function(index) {
   s.assembledPrompt = finalPrompt;
 };
 
-window.isSelfContainedFlowPrompt = function(prompt) {
-  const text = String(prompt || '');
-  if (!text.includes('[GLOBAL VIDEO DIRECTIVE]') || !text.includes('[TIMED SHOT PLAN]')) return false;
-  return [1, 2, 3, 4, 5].every(number => {
-    const reference = String(number).padStart(2, '0');
-    return text.includes(`REFERENCE [${reference}] -> SCENE ${number}`);
-  });
-};
+
 
 window.formatCapaPrompt = function(scene1Prompt) {
   let prompt = String(scene1Prompt || '').trim();
@@ -887,7 +894,18 @@ window.openReadModal = async function(type, index) {
 
 window.handleGenerateAction = async function(type, campaignId, fromDashboard = false) {
   AppState.isGenerating = true; // Trava a UI
-  const contentArea = document.getElementById('multiversePromptsArea') || document.body;
+  const contentArea = document.getElementById('subjectsGrid') || document.body;
+  const leftPanel = document.getElementById('activeCampaignPanel');
+  const rightPanel = document.getElementById('multiversePromptsArea');
+  const controlPanel = document.getElementById('multiverseControlPanel');
+  
+  // Preserva os painéis laterais (esquerdo e direito) visíveis durante a animação central
+  if (leftPanel) leftPanel.style.display = 'flex';
+  if (rightPanel) rightPanel.style.display = 'flex';
+  
+  if (contentArea && contentArea.id === 'subjectsGrid') {
+    contentArea.style.display = 'flex';
+  }
   
   // Salvar conteúdo original para restaurar depois se der erro
   const originalHtml = contentArea === document.body ? '' : contentArea.innerHTML;
@@ -957,7 +975,7 @@ window.handleGenerateAction = async function(type, campaignId, fromDashboard = f
   `;
   
   try {
-    if (type === 'gpt') {
+    if (type === 'gpt' || type === 'minisserie') {
       await API.generateGPT(campaignId);
     } else if (type === 'gemini') {
       await API.generateGemini(campaignId);
@@ -966,6 +984,13 @@ window.handleGenerateAction = async function(type, campaignId, fromDashboard = f
     alert("Erro na geração: " + e.message);
   } finally {
     AppState.isGenerating = false; // Destrava a UI
+    const controlPanel = document.getElementById('multiverseControlPanel');
+    if (controlPanel) {
+      controlPanel.style.background = 'rgba(255, 255, 255, 0.02)';
+      controlPanel.style.border = '1px solid rgba(0, 174, 239, 0.25)';
+      controlPanel.style.boxShadow = 'inset 0 0 15px rgba(0,174,239,0.06), 0 0 20px rgba(0,174,239,0.1)';
+      controlPanel.style.backdropFilter = 'blur(1px)';
+    }
   }
   
   if (fromDashboard) {
@@ -1167,9 +1192,13 @@ window.toggleApi = function(apiStr) {
 window.generateFlowMaster = async function(campaignId, btn) {
   AppState.isGenerating = true; // Trava a UI
   
-  // A geração isolada remanescente usa somente o painel principal.
-  let contentArea = document.getElementById('multiversePromptsArea');
-  if (!contentArea) contentArea = document.getElementById('multiversePromptsArea');
+  // Preserva os painéis laterais (esquerdo e direito) visíveis durante a animação central
+  if (leftPanel) leftPanel.style.display = 'flex';
+  if (rightPanel) rightPanel.style.display = 'flex';
+  
+  if (contentArea && contentArea.id === 'subjectsGrid') {
+    contentArea.style.display = 'flex';
+  }
   
   contentArea.innerHTML = `
     <style>
@@ -1273,6 +1302,13 @@ window.generateFlowMaster = async function(campaignId, btn) {
     alert("Falha: " + error.message);
   } finally {
     AppState.isGenerating = false;
+    const controlPanel = document.getElementById('multiverseControlPanel');
+    if (controlPanel) {
+      controlPanel.style.background = 'rgba(255, 255, 255, 0.02)';
+      controlPanel.style.border = '1px solid rgba(0, 174, 239, 0.25)';
+      controlPanel.style.boxShadow = 'inset 0 0 15px rgba(0,174,239,0.06), 0 0 20px rgba(0,174,239,0.1)';
+      controlPanel.style.backdropFilter = 'blur(1px)';
+    }
     UI.renderStudio(); // Recarrega a UI do cockpit
   }
 };
@@ -1457,10 +1493,11 @@ window.mountVisualRobotSwitcher = function(campaignId) {
     const template = document.createElement('template');
     template.innerHTML = window.__visualRobotGeminiMarkup[key];
 
-    const title = Array.from(template.content.querySelectorAll('div')).find(element =>
-      element.textContent.replace(/\s+/g, ' ').trim() === 'GEMINI WEB (5 MOVIMENTOS)'
-    );
-    if (title) title.textContent = 'CHATGPT WEB (5 IMAGENS)';
+    const title = Array.from(template.content.querySelectorAll('div')).find(element => {
+      const text = element.textContent.replace(/\s+/g, ' ').trim();
+      return text === 'GEMINI WEB (7 MOVIMENTOS)' || text === 'GEMINI WEB (5 MOVIMENTOS)';
+    });
+    if (title) title.textContent = 'CHATGPT WEB (7 IMAGENS)';
 
     const selectAll = template.content.querySelector('#geminiTodas');
     if (selectAll) {
@@ -1866,38 +1903,42 @@ window.autoResumeAllRobotTelemetries = async function() {
     console.warn('Erro ao auto-retomar telemetria doc GPT:', e);
   }
 
-  // 2. Minisséries Robot Gemini Telemetry
+  // 2. Minisséries Robot Gemini Telemetry (Documentários)
   try {
     const savedDocGeminiJob = window.getActiveDocGeminiJob();
-    const geminiJobIdQuery = savedDocGeminiJob?.jobId ? `?jobId=${encodeURIComponent(savedDocGeminiJob.jobId)}` : '';
-    let resGemini = await fetch('/api/automate-gemini/status' + geminiJobIdQuery);
-    let job = resGemini.ok ? await resGemini.json() : null;
-    if (!job || job.status === 'idle') {
-      const resFallback = await fetch('/api/automate-chatgpt/status?provider=gemini' + (savedDocGeminiJob?.jobId ? `&jobId=${encodeURIComponent(savedDocGeminiJob.jobId)}` : ''));
-      if (resFallback.ok) {
-        const fbJob = await resFallback.json();
-        if (fbJob && fbJob.status === 'running') job = fbJob;
+    const savedFlowGeminiJobId = localStorage.getItem('vortex_active_flow_gemini_job');
+    // Apenas retoma a telemetria compacta da barra se houver um job real de Documentários gravado e não for o job do Flow
+    if (savedDocGeminiJob?.jobId && savedDocGeminiJob.jobId !== savedFlowGeminiJobId) {
+      const geminiJobIdQuery = `?jobId=${encodeURIComponent(savedDocGeminiJob.jobId)}`;
+      let resGemini = await fetch('/api/automate-gemini/status' + geminiJobIdQuery);
+      let job = resGemini.ok ? await resGemini.json() : null;
+      if (!job || job.status === 'idle') {
+        const resFallback = await fetch('/api/automate-chatgpt/status?provider=gemini&jobId=' + encodeURIComponent(savedDocGeminiJob.jobId));
+        if (resFallback.ok) {
+          const fbJob = await resFallback.json();
+          if (fbJob && fbJob.status === 'running') job = fbJob;
+        }
       }
-    }
-    if (job && job.status === 'running') {
-      window.activeDocGeminiJobId = job.jobId || savedDocGeminiJob?.jobId || 'active';
-      window.activeDocGeminiCampaignNumber = savedDocGeminiJob?.campaignNumber || job.docNum || job.campaignNumber || (job.jobId?.match(/-(\d{2})-/)?.[1] || '01');
-      window.saveActiveDocGeminiJob({
-        jobId: window.activeDocGeminiJobId,
-        provider: 'gemini',
-        campaignNumber: window.activeDocGeminiCampaignNumber
-      });
-      window.showDocGeminiTopbarTelemetry();
-      const log = document.getElementById('docGeminiMonitorLog');
-      const bar = document.getElementById('docGeminiMonitorBar');
-      const percent = document.getElementById('docGeminiMonitorPercent');
-      if (log) log.innerText = job.message || 'Retomando Gemini...';
-      const pct = Math.min(100, Math.max(0, job.progress || 0));
-      if (bar) bar.style.width = pct + '%';
-      if (percent) percent.innerText = pct + '%';
-      window.pollDocGeminiAutomationStatus();
-    } else if (!job || (job.status !== 'running' && job.status !== 'idle')) {
-      window.clearActiveDocGeminiJob();
+      if (job && job.status === 'running') {
+        window.activeDocGeminiJobId = job.jobId || savedDocGeminiJob.jobId;
+        window.activeDocGeminiCampaignNumber = savedDocGeminiJob.campaignNumber || job.docNum || job.campaignNumber || (job.jobId?.match(/-(\d{2})-/)?.[1] || '01');
+        window.saveActiveDocGeminiJob({
+          jobId: window.activeDocGeminiJobId,
+          provider: 'gemini',
+          campaignNumber: window.activeDocGeminiCampaignNumber
+        });
+        window.showDocGeminiTopbarTelemetry();
+        const log = document.getElementById('docGeminiMonitorLog');
+        const bar = document.getElementById('docGeminiMonitorBar');
+        const percent = document.getElementById('docGeminiMonitorPercent');
+        if (log) log.innerText = job.message || 'Retomando Gemini...';
+        const pct = Math.min(100, Math.max(0, job.progress || 0));
+        if (bar) bar.style.width = pct + '%';
+        if (percent) percent.innerText = pct + '%';
+        window.pollDocGeminiAutomationStatus();
+      } else if (!job || (job.status !== 'running' && job.status !== 'idle')) {
+        window.clearActiveDocGeminiJob();
+      }
     }
   } catch (e) {
     console.warn('Erro ao auto-retomar telemetria doc Gemini:', e);
@@ -1913,6 +1954,9 @@ window.autoResumeAllRobotTelemetries = async function() {
       if (job && job.status === 'running') {
         window.activeGeminiJobId = job.jobId || savedGeminiJobId || 'active';
         window.saveActiveFlowGeminiJob(window.activeGeminiJobId);
+        // Garante que o monitor compacto do topo não apareça sobreposto ao central
+        const docMonitor = document.getElementById('docGeminiMonitorContainer');
+        if (docMonitor) docMonitor.style.display = 'none';
         const box = document.getElementById('geminiAutomationStatusBox');
         if (box) box.style.display = 'block';
         window.updateGlobalTelemetryWidget(job.message || 'Robô Gemini em andamento...', job.progress || 0, 'running');
@@ -2554,10 +2598,10 @@ window.startChatGPTWebAutomation = async function(campaignId) {
   }
 };
 
-// Robô GPT do dashboard: gera somente as cinco imagens destinadas ao Flow.
+// Robô GPT do dashboard: gera as sete imagens destinadas ao Flow.
 // A esteira de 50 imagens usa startChatGPTFullAutomation, em outro caminho.
 window.startChatGPTFlowAutomation = async function(campaignId) {
-  if (!confirm('Serão geradas as 5 imagens GPT destinadas ao Flow. O download ocorrerá somente depois da geração. Deseja iniciar?')) return;
+  if (!confirm('Serão geradas as 7 imagens GPT destinadas ao Flow. O download ocorrerá somente depois da geração. Deseja iniciar?')) return;
   const campaign = (AppState.campaigns || []).find(c => c.id === campaignId || c.number == campaignId);
   if (!campaign) return alert('Nenhuma minissérie selecionada.');
 
@@ -2565,7 +2609,7 @@ window.startChatGPTFlowAutomation = async function(campaignId) {
   const sourceScenes = Array.isArray(campaign.geminiScenes) && campaign.geminiScenes.length
     ? campaign.geminiScenes
     : (Array.isArray(campaign.scenes) ? campaign.scenes.filter(scene => scene.geminiMotion) : []);
-  const prompts = sourceScenes.slice(0, 5).map((scene, index) => ({
+  const prompts = sourceScenes.slice(0, 7).map((scene, index) => ({
     type: 'chatgpt-flow',
     sceneNum: String(index + 1).padStart(2, '0'),
     fullPrompt: String(scene.geminiMotion || scene.prompt || scene.visualPrompt || scene.description || '').trim()
@@ -2702,6 +2746,8 @@ window.startGeminiWebAutomation = async function(campaignId) {
   const bar = document.getElementById('geminiAutomationProgressBar');
   const btn = document.getElementById('btnAutomateGeminiWeb');
 
+  const docMonitor = document.getElementById('docGeminiMonitorContainer');
+  if (docMonitor) docMonitor.style.display = 'none';
   if (box) box.style.display = 'block';
   if (btn) {
     btn.style.opacity = '0.6';
@@ -2720,8 +2766,8 @@ window.startGeminiWebAutomation = async function(campaignId) {
       ? campaign.geminiScenes
       : (Array.isArray(campaign.scenes) ? campaign.scenes.filter(s => s.geminiMotion) : []);
     if (geminiScenes.length) {
-      // APENAS GEMINI — 5 cenas de movimento em ordem
-      geminiScenes.slice(0, 5).forEach((s, idx) => {
+      // GEMINI — até 7 cenas de movimento em ordem (limite do Google Flow)
+      geminiScenes.slice(0, 7).forEach((s, idx) => {
         const sceneNum = String(idx + 1).padStart(2, '0');
         if (selectedGemini.includes(sceneNum) || selectedGemini.length === 0) {
            const cenaMotion = (s.geminiMotion || s.prompt || '').trim();
@@ -2924,7 +2970,7 @@ window.rescueChatGPTWebDownloads = async function(campaignId) {
   const sourceScenes = Array.isArray(campaign.geminiScenes) && campaign.geminiScenes.length
     ? campaign.geminiScenes
     : (Array.isArray(campaign.scenes) ? campaign.scenes.filter(scene => scene.geminiMotion) : []);
-  const prompts = sourceScenes.slice(0, 5).map((scene, index) => ({
+  const prompts = sourceScenes.slice(0, 7).map((scene, index) => ({
     type: 'chatgpt-flow',
     sceneNum: String(index + 1).padStart(2, '0'),
     fullPrompt: String(scene.geminiMotion || scene.prompt || scene.visualPrompt || scene.description || '').trim()
@@ -2959,3 +3005,28 @@ window.rescueChatGPTWebDownloads = async function(campaignId) {
     alert('Erro no resgate GPT: ' + err.message);
   }
 };
+
+window.syncFlowImages = async function(campaignId) {
+  const campaign = (AppState.campaigns || []).find(c => c.id === campaignId || c.number == campaignId);
+  if (!campaign) return alert('Nenhuma minissérie selecionada.');
+  const numStr = String(campaign.number || campaign.id || '').replace(/\D/g, '').padStart(2, '0');
+
+  try {
+    const res = await fetch('/api/sync-flow-images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number: numStr })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    if (data.copied > 0) {
+      alert(`✓ Sincronização concluída!\n\n${data.copied} imagem(ns) padronizada(s) copiadas de M${numStr}/ para flow/:\n` +
+        data.files.map(f => `• ${f.src} ➔ ${f.dest}`).join('\n'));
+    } else {
+      alert(`⚠️ Nenhuma imagem de referência encontrada ainda em minisseries/${numStr}/M${numStr}/.\nGere as imagens da esteira antes de sincronizar.`);
+    }
+  } catch (err) {
+    alert('Erro ao sincronizar imagens para o Flow: ' + err.message);
+  }
+};
+

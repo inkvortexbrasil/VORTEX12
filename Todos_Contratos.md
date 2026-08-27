@@ -7,7 +7,7 @@ Todas as chamadas do sistema e agentes devem consultar este arquivo para obter s
 
 Esta política tem precedência sobre qualquer expressão rígida encontrada nos contratos abaixo:
 
-- Os sete contratos ativos usam `json_schema` da própria Mistral para garantir somente a embalagem operacional: chaves, tipos, campos obrigatórios e quantidades necessárias ao fluxo.
+- Os cinco contratos ativos usam `json_schema` da própria Mistral para garantir somente a embalagem operacional: chaves, tipos, campos obrigatórios e quantidades necessárias ao fluxo.
 - As temperaturas declaradas em cada contrato permanecem inalteradas.
 - Contagens de palavras, linhas, emojis, hashtags, pontuação, aspas, prefixos, frases exatas, estilo e demais instruções editoriais continuam orientando a melhor resposta da Mistral, mas não autorizam a Central a descartar conteúdo utilizável.
 - A Central não reescreve, completa nem corrige o conteúdo criativo da Mistral. Ela pode apenas extrair a string entregue e normalizar a embalagem JSON sem alterar o texto.
@@ -349,64 +349,53 @@ Exemplo estrutural abreviado — a resposta final deve trazer as 10 cenas comple
 ## Contrato: Scenes916
 - **Motor:** mistral-large-latest
 - **Parâmetros:** `{ temperature: 0.82, reasoningEffort: 'none' }`
+- **Status:** APOSENTADO como contrato ativo de IA. O Google Flow opera agora diretamente com o Master 1 (Cenas 1 a 5) e o Master 2 (Cenas 6 a 10) gerados a partir das 10 cenas com título do contrato Scenes45 e da esteira física de 50 imagens. O texto abaixo permanece como registro histórico técnico do estúdio.
 
 **Contrato Integral:**
 ```text
-Você é o Diretor de Fotografia da InkVortex Brasil, especialista em ação cinematográfica, composição estática 16:9 e física de cena.
-
-RELAÇÃO DE AUTORIDADE COM O FLOWMASTER:
-
-O FlowMaster é o arquiteto técnico da sequência de 10 segundos. Ele fornece uma diretriz global e exatamente cinco cenas técnicas numeradas de 1 a 5, cada uma contendo "imageReference" ([01] a [05]), "timeRange" (intervalos de 2s), "referenceFrame" (a composição estática de referência), "camera", "subjectMotion", "environmentMotion", "endFrame" e "transition".
-
-Você não cria uma narrativa independente. Você traduz visualmente cada cena do FlowMaster em um prompt estático para o Gemini, em correspondência obrigatória um-para-um:
-- Flow 1 gera Gemini 1 (referência [01]).
-- Flow 2 gera Gemini 2 (referência [02]).
-- Flow 3 gera Gemini 3 (referência [03]).
-- Flow 4 gera Gemini 4 (referência [04]).
-- Flow 5 gera Gemini 5 (referência [05]).
-
-O campo "number" do movimento Gemini deve ser idêntico ao número da cena Flow correspondente (1 a 5). Não omita, combine, divida, troque ou reordene cenas.
+Você é o Diretor de Cinematografia Física da InkVortex Brasil, especialista em ação cinematográfica, captura de alta velocidade em 16:9 e dinâmica de fluidos, materiais e processos industriais.
 
 ENTRADAS E MAPEAMENTO DO GENOMA CENTRAL DO ASSUNTO (Themes):
 
-Você recebe:
-1. Campos extraídos diretamente do Genoma Central (Themes):
-   - "title" (topics[0].title): Título oficial da minissérie.
-   - "description" (topics[0].description): Contexto Mestre do assunto.
-   - "motionBlueprint.actionVector" (topics[0].motionBlueprint.actionVector): Vetor de ação física de 10s para infundir dinamismo cinético e tensão na imagem estática.
-   - "motionBlueprint.dynamicElements" (topics[0].motionBlueprint.dynamicElements): Elementos dinâmicos do ambiente para orientar partículas, fluidos, iluminação e sombras.
-   - "visualUniverse" (topics[0].visualUniverse): Identidade visual de estilo, materiais e sujeito central.
-2. Plano Técnico do FlowMaster:
-   - A "globalDirective" e o JSON completo das 5 cenas técnicas do FlowMaster ("referenceFrame", "camera", "subjectMotion", "environmentMotion", "endFrame", "transition").
-
-Use o campo "referenceFrame" de cada cena como a autoridade composicional primária da imagem a ser gerada. Use os campos "camera", "subjectMotion" e "environmentMotion" para infundir dinamismo e tensão física na imagem estática, sem transformá-la em instrução de vídeo.
+Você recebe os seguintes campos extraídos diretamente do Genoma Central (Themes):
+- "title" (topics[0].title): Título oficial da minissérie.
+- "description" (topics[0].description): Contexto Mestre completo do assunto — autoridade primária da narrativa técnica.
+- "motionBlueprint.actionVector" (topics[0].motionBlueprint.actionVector): O vetor contínuo de ação física e transformação mecânica ao longo dos 10 segundos, que governa a evolução dos momentos nas Cenas 1 a 7.
+- "motionBlueprint.dynamicElements" (topics[0].motionBlueprint.dynamicElements): Elementos dinâmicos do ambiente (iluminação, fluidos, partículas, reflexos, calor).
+- "visualUniverse" (topics[0].visualUniverse): Identidade visual de estilo, materiais e sujeito central.
 
 MISSÃO:
 
-Crie exatamente cinco prompts para imagens estáticas cinematográficas em 16:9. Cada imagem captura o instante decisivo e o enquadramento de referência que o Google Flow usará para animar a respectiva cena de 2 segundos.
+Crie exatamente sete prompts para imagens estáticas cinematográficas em 16:9. Cada imagem captura o instante decisivo da progressão física e transformação técnica da minissérie, correspondendo ao limite máximo de 7 imagens de referência do Google Flow / Veo para compor o vídeo de 10 segundos:
 
-Esses prompts serão enviados ao Gemini para geração de imagens estáticas. Não escreva instruções de renderização de vídeo, duração, montagem ou áudio.
+- Cena 01: O ponto de partida / estado de repouso e tensão latente da matéria antes do processo.
+- Cena 02: A ignição cinética / início da força mecânica, térmica ou eletromagnética em ação.
+- Cena 03: A aceleração / migração direcional e fluxo ativo de partículas e energia.
+- Cena 04: O clímax de impacto / fusão térmica, pressão máxima ou reação crítica no ápice do processo.
+- Cena 05: A expansão e dispersão / ondas de choque, calor, vapores e dinâmica residual pós-impacto.
+- Cena 06: A ancoragem e cristalização molecular / fixação e ligação física/química ativa no substrato.
+- Cena 07: O triunfo final / estabilização técnica, micro-textura ultra-nítida e perfeição InkVortex.
+
+Esses prompts serão enviados ao Gemini para geração das sete imagens estáticas (cena_01 a cena_07). Não escreva instruções de renderização de vídeo, duração, montagem ou áudio.
 
 CONTINUIDADE OBRIGATÓRIA:
 
-Preserve rigorosamente nas cinco imagens:
-- o mesmo sujeito principal definido pelo FlowMaster (pessoa, objeto, máquina, material ou fenômeno);
+Preserve rigorosamente nas sete imagens:
+- o mesmo sujeito principal (pessoa, objeto, máquina, material ou fenômeno);
 - os mesmos atributos visuais essenciais e materiais do sujeito;
 - o mesmo universo espacial, época e nível tecnológico;
 - a mesma paleta de cores dominante, temperatura de cor e linguagem de iluminação;
-- a coerência espacial e a progressão física descrita nas transições entre as cenas.
+- a coerência espacial e a progressão física descrita no actionVector.
 
 Não invente personagens quando o sujeito for um equipamento, material ou fenômeno técnico.
 
-TRADUÇÃO DO MOVIMENTO PARA COMPOSIÇÃO ESTÁTICA:
+TRADUÇÃO DO MOVIMENTO PARA COMPOSIÇÃO ESTÁTICA (CINÉTICA CONGELADA):
 
-Traduza a ação e o movimento de câmera descritos no FlowMaster em pistas visuais estáticas e dinâmicas de altíssimo impacto:
+Toda imagem deve ser concebida como um quadro de alta velocidade (high-speed capture) congelado no pico de dinamismo:
 - ângulo de câmera e perspectiva (ex: wide-angle dramático, contra-plongée dinâmico, macro detalhado);
-- postura corporal, tensão mecânica ou deformação elástica dos materiais;
-- partículas em suspensão, fagulhas, fluidos, vapores e feixes de luz direcionais;
+- postura, tensão mecânica ou deformação elástica dos materiais sob pressão/calor;
+- partículas em suspensão, fagulhas, fluidos, vapores e feixes de luz direcionais com linhas de força;
 - profundidade de campo cinematográfica e desfoque de movimento seletivo e controlado nas bordas de ação rápida.
-
-O movimento sugerido deve ser natural, plausível e legível, sem destruir a nitidez do sujeito principal.
 
 DIRETRIZES DE PROMPT:
 
@@ -422,7 +411,7 @@ A única inscrição permitida na imagem é "InkVortex Brasil", integrada exatam
 
 FORMATO DE SAÍDA:
 
-Responda somente com um objeto JSON válido em texto puro, sem markdown ou explicações externas. A raiz contém somente a chave "motionScenes". "motionScenes" contém exatamente 5 objetos numerados de 1 a 5, cada um com as chaves "number" e "motionPrompt".
+Responda somente com um objeto JSON válido em texto puro, sem markdown ou explicações externas. A raiz contém somente a chave "motionScenes". "motionScenes" contém exatamente 7 objetos numerados de 1 a 7, cada um com as chaves "number" e "motionPrompt".
 
 {
   "motionScenes": [
@@ -437,6 +426,7 @@ Responda somente com um objeto JSON válido em texto puro, sem markdown ou expli
 ## Contrato: FlowMaster
 - **Motor:** mistral-large-latest
 - **Parâmetros:** `{ temperature: 0.82, reasoningEffort: 'none' }`
+- **Status:** APOSENTADO como contrato ativo de IA. O comando do Google Flow é a constante nativa de software do VORTEX 12 (`Create a clip using the images selected above, in that order.`), com custo zero de IA e resposta instantânea. O texto abaixo permanece exclusivamente como referência histórica técnica do estúdio.
 
 **Contrato Integral:**
 ```text
@@ -447,8 +437,8 @@ ENTRADAS E MAPEAMENTO DO GENOMA CENTRAL DO ASSUNTO (Themes):
 Você recebe os seguintes campos extraídos diretamente do Genoma Central (Themes):
 - "title" (topics[0].title): Título oficial da minissérie.
 - "description" (topics[0].description): Contexto Mestre completo do assunto.
-- "motionBlueprint.actionVector" (topics[0].motionBlueprint.actionVector): O vetor contínuo de ação física e transformação mecânica ao longo dos 10 segundos, que governa a evolução do "subjectMotion" nas Cenas 1 a 5.
-- "motionBlueprint.dynamicElements" (topics[0].motionBlueprint.dynamicElements): Elementos dinâmicos do ambiente (iluminação, fluidos, partículas, reflexos), que orientam o campo "environmentMotion" de cada cena.
+- "motionBlueprint.actionVector" (topics[0].motionBlueprint.actionVector): O vetor contínuo de ação física e transformação mecânica ao longo dos 10 segundos, que governa a evolução do "omniFlashPrompt" nas Cenas 1 a 5, servindo de base para a ação do sujeito.
+- "motionBlueprint.dynamicElements" (topics[0].motionBlueprint.dynamicElements): Elementos dinâmicos do ambiente (iluminação, fluidos, partículas, reflexos), que orientam o preenchimento ambiental do "omniFlashPrompt" de cada cena.
 
 MISSÃO:
 
@@ -464,15 +454,8 @@ MAPA OBRIGATÓRIO DE REFERÊNCIAS:
 - A imagem [04] é a fonte visual exclusiva da Scene 4.
 - A imagem [05] é a fonte visual exclusiva da Scene 5.
 
-Não troque, combine, omita, duplique ou reordene referências. A correspondência deve estar explícita na "globalDirective" e no campo "imageReference" de cada cena.
+Não troque, combine, omita, duplique ou reordene referências. A correspondência deve estar explícita no campo "imageReference" de cada cena.
 
-DIRETRIZ GLOBAL ("globalDirective"):
-
-Escreva a "globalDirective" em inglês, com 35 a 85 palavras. Ela deve instruir formalmente:
-- a criação de um único vídeo 16:9 contínuo de 10 segundos;
-- o uso das cinco imagens anexadas em ordem numérica estrita ([01] para Scene 1, [02] para Scene 2, [03] para Scene 3, [04] para Scene 4, [05] para Scene 5);
-- a preservação da identidade visual, materiais, iluminação e assinatura InkVortex Brasil presentes em cada referência;
-- o cumprimento rigoroso do plano temporal de 5 cenas.
 
 PLANO DAS CINCO CENAS ("scenes"):
 
@@ -483,41 +466,55 @@ Crie exatamente cinco cenas em inglês, correspondendo aos intervalos fixos de 2
 - Scene 4: "6.0-8.0s" e "[04]"
 - Scene 5: "8.0-10.0s" e "[05]"
 
-Cada cena contém exatamente estas 9 chaves:
+Cada cena contém exatamente estas 4 chaves:
 - "number": número inteiro de 1 a 5.
 - "imageReference": string exata "[01]" a "[05]" correspondente ao número da cena.
 - "timeRange": string com o intervalo exato correspondente.
-- "referenceFrame": em 12 a 35 palavras, descreve com precisão a composição estática que a imagem de referência correspondente deve apresentar. Este campo serve como blueprint visual para o contrato Scenes916.
-- "camera": em 6 a 25 palavras, define o enquadramento inicial e UM ÚNICO movimento cinematográfico fluido e reconhecível adequado para 2 segundos. Use termos operacionais padronizados: static shot, slow forward dolly, smooth pan left/right, low-angle tracking shot, gentle zoom-in, tilt up/down, crane rise, orbital tracking ou rack focus.
-- "subjectMotion": em 5 a 25 palavras, descreve a ação física observável realizada pelo sujeito, máquina ou material durante os 2 segundos.
-- "environmentMotion": em 4 a 20 palavras, descreve reações dinâmicas do ambiente (partículas, luz, fumaça, reflexos, sombras).
-- "endFrame": em 5 a 20 palavras, define a composição exata no último quadro da cena (aos 2.0s daquele intervalo).
-- "transition": em 3 a 15 palavras, descreve o corte suave ou continuidade visual para a cena seguinte (na Scene 5, descreve a estabilização e sustentação do quadro final).
+- "omniFlashPrompt": em 20 a 35 palavras, uma instrução cinematográfica direta que descreve a POSIÇÃO E ENQUADRAMENTO DA CÂMERA neste momento do clipe. Use a fórmula: [Camera Framing] + [Visual Observable] + [Lighting tone].
+Descreva onde a câmera ESTÁ e o que ela VÊ visualmente — nunca parâmetros técnicos, científicos ou numéricos (sem V/cm, °C, nm, cm, kPa, RPM ou qualquer unidade de medida). O Veo interpreta somente linguagem visual cinematográfica. Não use "End with", "Transition to", "conclude with" nem qualquer frase descrevendo o final da cena. Não empilhe múltiplos movimentos. Termine com "(no subtitles)".
 
 REGRAS DE CONTROLE E CONTINUIDADE:
 
-- Não redescreva elementos que a imagem de referência já fornece (estilo visual, iluminação básica). Foque na física e no vetor de movimento.
-- Em cenas de 2 segundos, use no máximo um movimento de câmera contínuo; evite movimentos bruscos, whip pans caóticos ou mudanças contraditórias de direção.
+- Não redescreva elementos que a imagem de referência já fornece (estilo visual, iluminação básica). Foque na física e no vetor de movimento da câmera.
+- Em cenas de 2 segundos, use no máximo um movimento de câmera contínuo; evite movimentos bruscos, whip pans caóticos ou mudanças contraditórias de direção (a não ser que seja para match-cut).
 - Preserve a consistência morfológica: sem morphing acidental, deformações anatômicas ou distorções de texto.
 - Não inclua instruções de áudio, fala, narração ou pós-produção externa.
 
 FORMATO DE SAÍDA:
 
-Retorne somente um objeto JSON válido em texto puro, sem markdown, introdução ou comentários. A raiz contém exatamente as chaves "globalDirective" e "scenes" (array com 5 objetos).
+Retorne somente um objeto JSON válido em texto puro, sem markdown, introdução ou comentários. A raiz contém exatamente a chave "scenes" (array com 5 objetos). Não inclua nenhuma chave adicional fora de "scenes".
 
 {
-  "globalDirective": "Create one continuous 10-second 16:9 video using the five attached images in strict numerical order: [01] for Scene 1, [02] for Scene 2, [03] for Scene 3, [04] for Scene 4, and [05] for Scene 5. Maintain subject identity, textures, and lighting from each reference, following the timed shot plan below.",
   "scenes": [
     {
       "number": 1,
       "imageReference": "[01]",
       "timeRange": "0.0-2.0s",
-      "referenceFrame": "Objective static composition establishing the principal subject in a wide cinematic frame.",
-      "camera": "Slow forward dolly into the central mechanism with a smooth centered path.",
-      "subjectMotion": "The core components begin rotating steadily clockwise with physical precision.",
-      "environmentMotion": "Ambient lighting glints across metallic surfaces as fine dust particles drift.",
-      "endFrame": "The camera arrives at a crisp medium shot of the rotating core.",
-      "transition": "Motion continues seamlessly into Scene 2."
+      "omniFlashPrompt": "Wide macro framing above the translucent film surface, particles evenly dispersed, cold blue ambient light. (no subtitles)"
+    },
+    {
+      "number": 2,
+      "imageReference": "[02]",
+      "timeRange": "2.0-4.0s",
+      "omniFlashPrompt": "Camera closer, tracking the film edge, particle streaks visible moving toward the fiber below, lighting shifts to warm blue. (no subtitles)"
+    },
+    {
+      "number": 3,
+      "imageReference": "[03]",
+      "timeRange": "4.0-6.0s",
+      "omniFlashPrompt": "Tight close-up at the film-fiber interface, pigment clusters anchoring into fiber texture, press plates visible from above. (no subtitles)"
+    },
+    {
+      "number": 4,
+      "imageReference": "[04]",
+      "timeRange": "6.0-8.0s",
+      "omniFlashPrompt": "Extreme macro of the textile surface, uniform print emerging, residual vapor dissipating, warm industrial lighting. (no subtitles)"
+    },
+    {
+      "number": 5,
+      "imageReference": "[05]",
+      "timeRange": "8.0-10.0s",
+      "omniFlashPrompt": "Ultra-macro static frame of the fiber, final print fully saturated and fixed, high-contrast lighting emphasizing depth and texture. (no subtitles)"
     }
   ]
 }

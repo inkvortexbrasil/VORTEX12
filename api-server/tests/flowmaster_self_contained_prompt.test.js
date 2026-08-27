@@ -10,9 +10,9 @@ const uiSource = fs.readFileSync(path.join(root, 'js', 'ui.js'), 'utf8');
 const contractSource = fs.readFileSync(path.join(root, 'Todos_Contratos.md'), 'utf8');
 
 const validatorStart = serverSource.indexOf('const FLOWMASTER_ROOT_FIELDS');
-const validatorEnd = serverSource.indexOf('\n\n//', validatorStart);
+const validatorEnd = serverSource.indexOf('const FLOW_MUSIC_ROOT_FIELDS', validatorStart);
 const formatterStart = serverSource.indexOf('function formatFlowPrompt');
-const formatterEnd = serverSource.indexOf('\n\nasync function runFlowGeminiJob', formatterStart);
+const formatterEnd = serverSource.indexOf('async function runFlowGeminiJob', formatterStart);
 
 assert.ok(validatorStart >= 0 && validatorEnd > validatorStart, 'Validador FlowMaster deve existir.');
 assert.ok(formatterStart >= 0 && formatterEnd > formatterStart, 'Formatador FlowMaster deve existir.');
@@ -22,25 +22,41 @@ const formatterSource = serverSource.slice(formatterStart, formatterEnd);
 const sandbox = {};
 vm.runInNewContext(`${validatorSource}\nfunction parseGeneratedJSON(value) { return value; }\n${formatterSource}\nthis.validate = validateFlowMasterOutput; this.format = formatFlowPrompt;`, sandbox);
 
-const globalDirective = 'Create one 10-second 16:9 video using the five attached images in exact numerical order: [01] for Scene 1, [02] for Scene 2, [03] for Scene 3, [04] for Scene 4, and [05] for Scene 5. Preserve each reference identity, materials, geometry, lighting, and brand details. Follow the timed shot plan below without swapping, combining, or omitting any reference.';
-const ranges = ['0.0-2.0s', '2.0-4.0s', '4.0-6.0s', '6.0-8.0s', '8.0-10.0s'];
+const validScenes = [
+  {
+    number: 1,
+    imageReference: '[01]',
+    timeRange: '0.0-2.0s',
+    omniFlashPrompt: 'A cinematic wide shot with a slow forward dolly. The metallic textile fibers crystallize under a bright blue laser beam. Dark environment with high-contrast neon lighting. The camera tilts up slightly at the end to seamlessly transition into the next frame. (no subtitles)'
+  },
+  {
+    number: 2,
+    imageReference: '[02]',
+    timeRange: '2.0-4.0s',
+    omniFlashPrompt: 'A cinematic medium shot tracking left. The metallic textile fibers crystallize under a bright blue laser beam. Dark environment with high-contrast neon lighting. The camera tilts up slightly at the end to seamlessly transition into the next frame. (no subtitles)'
+  },
+  {
+    number: 3,
+    imageReference: '[03]',
+    timeRange: '4.0-6.0s',
+    omniFlashPrompt: 'A cinematic close-up with a gentle zoom-in. The metallic textile fibers crystallize under a bright blue laser beam. Dark environment with high-contrast neon lighting. The camera tilts up slightly at the end to seamlessly transition into the next frame. (no subtitles)'
+  },
+  {
+    number: 4,
+    imageReference: '[04]',
+    timeRange: '6.0-8.0s',
+    omniFlashPrompt: 'A cinematic arc shot orbiting right. The metallic textile fibers crystallize under a bright blue laser beam. Dark environment with high-contrast neon lighting. The camera tilts up slightly at the end to seamlessly transition into the next frame. (no subtitles)'
+  },
+  {
+    number: 5,
+    imageReference: '[05]',
+    timeRange: '8.0-10.0s',
+    omniFlashPrompt: 'A cinematic low-angle tracking shot. The metallic textile fibers crystallize under a bright blue laser beam. Dark environment with high-contrast neon lighting. The camera tilts up slightly at the end to seamlessly transition into the next frame. (no subtitles)'
+  }
+];
+
 const validFlowMaster = {
-  globalDirective,
-  scenes: ranges.map((timeRange, index) => {
-    const number = index + 1;
-    const reference = `[${String(number).padStart(2, '0')}]`;
-    return {
-      number,
-      imageReference: reference,
-      timeRange,
-      referenceFrame: `Reference ${reference} shows the principal textile mechanism centered in a clean cinematic composition before its visible transformation begins`,
-      camera: 'Slow dolly in from a wide shot toward the centered principal subject',
-      subjectMotion: 'The principal material expands gradually from left to right',
-      environmentMotion: 'Fine suspended fibers drift gently behind the subject',
-      endFrame: 'The transformed surface fills the central third of frame',
-      transition: number < 5 ? `Match movement into Scene ${number + 1}` : 'Hold the final composition steadily'
-    };
-  })
+  scenes: validScenes
 };
 
 const validated = sandbox.validate(validFlowMaster);
@@ -49,12 +65,10 @@ assert.strictEqual(validated.scenes[0].imageReference, '[01]');
 assert.strictEqual(validated.scenes[4].imageReference, '[05]');
 
 const formatted = sandbox.format(validFlowMaster);
-assert.ok(formatted.prompt.startsWith('[GLOBAL VIDEO DIRECTIVE]\n'), 'O prompt deve começar pela diretriz global gerada.');
-assert.ok(formatted.prompt.includes('[TIMED SHOT PLAN]'), 'O prompt deve conter o plano temporal.');
-for (let number = 1; number <= 5; number += 1) {
-  const reference = String(number).padStart(2, '0');
-  assert.ok(formatted.prompt.includes(`REFERENCE [${reference}] -> SCENE ${number}`), `O mapa [${reference}] -> Scene ${number} deve estar incorporado.`);
-}
+assert.ok(!formatted.prompt.includes('[TIMED SHOT PLAN]'), 'O prompt unificado não deve conter o bloco [TIMED SHOT PLAN].');
+assert.ok(!formatted.prompt.includes('REFERENCE ['), 'O prompt unificado não deve conter rótulos REFERENCE.');
+assert.ok(formatted.prompt.endsWith('(no subtitles)'), 'O prompt unificado deve terminar com (no subtitles) uma única vez.');
+assert.strictEqual((formatted.prompt.match(/\(no subtitles\)/gi) || []).length, 1, '(no subtitles) deve aparecer exatamente uma vez no prompt unificado.');
 assert.ok(!formatted.prompt.includes('Reference image content:'), 'A composição estática não deve ser redescrita ao Omni Flash.');
 assert.ok(!formatted.prompt.includes('[INTRODUCTION]'), 'A introdução literária foi aposentada.');
 
