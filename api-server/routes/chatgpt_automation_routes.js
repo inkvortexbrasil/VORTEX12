@@ -588,9 +588,15 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
         const defaultPrompts = {
           prompts: readFinalChatGPTQueue(ROOT, numStr).queue
         };
-        const targetPrompts = mode === 'flow'
+        const finalQueue = isFlow ? [] : defaultPrompts.prompts;
+        const gptOnlyQueue = finalQueue.filter(item => item.source === 'gpt' || item.type === 'gpt');
+        const effectiveDefault = gptOnlyQueue.length ? gptOnlyQueue : finalQueue;
+        const targetPrompts = isFlow
           ? (Array.isArray(payload.prompts) && payload.prompts.length ? payload.prompts : readFlowChatGPTQueue(ROOT, numStr).queue)
-          : defaultPrompts.prompts;
+          : effectiveDefault;
+        const targetSequences = scenes === 'auto' || !Array.isArray(scenes) || !scenes.length
+          ? (isFlow ? 'auto' : targetPrompts.map(item => Number(item.sequence || item.finalSequence)))
+          : scenes;
 
         activeChatGPTWebJobs[jobId] = {
           jobId,
@@ -610,8 +616,8 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
               numStr,
               runId: jobId,
               mode,
-              sequences: scenes,
-              prompts: mode === 'flow' ? targetPrompts : readFinalChatGPTQueue(ROOT, numStr).queue,
+              sequences: targetSequences,
+              prompts: targetPrompts,
               shouldCancel: () => Boolean(activeChatGPTWebJobs[jobId]?.cancelRequested),
               onProgress: (percent, msg) => {
                 if (activeChatGPTWebJobs[jobId]) {
