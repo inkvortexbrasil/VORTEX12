@@ -1515,27 +1515,33 @@ body.living-stage-active {
   }
 
   .logoBox {
-    width: 250px !important;
-    min-width: 250px !important;
-    height: 68px !important;
+    width: 210px !important;
+    min-width: 210px !important;
+    height: 60px !important;
     padding: 0 !important;
   }
 
+  .vortexGlobalActions {
+    gap: 6px !important;
+    max-width: calc(50vw - 250px) !important;
+  }
+
   #btnBackToDashboard,
-  #btnChangeWallpaper,
-  #btnSystem {
-    padding: 7px 12px !important;
-    font-size: 0.76rem !important;
+  #btnChangeWallpaper {
+    padding: 5px 9px !important;
+    font-size: 0.70rem !important;
+    min-height: 30px !important;
+    height: 30px !important;
   }
 
   #topbarMultiverseTitle {
-    max-width: min(590px, 40vw);
+    max-width: min(500px, 35vw);
     padding: 0 10px !important;
   }
 
   #topbarTitle {
     max-width: 100%;
-    font-size: clamp(1.08rem, 1.55vw, 1.38rem) !important;
+    font-size: clamp(1.02rem, 1.4vw, 1.25rem) !important;
     line-height: 1.15 !important;
     white-space: nowrap;
     overflow: hidden;
@@ -1544,22 +1550,36 @@ body.living-stage-active {
 
   #topbarSubtitle {
     max-width: 100% !important;
-    font-size: 0.72rem !important;
+    font-size: 0.70rem !important;
   }
 
   .vortexRightActions {
     display: flex !important;
-    gap: 6px !important;
+    gap: 4px !important;
     align-items: center !important;
     flex-shrink: 0 !important;
     margin-left: auto !important;
     position: relative !important;
     z-index: 2 !important;
+    max-width: calc(50vw - 250px) !important;
+    justify-content: flex-end !important;
   }
 
   .vortexRightActions .iconBtn,
   .vortexRightActions .actionBtn {
-    min-height: 36px;
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 4px 7px !important;
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
+  }
+
+  .vortexRightActions .vortexVersionBadge {
+    padding: 2px 5px !important;
+    font-size: 0.62rem !important;
+    gap: 2px !important;
+    flex-shrink: 0 !important;
   }
 
   /* Dashboard principal */
@@ -1651,7 +1671,7 @@ body.living-stage-active {
     transform: translateX(-50%) !important;
     right: auto !important;
     width: min(940px, calc(100vw - 420px)) !important;
-    top: var(--cockpit-main-top) !important;
+    top: 162px !important;
     bottom: 22px !important;
     padding: 6px 10px !important;
     overflow: hidden !important;
@@ -1962,7 +1982,7 @@ body.living-stage-active {
     transform: translateX(-50%) !important;
     right: auto !important;
     width: min(940px, calc(100vw - 420px)) !important;
-    top: var(--cockpit-main-top) !important;
+    top: 162px !important;
     bottom: 22px !important;
     padding: 6px 10px !important;
     overflow: hidden !important;
