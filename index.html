@@ -25,9 +25,9 @@
       <div class="logoBox" style="display: flex; align-items: center;">
         <img id="mainLogo" src="/api/logo" alt="InkVortex Logo">
       </div>
-      <button id="btnBackToDashboard" class="actionBtn" style="display: none;" onclick="window.switchMultiverseRoom('multiverseWelcome', null)">⬅ VOLTAR</button>
+      <button id="btnBackToDashboard" class="actionBtn" style="display: none; padding: 6px 10px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25); font-weight: bold; font-size: 0.70rem; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;" onclick="window.switchMultiverseRoom('multiverseWelcome', null)" onmouseover="this.style.background='var(--brandGrad)'; this.style.borderColor='transparent';" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,255,255,0.25)';">⬅ VOLTAR</button>
       <div style="position: relative;">
-        <button id="btnChangeWallpaper" class="actionBtn" onclick="window.toggleDropdown('dropdownStage')">🌌 MULTIVERSO</button>
+        <button id="btnChangeWallpaper" class="actionBtn" style="padding: 6px 11px; border-radius: 8px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25); font-weight: bold; font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;" onclick="window.toggleDropdown('dropdownStage')" onmouseover="this.style.background='var(--brandGrad)'; this.style.borderColor='transparent';" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,255,255,0.25)';">🌌 MULTIVERSO</button>
         <div id="dropdownStage" class="vortexDropdown" style="display: none; width: 420px; left: 0; top: 100%; margin-top: 10px; z-index: 100;">
           <div id="stageGrid" class="stageGrid" style="max-height: min(62vh, 560px); overflow-y: auto; padding-right: 8px;"></div>
         </div>
@@ -35,7 +35,7 @@
 
       <!-- Quadrinho para Nº da Minissérie ao lado de Multiverso -->
       <div class="topbar-series-picker" style="display: flex; align-items: center; gap: 4px;">
-        <input type="number" id="customSubjectInput" placeholder="Nº" title="Digite o número da minissérie (ex: 15) e aperte Enter" onkeydown="if(event.key === 'Enter') window.createCustomSubject()">
+        <input type="number" id="customSubjectInput" placeholder="Nº" title="Digite o número da minissérie (ex: 15) e aperte Enter" style="width: 46px; height: 30px; box-sizing: border-box; padding: 2px 4px; background: rgba(0, 0, 0, 0.45); border: 1.5px solid rgba(0, 174, 239, 0.5); color: #fff; font-family: var(--uiRounded); border-radius: 8px; outline: none; font-size: 0.90rem; font-weight: 900; text-align: center; box-shadow: inset 0 0 6px rgba(0, 174, 239, 0.2); transition: all 0.2s ease;" onkeydown="if(event.key === 'Enter') window.createCustomSubject()">
       </div>
     </div>
 
@@ -117,24 +117,21 @@
       </div>
     </div>
 
-    <div class="vortexRightActions">
+    <div class="vortexRightActions" style="display: flex !important; gap: 4px; align-items: center; margin-left: auto !important; position: relative; z-index: 2; max-width: calc(50vw - 250px); justify-content: flex-end;">
       <!-- Ações do Cockpit Superior: ASSUNTO e VERSÃO -->
-      <button id="btnGenerateSubjects" class="actionBtn" onclick="window.handleGenerateSubjects()" title="Expandir Assunto com IA">
+      <button id="btnGenerateSubjects" class="actionBtn" onclick="window.handleGenerateSubjects()" style="padding: 5px 9px; border-radius: 6px; background: rgba(0, 174, 239, 0.15); color: #fff; border: 1px solid rgba(0, 174, 239, 0.5); font-weight: 800; font-size: 0.70rem; font-family: var(--uiRounded); letter-spacing: 0.3px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 4px;" title="Expandir Assunto com IA" onmouseover="this.style.background='var(--brandGrad)'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(0, 174, 239, 0.15)'; this.style.borderColor='rgba(0, 174, 239, 0.5)';">
         <span>✨ ASSUNTO</span>
       </button>
 
-      <button id="btnNewCampaignVersion" class="actionBtn" onclick="window.resetCurrentCampaignVersion()" title="Gerar Nova Versão da Minissérie">
+      <button id="btnNewCampaignVersion" class="actionBtn" onclick="window.resetCurrentCampaignVersion()" style="padding: 5px 9px; border-radius: 6px; background: rgba(232, 0, 109, 0.15); color: #fff; border: 1px solid rgba(232, 0, 109, 0.5); font-weight: 800; font-size: 0.70rem; font-family: var(--uiRounded); letter-spacing: 0.3px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 10px rgba(232, 0, 109, 0.2);" title="Gerar Nova Versão da Minissérie" onmouseover="this.style.background='linear-gradient(135deg, #e8006d, #ff4081)'; this.style.borderColor='transparent';" onmouseout="this.style.background='rgba(232, 0, 109, 0.15)'; this.style.borderColor='rgba(232, 0, 109, 0.5)';">
         <span>♻️ VERSÃO</span>
       </button>
 
-      <!-- Divisor sutil entre criação e utilitários -->
-      <div class="topbar-action-divider" aria-hidden="true"></div>
-
       <!-- Player de Som Ambiente / Focus Music Studio -->
       <div style="position: relative;" id="ambientAudioWrapper">
-        <button id="btnAmbientAudio" class="actionBtn ambientAudioBtn" onclick="window.toggleAmbientAudioDropdown()" title="Música Ambiente do Estúdio">
-          <span id="ambientAudioIcon" style="font-size: 1.1rem; line-height: 1; transition: transform 0.2s ease;">🔇</span>
-          <span id="ambientAudioLabel" style="font-size: 0.72rem; font-family: var(--uiRounded); letter-spacing: 0.5px; text-transform: uppercase;">SOM</span>
+        <button id="btnAmbientAudio" class="actionBtn ambientAudioBtn" style="padding: 5px 9px; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-weight: bold; cursor: pointer; transition: all 0.25s ease; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 5px; font-size: 0.70rem;" onclick="window.toggleAmbientAudioDropdown()" title="Música Ambiente do Estúdio">
+          <span id="ambientAudioIcon" style="font-size: 1.15rem; line-height: 1; transition: transform 0.2s ease;">🔇</span>
+          <span id="ambientAudioLabel" style="font-size: 0.78rem; font-family: var(--uiRounded); letter-spacing: 0.5px; text-transform: uppercase;">SOM</span>
         </button>
         <div id="dropdownAmbientAudio" class="vortexDropdown ambientAudioDropdown" style="display: none; width: 440px; right: 0; top: 100%; margin-top: 10px; z-index: 1000; padding: 14px; background: rgba(5,12,28,0.96); border: 1px solid rgba(0,198,255,0.4); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,198,255,0.25); backdrop-filter: blur(16px);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10px;">
@@ -175,7 +172,7 @@
         </div>
       </div>
       <!-- API Config -->
-      <div style="position: relative;">
+      <div style="position: relative; margin-right: 8px;">
         <button class="iconBtn" id="btnApiConfig" title="Chave da API" aria-label="Configurar Chaves de API" onclick="document.getElementById('modalApiConfig').style.display='flex'">🔑 API</button>
       </div>
       <div style="position: relative;">
@@ -229,7 +226,7 @@
 
       <!-- Sistema Dropdown -->
       <div style="position: relative;">
-        <button class="actionBtn" id="btnSystem" onclick="window.toggleDropdown('dropdownSystem')">⚙️ SISTEMA</button>
+        <button class="actionBtn" id="btnSystem" style="padding: 10px 16px; border: 1px solid rgba(255, 255, 255, 0.2);" onclick="window.toggleDropdown('dropdownSystem')">⚙️ SISTEMA</button>
         <div id="dropdownSystem" class="vortexDropdown" style="display: none; min-width: 250px; right: 0; z-index: 100;">
           <h3 style="margin: 0 0 16px 0; font-family: var(--uiRounded); color: #fff;">Opções do Sistema</h3>
           <p style="color: var(--ivTextSecondary); margin-bottom: 16px; font-size: 0.9rem;">Gerencie o banco de dados do Vortex 12.0</p>

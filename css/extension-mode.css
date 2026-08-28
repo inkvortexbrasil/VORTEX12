@@ -1515,79 +1515,23 @@ body.living-stage-active {
   }
 
   .logoBox {
-    width: 200px !important;
-    min-width: 200px !important;
-    height: 52px !important;
+    width: 210px !important;
+    min-width: 210px !important;
+    height: 60px !important;
     padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
   }
 
   .vortexGlobalActions {
     gap: 6px !important;
     max-width: calc(50vw - 250px) !important;
-    display: flex !important;
-    align-items: center !important;
   }
 
   #btnBackToDashboard,
   #btnChangeWallpaper {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 12px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.72rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.4px !important;
-    color: #fff !important;
-    background: rgba(0, 174, 239, 0.12) !important;
-    border: 1px solid rgba(0, 174, 239, 0.4) !important;
-    box-shadow: 0 0 10px rgba(0, 174, 239, 0.15) !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  #btnBackToDashboard:hover,
-  #btnChangeWallpaper:hover {
-    background: var(--brandGrad) !important;
-    border-color: transparent !important;
-    box-shadow: 0 0 16px rgba(0, 174, 239, 0.4) !important;
-    transform: translateY(-1px) !important;
-  }
-
-  #customSubjectInput {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    width: 48px !important;
-    box-sizing: border-box !important;
-    padding: 0 4px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.88rem !important;
-    font-weight: 900 !important;
-    color: #00e5ff !important;
-    text-align: center !important;
-    background: rgba(4, 10, 27, 0.6) !important;
-    border: 1px solid rgba(0, 174, 239, 0.45) !important;
-    box-shadow: inset 0 0 8px rgba(0, 174, 239, 0.2) !important;
-    outline: none !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  #customSubjectInput:focus {
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.5), inset 0 0 8px rgba(0, 174, 239, 0.3) !important;
-    background: rgba(4, 10, 27, 0.8) !important;
+    padding: 5px 9px !important;
+    font-size: 0.70rem !important;
+    min-height: 30px !important;
+    height: 30px !important;
   }
 
   #topbarMultiverseTitle {
@@ -1611,7 +1555,7 @@ body.living-stage-active {
 
   .vortexRightActions {
     display: flex !important;
-    gap: 5px !important;
+    gap: 4px !important;
     align-items: center !important;
     flex-shrink: 0 !important;
     margin-left: auto !important;
@@ -1621,121 +1565,20 @@ body.living-stage-active {
     justify-content: flex-end !important;
   }
 
-  /* Botões Nobres de Criação */
-  #btnGenerateSubjects {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 11px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.71rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.4px !important;
-    color: #fff !important;
-    background: rgba(0, 174, 239, 0.15) !important;
-    border: 1px solid rgba(0, 174, 239, 0.55) !important;
-    box-shadow: 0 0 12px rgba(0, 174, 239, 0.25) !important;
-    cursor: pointer !important;
+  .vortexRightActions .iconBtn,
+  .vortexRightActions .actionBtn {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 4px 7px !important;
+    font-size: 0.68rem !important;
     white-space: nowrap !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  #btnGenerateSubjects:hover {
-    background: var(--brandGrad) !important;
-    border-color: transparent !important;
-    box-shadow: 0 0 18px rgba(0, 174, 239, 0.5) !important;
-    transform: translateY(-1px) !important;
-  }
-
-  #btnNewCampaignVersion {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 11px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.71rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.4px !important;
-    color: #fff !important;
-    background: rgba(232, 0, 109, 0.15) !important;
-    border: 1px solid rgba(232, 0, 109, 0.55) !important;
-    box-shadow: 0 0 12px rgba(232, 0, 109, 0.25) !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  #btnNewCampaignVersion:hover {
-    background: linear-gradient(135deg, #e8006d, #ff4081) !important;
-    border-color: transparent !important;
-    box-shadow: 0 0 18px rgba(232, 0, 109, 0.5) !important;
-    transform: translateY(-1px) !important;
-  }
-
-  .topbar-action-divider {
-    width: 1px !important;
-    height: 18px !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    margin: 0 2px !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Botões Utilitários */
-  .vortexRightActions .actionBtn:not(#btnGenerateSubjects):not(#btnNewCampaignVersion),
-  .vortexRightActions .iconBtn {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 9px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.71rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.3px !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: none !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  .vortexRightActions .actionBtn:not(#btnGenerateSubjects):not(#btnNewCampaignVersion):hover,
-  .vortexRightActions .iconBtn:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    color: #fff !important;
-    transform: translateY(-1px) !important;
+    border-radius: 6px !important;
   }
 
   .vortexRightActions .vortexVersionBadge {
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 8px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    box-sizing: border-box !important;
-    font-family: var(--uiRounded, sans-serif) !important;
-    font-size: 0.68rem !important;
-    background: rgba(0, 174, 239, 0.08) !important;
-    border: 1px solid rgba(0, 174, 239, 0.3) !important;
-    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 2px 5px !important;
+    font-size: 0.62rem !important;
+    gap: 2px !important;
     flex-shrink: 0 !important;
   }
 
@@ -2027,7 +1870,32 @@ body.living-stage-active {
   }
 
   #multiverseControlPanel {
-    display: none !important;
+    left: auto !important;
+    right: var(--cockpit-left-edge) !important;
+    transform: none !important;
+    width: var(--cockpit-left-width) !important;
+    height: auto !important;
+    top: var(--cockpit-main-top) !important;
+    bottom: auto !important;
+    max-height: calc(100vh - var(--cockpit-main-top) - 30px) !important;
+    padding: 12px 14px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(0, 174, 239, 0.25) !important;
+    border-radius: 16px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 45px rgba(0, 0, 0, 0.25) !important;
+    background: linear-gradient(155deg, rgba(4, 10, 27, 0.28), rgba(7, 10, 26, 0.08)) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  #multiverseControlPanel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  #multiverseControlPanel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 99px;
   }
 
   #orbitLeft {
