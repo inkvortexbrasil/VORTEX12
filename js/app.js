@@ -760,7 +760,26 @@ window.copyExpandedContent = async function(type, index, btnElement) {
     geminiScene.assembledGemini = textToCopy;
     geminiScene.copiedGemini = true;
   } else if (type === 'social') {
-    textToCopy = (campaign.social && (campaign.social.caption || campaign.social.baseCaption || campaign.social.socialCaption)) || campaign.socialCaption || "";
+    const cNum = String(campaign.number || campaign.no || campaign.id || '01').padStart(2, '0');
+    const title = campaign.title || campaign.topic?.title || campaign.assuntoPrincipal || '';
+    const rawCaption = (campaign.social && (campaign.social.caption || campaign.social.baseCaption || campaign.social.socialCaption))
+      || campaign.socialCaption
+      || '';
+
+    const rawLines = rawCaption.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const hashtagLines = rawLines.filter(l => l.startsWith('#'));
+    const contentLines = rawLines.filter(l => !l.startsWith('#') && !/^miniss[eé]rie\s+\d+/i.test(l));
+
+    const header = `MINISSÉRIE ${cNum} — ${title}`.trim();
+    const parts = [header];
+    if (contentLines.length > 0) {
+      parts.push(contentLines.join('\n\n'));
+    }
+    if (hashtagLines.length > 0) {
+      parts.push(hashtagLines.join(' '));
+    }
+    textToCopy = parts.join('\n\n');
+
     if (campaign.social) campaign.social.copied = true;
   } else if (type === 'flow') {
     textToCopy = campaign.flow ? campaign.flow.prompt || "" : "";

@@ -518,9 +518,9 @@ Object.assign(UI, {
       if (this.contentArea) {
         this.contentArea.innerHTML = `
           <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
-            <div style="font-size: 2.8rem; margin-bottom: 12px; opacity: 0.5;">🌌</div>
-            <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.1rem; margin-bottom: 8px;">MULTIVERSO AGUARDANDO</h3>
-            <p style="color: var(--ivTextSecondary); max-width: 440px; font-size: 0.88rem; line-height: 1.5; margin: 0;">
+            <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.6; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));">🌌</div>
+            <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">MULTIVERSO AGUARDANDO</h3>
+            <p style="color: rgba(255,255,255,0.85); max-width: 460px; font-size: 0.95rem; line-height: 1.5; margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.9);">
               Selecione uma minissérie na biblioteca ou crie uma nova obra para visualizar a apresentação editorial neste palco central.
             </p>
           </div>
@@ -529,6 +529,8 @@ Object.assign(UI, {
       return;
     }
 
+    const cNum = String(campaign.number || campaign.no || campaign.id || '01').padStart(2, '0');
+    const title = campaign.title || campaign.topic?.title || campaign.assuntoPrincipal || 'SEM TÍTULO DEFINIDO';
     const isCopied = campaign.social ? !!campaign.social.copied : false;
     const rawCaption = (campaign.social && (campaign.social.caption || campaign.social.baseCaption || campaign.social.socialCaption))
       || campaign.socialCaption
@@ -537,12 +539,13 @@ Object.assign(UI, {
     if (!rawCaption) {
       this.contentArea.innerHTML = `
         <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
-          <div style="font-size: 2.8rem; margin-bottom: 12px; opacity: 0.5;">📝</div>
-          <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.1rem; margin-bottom: 8px;">APRESENTAÇÃO DA MINISSÉRIE</h3>
-          <p style="color: var(--ivTextSecondary); max-width: 440px; font-size: 0.88rem; line-height: 1.5; margin: 0 0 16px 0;">
+          <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.6; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));">📝</div>
+          <h3 style="color: var(--cyan, #00e5ff); font-family: var(--uiRounded); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">MINISSÉRIE ${cNum}</h3>
+          <p style="color: #fff; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); text-transform: uppercase;">${title}</p>
+          <p style="color: rgba(255,255,255,0.85); max-width: 440px; font-size: 0.92rem; line-height: 1.5; margin: 0 0 18px 0; text-shadow: 0 1px 4px rgba(0,0,0,0.9);">
             A narrativa social de apresentação desta obra ainda não foi gerada no estúdio.
           </p>
-          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 800;">
+          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="padding: 10px 22px; font-size: 0.85rem; font-weight: 800;">
             ✨ EXPANDIR (IA)
           </button>
         </div>
@@ -550,39 +553,47 @@ Object.assign(UI, {
       return;
     }
 
-    // Separa as frases e as hashtags
+    // Separa as frases e as hashtags do rawCaption
     const rawLines = rawCaption.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const hashtagLines = rawLines.filter(l => l.startsWith('#'));
     const hashtagsText = hashtagLines.join(' ');
     const contentLines = rawLines.filter(l => !l.startsWith('#') && !/^miniss[eé]rie\s+\d+/i.test(l));
 
     this.contentArea.innerHTML = `
-      <div style="display: flex; flex-direction: column; height: 100%; min-height: 0; box-sizing: border-box; padding: 12px 18px 16px 18px; position: relative;">
-        <!-- Topo: Botão Copiar no canto superior direito -->
-        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
+      <div style="display: flex; flex-direction: column; height: 100%; min-height: 0; box-sizing: border-box; padding: 4px 6px 12px 6px; position: relative;">
+        
+        <!-- Topo da Apresentação com Botão Copiar -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-shrink: 0; gap: 16px; border-bottom: 1px solid rgba(0, 174, 239, 0.25); padding-bottom: 12px;">
+          <!-- Cabeçalho Oficial: Minissérie NN e Título -->
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">
+            <div style="color: var(--cyan, #00e5ff); font-size: 0.92rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 14px rgba(0,229,255,0.45);">
+              MINISSÉRIE ${cNum}
+            </div>
+            <h2 style="color: #fff; font-family: var(--uiRounded); font-size: 1.15rem; font-weight: 800; line-height: 1.38; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.95); text-transform: uppercase; letter-spacing: 0.4px;">
+              ${title}
+            </h2>
+          </div>
+
+          <!-- Botão Copiar no Canto Superior Direito -->
           <button id="btnCopySocialCaption" class="actionBtn" 
-                  style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.16)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(0, 174, 239, 0.55)'}; padding: 7px 18px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; box-shadow: 0 0 14px rgba(0,174,239,0.22); display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0.5px; transition: all 0.2s ease;"
+                  style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.2)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(0, 174, 239, 0.65)'}; padding: 8px 20px; font-size: 0.86rem; font-weight: 800; border-radius: 8px; box-shadow: 0 0 16px rgba(0,174,239,0.3); display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px; flex-shrink: 0; transition: all 0.2s ease;"
                   onclick="window.copyExpandedContent('social', 0, this)">
-            <span style="font-size: 0.95rem;">${isCopied ? '✓' : '📋'}</span>
+            <span style="font-size: 1.05rem;">${isCopied ? '✓' : '📋'}</span>
             <span>${isCopied ? 'COPIADO' : 'COPIAR'}</span>
           </button>
         </div>
 
-        <!-- Leitura Horizontal Fluida das 10 Linhas da Minissérie -->
-        <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 6px;">
-          <div id="socialCaptionText" style="display: flex; flex-direction: column; gap: 11px; color: #eaf4ff; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.96rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.62; text-shadow: 0 1px 4px rgba(0,0,0,0.85);">
+        <!-- Área de Leitura das 10 Frases e Hashtags (Sem película, texto límpido flutuando com sombra profunda) -->
+        <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 8px;">
+          <div id="socialCaptionText" style="display: flex; flex-direction: column; gap: 14px; color: #f1f7ff; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(1.02rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.65; text-shadow: 0 2px 8px rgba(0,0,0,0.98), 0 0 16px rgba(0,0,0,0.95);">
             ${contentLines.length > 0
-              ? contentLines.map(line => `
-                  <div style="display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.04);">
-                    <span style="line-height: 1.62; flex: 1;">${line}</span>
-                  </div>
-                `).join('')
-              : `<p style="white-space: pre-wrap; margin: 0; line-height: 1.6;">${rawCaption}</p>`
+              ? contentLines.map(line => `<div style="line-height: 1.65; word-break: break-word;">${line}</div>`).join('')
+              : `<p style="white-space: pre-wrap; margin: 0; line-height: 1.65;">${rawCaption}</p>`
             }
           </div>
 
           ${hashtagsText ? `
-            <div style="margin-top: 16px; padding: 12px 14px; background: rgba(0, 174, 239, 0.06); border: 1px solid rgba(0, 174, 239, 0.25); border-radius: 10px; color: #00e5ff; font-weight: 700; font-size: 0.90rem; letter-spacing: 0.5px; line-height: 1.6; text-shadow: 0 0 12px rgba(0,229,255,0.35);">
+            <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(0, 174, 239, 0.2); color: #00e5ff; font-weight: 800; font-size: 0.98rem; letter-spacing: 0.5px; line-height: 1.65; text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 14px rgba(0,229,255,0.45);">
               ${hashtagsText}
             </div>
           ` : ''}
