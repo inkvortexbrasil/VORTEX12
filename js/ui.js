@@ -514,37 +514,78 @@ Object.assign(UI, {
 
   renderSocialArea() {
     const campaign = AppState.getSelectedCampaign();
-    if (!campaign) return;
-
-    if (!campaign.generatedGPT || !campaign.social || (!campaign.social.caption && !campaign.social.baseCaption)) {
-      this.contentArea.innerHTML = this.renderMiniseriesNotGenerated(campaign);
+    if (!campaign) {
+      if (this.contentArea) {
+        this.contentArea.innerHTML = `
+          <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
+            <div style="font-size: 2.8rem; margin-bottom: 12px; opacity: 0.5;">🌌</div>
+            <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.1rem; margin-bottom: 8px;">MULTIVERSO AGUARDANDO</h3>
+            <p style="color: var(--ivTextSecondary); max-width: 440px; font-size: 0.88rem; line-height: 1.5; margin: 0;">
+              Selecione uma minissérie na biblioteca ou crie uma nova obra para visualizar a apresentação editorial neste palco central.
+            </p>
+          </div>
+        `;
+      }
       return;
     }
 
-    const isCopied = campaign.social ? campaign.social.copied : false;
+    const isCopied = campaign.social ? !!campaign.social.copied : false;
+    const rawCaption = (campaign.social && (campaign.social.caption || campaign.social.baseCaption || campaign.social.socialCaption))
+      || campaign.socialCaption
+      || '';
+
+    if (!rawCaption) {
+      this.contentArea.innerHTML = `
+        <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
+          <div style="font-size: 2.8rem; margin-bottom: 12px; opacity: 0.5;">📝</div>
+          <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.1rem; margin-bottom: 8px;">APRESENTAÇÃO DA MINISSÉRIE</h3>
+          <p style="color: var(--ivTextSecondary); max-width: 440px; font-size: 0.88rem; line-height: 1.5; margin: 0 0 16px 0;">
+            A narrativa social de apresentação desta obra ainda não foi gerada no estúdio.
+          </p>
+          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="padding: 8px 18px; font-size: 0.82rem; font-weight: 800;">
+            ✨ EXPANDIR (IA)
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    // Separa as frases e as hashtags
+    const rawLines = rawCaption.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const hashtagLines = rawLines.filter(l => l.startsWith('#'));
+    const hashtagsText = hashtagLines.join(' ');
+    const contentLines = rawLines.filter(l => !l.startsWith('#') && !/^miniss[eé]rie\s+\d+/i.test(l));
 
     this.contentArea.innerHTML = `
-      <div style="padding: 0 8px 16px 8px; height: 100%; display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box;">
-        
-        <!-- Cabeçalho Fixo da Aba -->
-        <div style="display: flex; align-items: center; margin-bottom: 8px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-          <div>
-            <h2 style="color: #fff; font-family: var(--uiRounded); margin: 0 0 2px 0; font-size: 1rem;">Legendas (Social)</h2>
-            <p style="color: rgba(255,255,255,0.45); margin: 0; font-size: 0.75rem;">Instagram, LinkedIn e Redes Sociais</p>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
-          <h3 style="color: rgba(255,255,255,0.7); margin: 0; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1.5px;">Legenda Completa</h3>
-          <button class="badge actionBtn" style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'transparent'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(255,255,255,0.2)'}; padding: 5px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 6px;" onclick="window.copyExpandedContent('social', 0, this)">
-            ${isCopied ? 'COPIADO' : 'COPIAR'}
+      <div style="display: flex; flex-direction: column; height: 100%; min-height: 0; box-sizing: border-box; padding: 12px 18px 16px 18px; position: relative;">
+        <!-- Topo: Botão Copiar no canto superior direito -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
+          <button id="btnCopySocialCaption" class="actionBtn" 
+                  style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.16)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(0, 174, 239, 0.55)'}; padding: 7px 18px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; box-shadow: 0 0 14px rgba(0,174,239,0.22); display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0.5px; transition: all 0.2s ease;"
+                  onclick="window.copyExpandedContent('social', 0, this)">
+            <span style="font-size: 0.95rem;">${isCopied ? '✓' : '📋'}</span>
+            <span>${isCopied ? 'COPIADO' : 'COPIAR'}</span>
           </button>
         </div>
 
-        <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0;">
-          <p id="socialCaptionText" style="color: #e2e8f0; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.86rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.55; white-space: pre-wrap; margin: 0; padding: 4px 8px 75px 8px;">
-            ${(campaign.social && (campaign.social.caption || campaign.social.baseCaption)) ? (campaign.social.caption || campaign.social.baseCaption) : 'Legenda ainda não gerada.'}
-          </p>
+        <!-- Leitura Horizontal Fluida das 10 Linhas da Minissérie -->
+        <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 6px;">
+          <div id="socialCaptionText" style="display: flex; flex-direction: column; gap: 11px; color: #eaf4ff; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(0.96rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.62; text-shadow: 0 1px 4px rgba(0,0,0,0.85);">
+            ${contentLines.length > 0
+              ? contentLines.map(line => `
+                  <div style="display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.04);">
+                    <span style="line-height: 1.62; flex: 1;">${line}</span>
+                  </div>
+                `).join('')
+              : `<p style="white-space: pre-wrap; margin: 0; line-height: 1.6;">${rawCaption}</p>`
+            }
+          </div>
+
+          ${hashtagsText ? `
+            <div style="margin-top: 16px; padding: 12px 14px; background: rgba(0, 174, 239, 0.06); border: 1px solid rgba(0, 174, 239, 0.25); border-radius: 10px; color: #00e5ff; font-weight: 700; font-size: 0.90rem; letter-spacing: 0.5px; line-height: 1.6; text-shadow: 0 0 12px rgba(0,229,255,0.35);">
+              ${hashtagsText}
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -907,139 +948,59 @@ window.renderMultiverseControlPanel = function() {
 
   const campaign = AppState.getSelectedCampaign();
   const subjectsGrid = document.getElementById('subjectsGrid');
+  const headerLabel = document.getElementById('activeMinisserieHeaderLabel');
   
   if (!campaign) {
     panel.style.display = 'flex';
-    rightArea.style.display = 'none';
+    rightArea.style.display = 'flex';
     if (subjectsGrid) subjectsGrid.style.display = 'flex';
-    const headerLabel = document.getElementById('activeMinisserieHeaderLabel');
     if (headerLabel) headerLabel.textContent = '--';
     
     panel.innerHTML = `
-      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
-        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5; filter: grayscale(100%);">🌌</div>
-        <h2 style="color: #fff; font-family: var(--uiRounded); font-size: 1.5rem; margin-bottom: 12px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">NENHUMA MINISSÉRIE SELECIONADA</h2>
-        <p style="color: var(--ivTextSecondary); max-width: 80%; line-height: 1.5; margin-bottom: 30px;">O Multiverso está aguardando suas diretrizes. Você pode criar novas ideias usando a Inteligência Artificial ou resgatar uma obra existente.</p>
-        
-        <div style="display: flex; gap: 16px; justify-content: center; width: 100%;">
-          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="padding: 12px 24px; font-size: 0.9rem; flex: 1;">
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 6px 0;">
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px; text-align: center;">
+          <div style="font-size: 2rem; margin-bottom: 6px; opacity: 0.6;">🌌</div>
+          <div style="color: #fff; font-family: var(--uiRounded); font-size: 0.92rem; font-weight: 900; margin-bottom: 6px;">NENHUMA MINISSÉRIE SELECIONADA</div>
+          <p style="color: var(--ivTextSecondary); font-size: 0.78rem; line-height: 1.4; margin: 0 0 12px 0;">Digite o número acima ou crie uma nova obra via IA.</p>
+          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="width: 100%; padding: 8px 14px; font-size: 0.8rem; font-weight: 800;">
             ✨ EXPANDIR (IA)
-          </button>
-          <button class="neonBtn" onclick="window.switchMultiverseRoom('pageLibrary')" style="padding: 12px 24px; font-size: 0.9rem; flex: 1; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: var(--ivTextSecondary);">
-            📚 ABRIR BIBLIOTECA
           </button>
         </div>
       </div>
     `;
+    UI.renderSocialArea();
     return;
   }
 
-  // Se tiver campanha selecionada, mostra o painel ativo e a area direita de texto
+  // Se tiver campanha selecionada, mostra o painel ativo e o palco central
   panel.style.display = 'flex';
   rightArea.style.display = 'flex';
   if (subjectsGrid) subjectsGrid.style.display = 'none';
 
   const cNum = String(campaign.number || campaign.no || campaign.id || '01').padStart(2, '0');
 
-  // Atualiza o Label no Topo (Novo Layout do Dashboard)
-  const headerLabel = document.getElementById('activeMinisserieHeaderLabel');
+  // Atualiza o Label no Topo (Número da Minissérie)
   if (headerLabel) {
     headerLabel.textContent = cNum;
   }
 
-  const t = AppState.studioActiveTab || 'gpt';
-  
-  // Status de Telemetria: Direção de Arte e Legenda Social
-  const hasGpt = Array.isArray(campaign.scenes) && campaign.scenes.length >= 10;
-  const hasSocial = !!(campaign.social && (campaign.social.caption || campaign.social.baseCaption));
-
+  // Cockpit compacto no lado direito: Título Principal da Minissérie
   panel.innerHTML = `
-    <!-- cockpit-robot-station aposentado por ordem do Diretor -->
-    <div class="cockpit-console" style="flex: 1; height: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
-
-      <!-- Título Principal Compacto e Nobre -->
-      <div class="cockpit-hero" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; padding: 12px 14px; text-align: left; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
-        <strong style="color: #fff; font-size: 1.02rem; line-height: 1.35; font-family: var(--uiRounded); font-weight: 900; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 10px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.6px;">
+    <div class="cockpit-console" style="display: flex; flex-direction: column; gap: 10px; padding: 0; width: 100%;">
+      <!-- Título Principal da Minissérie -->
+      <div class="cockpit-hero" style="background: linear-gradient(145deg, rgba(4, 12, 31, 0.4), rgba(255, 255, 255, 0.03)); border: 1px solid rgba(0, 174, 239, 0.35); border-radius: 14px; padding: 14px 16px; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+        <div style="color: var(--cyan); font-size: 0.68rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; opacity: 0.85;">
+          TÍTULO DA MINISSÉRIE
+        </div>
+        <strong style="color: #fff; font-size: 0.98rem; line-height: 1.4; font-family: var(--uiRounded); font-weight: 900; display: block; text-shadow: 0 2px 10px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.5px;">
           ${campaign.title || campaign.topic?.title || campaign.assuntoPrincipal || 'SEM TÍTULO DEFINIDO'}
         </strong>
       </div>
-
-      <!-- Abas Ampliadas de Comando: Direção de Arte e Legenda Social preenchendo de cima a baixo -->
-      <div class="cockpit-module-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; height: 100%; min-height: 0; margin-top: 2px;">
-
-        <!-- ABA 1: DIREÇÃO DE ARTE -->
-        <div class="cockpit-tab-card tab-gpt ${t !== 'social' ? 'active' : ''}" 
-             onclick="AppState.studioActiveTab='gpt'; UI.renderWorkspace();"
-             title="Clique para alternar para a Direção de Arte (10 Cenas do GPT)">
-          
-          ${t !== 'social' ? '<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan)); box-shadow: 0 0 10px var(--cyan);"></div>' : ''}
-
-          <!-- Topo do Card -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
-            <span style="font-size: 1.85rem; line-height: 1; filter: drop-shadow(0 0 10px rgba(0,174,239,0.7));">🎨</span>
-            <div style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.8px; font-family: var(--uiRounded); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2;">
-              DIREÇÃO<br>DE ARTE
-            </div>
-            ${t !== 'social' 
-              ? '<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:900; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(0,174,239,0.25); color:#00e5ff; border:1px solid rgba(0,174,239,0.8); box-shadow:0 0 10px rgba(0,174,239,0.3);"><span style="width:5px; height:5px; border-radius:50%; background:#00e5ff; box-shadow:0 0 6px #00e5ff;"></span> ATIVO</span>' 
-              : '<span style="font-size:0.65rem; font-weight:800; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);">10 CENAS</span>'}
-          </div>
-
-          <!-- Meio do Card: Micro-Chips e Informações -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin: 6px 0;">
-            <span style="background: rgba(0,174,239,0.14); border: 1px solid rgba(0,174,239,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #d0f4ff; font-weight: 700; width: 94%; text-align: center;">🎬 Master 1 (10s)</span>
-            <span style="background: rgba(0,174,239,0.14); border: 1px solid rgba(0,174,239,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #d0f4ff; font-weight: 700; width: 94%; text-align: center;">🎬 Master 2 (10s)</span>
-            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #fff; font-weight: 700; width: 94%; text-align: center;">🎞️ Esteira (50 Img)</span>
-          </div>
-
-          <!-- Base do Card -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; width: 100%;">
-            <span style="font-size: 0.60rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--uiRounded); font-weight: 700;">Prompts 16:9</span>
-            <span style="font-size: 0.75rem; color: ${t !== 'social' ? '#00e5ff' : 'rgba(255,255,255,0.65)'}; font-weight: 900; font-family: var(--uiRounded);">${hasGpt ? '✓ 10 Prontos' : 'Aguardando'}</span>
-          </div>
-        </div>
-
-        <!-- ABA 2: LEGENDA SOCIAL -->
-        <div class="cockpit-tab-card tab-social ${t === 'social' ? 'active' : ''}" 
-             onclick="AppState.studioActiveTab='social'; UI.renderWorkspace();"
-             title="Clique para alternar para a Legenda Social (Mistral)">
-          
-          ${t === 'social' ? '<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--pink), #fff, var(--pink)); box-shadow: 0 0 10px var(--pink);"></div>' : ''}
-
-          <!-- Topo do Card -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
-            <span style="font-size: 1.85rem; line-height: 1; filter: drop-shadow(0 0 10px rgba(236,0,140,0.7));">📝</span>
-            <div style="font-size: 0.95rem; font-weight: 900; letter-spacing: 0.8px; font-family: var(--uiRounded); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2;">
-              LEGENDA<br>SOCIAL
-            </div>
-            ${t === 'social' 
-              ? '<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.65rem; font-weight:900; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(236,0,140,0.25); color:#ff66cc; border:1px solid rgba(236,0,140,0.8); box-shadow:0 0 10px rgba(236,0,140,0.3);"><span style="width:5px; height:5px; border-radius:50%; background:#ff66cc; box-shadow:0 0 6px #ff66cc;"></span> ATIVO</span>' 
-              : '<span style="font-size:0.65rem; font-weight:800; letter-spacing:0.5px; font-family:var(--uiRounded); text-transform:uppercase; padding:3px 8px; border-radius:99px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.15);">10 LINHAS</span>'}
-          </div>
-
-          <!-- Meio do Card: Micro-Chips e Informações -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; margin: 6px 0;">
-            <span style="background: rgba(236,0,140,0.14); border: 1px solid rgba(236,0,140,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #ffd0ec; font-weight: 700; width: 94%; text-align: center;">📱 Instagram</span>
-            <span style="background: rgba(236,0,140,0.14); border: 1px solid rgba(236,0,140,0.35); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #ffd0ec; font-weight: 700; width: 94%; text-align: center;">💼 LinkedIn</span>
-            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 3px 4px; font-size: 0.68rem; color: #fff; font-weight: 700; width: 94%; text-align: center;">🏷️ 4 Hashtags</span>
-          </div>
-
-          <!-- Base do Card -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; width: 100%;">
-            <span style="font-size: 0.60rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; font-family: var(--uiRounded); font-weight: 700;">Copywriting</span>
-            <span style="font-size: 0.75rem; color: ${t === 'social' ? '#ff66cc' : 'rgba(255,255,255,0.65)'}; font-weight: 900; font-family: var(--uiRounded);">${hasSocial ? '✓ Concluída' : 'Aguardando'}</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Fim do Painel Central -->
     </div>
   `;
 
-  // Renderiza a aba ativa na coluna direita (somente Direção de Arte ou Legenda Social)
-  if (t === 'social') UI.renderSocialArea();
-  else UI.renderGPTArea();
+  // Renderiza a apresentação da minissérie (10 linhas e hashtags) no Palco Central
+  UI.renderSocialArea();
 };
 
 

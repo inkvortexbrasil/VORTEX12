@@ -760,7 +760,7 @@ window.copyExpandedContent = async function(type, index, btnElement) {
     geminiScene.assembledGemini = textToCopy;
     geminiScene.copiedGemini = true;
   } else if (type === 'social') {
-    textToCopy = campaign.social ? campaign.social.caption || "" : "";
+    textToCopy = (campaign.social && (campaign.social.caption || campaign.social.baseCaption || campaign.social.socialCaption)) || campaign.socialCaption || "";
     if (campaign.social) campaign.social.copied = true;
   } else if (type === 'flow') {
     textToCopy = campaign.flow ? campaign.flow.prompt || "" : "";
