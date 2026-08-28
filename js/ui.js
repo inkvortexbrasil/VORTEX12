@@ -539,7 +539,7 @@ Object.assign(UI, {
       this.contentArea.innerHTML = `
         <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
           <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.6; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));">📝</div>
-          <h3 style="color: var(--cyan, #00e5ff); font-family: var(--uiRounded); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">MINISSÉRIE ${cNum}</h3>
+          <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">MINISSÉRIE ${cNum}</h3>
           <p style="color: #fff; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); text-transform: uppercase;">${title}</p>
           <p style="color: rgba(255,255,255,0.85); max-width: 440px; font-size: 0.92rem; line-height: 1.5; margin: 0 0 18px 0; text-shadow: 0 1px 4px rgba(0,0,0,0.9);">
             A narrativa social de apresentação desta obra ainda não foi gerada no estúdio.
@@ -565,7 +565,7 @@ Object.assign(UI, {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-shrink: 0; gap: 16px; border-bottom: 1px solid rgba(0, 174, 239, 0.25); padding-bottom: 12px;">
           <!-- Cabeçalho Oficial: Minissérie NN e Título -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">
-            <div style="color: var(--cyan, #00e5ff); font-size: 0.92rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 14px rgba(0,229,255,0.45);">
+            <div style="color: #fff; font-size: 0.92rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">
               MINISSÉRIE ${cNum}
             </div>
             <h2 style="color: #fff; font-family: var(--uiRounded); font-size: 1.15rem; font-weight: 800; line-height: 1.38; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.95); text-transform: uppercase; letter-spacing: 0.4px;">
