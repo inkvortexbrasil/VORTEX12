@@ -1413,19 +1413,18 @@ window.switchMultiverseRoom = function(roomId, btnId) {
     target.classList.add('active');
   }
 
-  // Dashboard vs Isolated Room logic: As 7 abas do Multiverso (orbitLeft) pertencem EXCLUSIVAMENTE ao Dashboard Central
+  // Dashboard vs Isolated Room logic: As abas do Multiverso (orbitLeft) pertencem EXCLUSIVAMENTE ao Dashboard Central
   if(roomId === 'multiverseWelcome') {
     if(orbitLeft) orbitLeft.style.display = 'flex';
-
     if(btnBack) btnBack.style.display = 'none';
   } else {
     if(orbitLeft) orbitLeft.style.display = 'none';
-
     if(btnBack) btnBack.style.display = 'flex';
   }
 
-  if(btnId && window.highlightActiveRoom) {
-    window.highlightActiveRoom(btnId);
+  // Mantém todas as abas 100% cristalinas e sem qualquer marcação ou destaque sobreposto
+  if(window.highlightActiveRoom) {
+    window.highlightActiveRoom(null);
   }
 };
 

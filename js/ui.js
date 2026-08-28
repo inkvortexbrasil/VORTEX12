@@ -53,8 +53,7 @@ window.highlightActiveRoom = function(roomId) {
   btns.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      if (id === roomId) el.classList.add('active');
-      else el.classList.remove('active');
+      el.classList.remove('active');
     }
   });
 };

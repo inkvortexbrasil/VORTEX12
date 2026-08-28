@@ -67,14 +67,7 @@ video:-ms-fullscreen {
   color: #fff !important;
 }
 
-#orbitLeft .actionBtn.active {
-  background: rgba(0, 174, 239, 0.25) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1.5px solid var(--cyan) !important;
-  box-shadow: 0 0 25px rgba(0, 174, 239, 0.5) !important;
-  color: #fff !important;
-}
+
 
 .iconBtn {
   background: transparent;
@@ -633,14 +626,7 @@ video:-ms-fullscreen {
   transform: translateX(4px) scale(1.02) !important;
   color: #fff !important;
 }
-#orbitLeft .actionBtn.active {
-  background: rgba(0, 174, 239, 0.25) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1.5px solid var(--cyan) !important;
-  box-shadow: 0 0 25px rgba(0, 174, 239, 0.5) !important;
-  color: #fff !important;
-}
+
 .neonBtn {
   background: rgba(255,255,255,0.05) !important;
   border: 2px solid rgba(255,255,255,0.2) !important;
