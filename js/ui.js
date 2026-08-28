@@ -948,66 +948,31 @@ window.openCampaignWorkspace = async function(campaignId) {
 };
 
 window.renderMultiverseControlPanel = function() {
-  const panel = document.getElementById('activeCampaignPanel');
   const rightArea = document.getElementById('multiversePromptsArea');
-  const ideationHeader = document.querySelector('.ideationHeader');
-  if(!panel || !rightArea) return;
-
-  // Garante que a secao de criacao e busca por numero fique SEMPRE VISIVEL no topo do cockpit
-  if (ideationHeader) ideationHeader.style.display = 'block';
+  if (!rightArea) return;
 
   const campaign = AppState.getSelectedCampaign();
   const subjectsGrid = document.getElementById('subjectsGrid');
-  const headerLabel = document.getElementById('activeMinisserieHeaderLabel');
+  const customInput = document.getElementById('customSubjectInput');
   
   if (!campaign) {
-    panel.style.display = 'flex';
     rightArea.style.display = 'flex';
-    if (subjectsGrid) subjectsGrid.style.display = 'flex';
-    if (headerLabel) headerLabel.textContent = '--';
-    
-    panel.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 12px; padding: 6px 0;">
-        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 14px; text-align: center;">
-          <div style="font-size: 2rem; margin-bottom: 6px; opacity: 0.6;">🌌</div>
-          <div style="color: #fff; font-family: var(--uiRounded); font-size: 0.92rem; font-weight: 900; margin-bottom: 6px;">NENHUMA MINISSÉRIE SELECIONADA</div>
-          <p style="color: var(--ivTextSecondary); font-size: 0.78rem; line-height: 1.4; margin: 0 0 12px 0;">Digite o número acima ou crie uma nova obra via IA.</p>
-          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="width: 100%; padding: 8px 14px; font-size: 0.8rem; font-weight: 800;">
-            ✨ EXPANDIR (IA)
-          </button>
-        </div>
-      </div>
-    `;
+    if (subjectsGrid) subjectsGrid.style.display = 'none';
+    if (customInput) customInput.value = '';
     UI.renderSocialArea();
     return;
   }
 
-  // Se tiver campanha selecionada, mostra o painel ativo e o palco central
-  panel.style.display = 'flex';
+  // Se tiver campanha selecionada, mostra o palco central
   rightArea.style.display = 'flex';
   if (subjectsGrid) subjectsGrid.style.display = 'none';
 
   const cNum = String(campaign.number || campaign.no || campaign.id || '01').padStart(2, '0');
 
-  // Atualiza o Label no Topo (Número da Minissérie)
-  if (headerLabel) {
-    headerLabel.textContent = cNum;
+  // Atualiza o Quadrinho de Número da Minissérie no Topbar
+  if (customInput && document.activeElement !== customInput) {
+    customInput.value = cNum;
   }
-
-  // Cockpit compacto no lado direito: Título Principal da Minissérie
-  panel.innerHTML = `
-    <div class="cockpit-console" style="display: flex; flex-direction: column; gap: 10px; padding: 0; width: 100%;">
-      <!-- Título Principal da Minissérie -->
-      <div class="cockpit-hero" style="background: linear-gradient(145deg, rgba(4, 12, 31, 0.4), rgba(255, 255, 255, 0.03)); border: 1px solid rgba(0, 174, 239, 0.35); border-radius: 14px; padding: 14px 16px; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-        <div style="color: var(--cyan); font-size: 0.68rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; opacity: 0.85;">
-          TÍTULO DA MINISSÉRIE
-        </div>
-        <strong style="color: #fff; font-size: 0.98rem; line-height: 1.4; font-family: var(--uiRounded); font-weight: 900; display: block; text-shadow: 0 2px 10px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.5px;">
-          ${campaign.title || campaign.topic?.title || campaign.assuntoPrincipal || 'SEM TÍTULO DEFINIDO'}
-        </strong>
-      </div>
-    </div>
-  `;
 
   // Renderiza a apresentação da minissérie (10 linhas e hashtags) no Palco Central
   UI.renderSocialArea();

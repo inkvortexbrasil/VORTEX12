@@ -592,7 +592,7 @@ async function executeGenerateSubject(briefVal = null, targetNumber = null) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = "✨ EXPANDIR (IA)";
+      btn.innerHTML = "<span>✨ ASSUNTO</span>";
       btn.style.opacity = '1';
     }
   }
