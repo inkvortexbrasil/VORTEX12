@@ -582,12 +582,12 @@ Object.assign(UI, {
           </button>
         </div>
 
-        <!-- Área de Leitura das 10 Frases e Hashtags (Sem película, texto límpido flutuando com sombra profunda) -->
+        <!-- Área de Leitura das 10 Frases e Hashtags (Branco puro forte igual ao título) -->
         <div class="show-scroll" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 8px;">
-          <div id="socialCaptionText" style="display: flex; flex-direction: column; gap: 14px; color: #f1f7ff; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(1.02rem * var(--readingFontSizeMultiplier, 1)); line-height: 1.65; text-shadow: 0 2px 8px rgba(0,0,0,0.98), 0 0 16px rgba(0,0,0,0.95);">
+          <div id="socialCaptionText" style="display: flex; flex-direction: column; gap: 14px; color: #ffffff; font-family: var(--readingFont, 'Inter', sans-serif); font-size: calc(1.04rem * var(--readingFontSizeMultiplier, 1)); font-weight: 700; line-height: 1.68; text-shadow: 0 2px 8px rgba(0,0,0,0.98), 0 0 16px rgba(0,0,0,0.95);">
             ${contentLines.length > 0
-              ? contentLines.map(line => `<div style="line-height: 1.65; word-break: break-word;">${line}</div>`).join('')
-              : `<p style="white-space: pre-wrap; margin: 0; line-height: 1.65;">${rawCaption}</p>`
+              ? contentLines.map(line => `<div style="color: #ffffff; font-weight: 700; line-height: 1.68; word-break: break-word; text-shadow: 0 2px 8px rgba(0,0,0,0.98), 0 0 16px rgba(0,0,0,0.95);">${line}</div>`).join('')
+              : `<p style="color: #ffffff; font-weight: 700; white-space: pre-wrap; margin: 0; line-height: 1.68; text-shadow: 0 2px 8px rgba(0,0,0,0.98), 0 0 16px rgba(0,0,0,0.95);">${rawCaption}</p>`
             }
           </div>
 
