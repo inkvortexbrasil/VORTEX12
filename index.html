@@ -21,7 +21,7 @@
 <body class="vortexAppShell dark-theme">
   <!-- Topbar Central -->
   <header class="vortexTopbar" style="display: flex !important; justify-content: space-between !important; align-items: center !important;">
-    <div class="vortexGlobalActions" style="display: flex; align-items: center; gap: 8px; max-width: calc(50vw - 250px);">
+    <div class="vortexGlobalActions" style="display: flex; align-items: center; gap: 6px; max-width: calc(50vw - 250px);">
       <div class="logoBox" style="display: flex; align-items: center;">
         <img id="mainLogo" src="/api/logo" alt="InkVortex Logo">
       </div>
@@ -171,8 +171,7 @@
           </div>
         </div>
       </div>
-      <!-- API Config -->
-      <div style="position: relative; margin-right: 8px;">
+      <div style="position: relative;">
         <button class="iconBtn" id="btnApiConfig" title="Chave da API" aria-label="Configurar Chaves de API" onclick="document.getElementById('modalApiConfig').style.display='flex'">🔑 API</button>
       </div>
       <div style="position: relative;">
@@ -226,7 +225,7 @@
 
       <!-- Sistema Dropdown -->
       <div style="position: relative;">
-        <button class="actionBtn" id="btnSystem" style="padding: 10px 16px; border: 1px solid rgba(255, 255, 255, 0.2);" onclick="window.toggleDropdown('dropdownSystem')">⚙️ SISTEMA</button>
+        <button class="actionBtn" id="btnSystem" style="padding: 6px 11px; border: 1px solid rgba(255, 255, 255, 0.2);" onclick="window.toggleDropdown('dropdownSystem')">⚙️ SISTEMA</button>
         <div id="dropdownSystem" class="vortexDropdown" style="display: none; min-width: 250px; right: 0; z-index: 100;">
           <h3 style="margin: 0 0 16px 0; font-family: var(--uiRounded); color: #fff;">Opções do Sistema</h3>
           <p style="color: var(--ivTextSecondary); margin-bottom: 16px; font-size: 0.9rem;">Gerencie o banco de dados do Vortex 12.0</p>

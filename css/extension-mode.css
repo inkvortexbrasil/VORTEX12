@@ -1515,8 +1515,8 @@ body.living-stage-active {
   }
 
   .logoBox {
-    width: 210px !important;
-    min-width: 210px !important;
+    width: 200px !important;
+    min-width: 200px !important;
     height: 60px !important;
     padding: 0 !important;
   }
@@ -1580,6 +1580,7 @@ body.living-stage-active {
     font-size: 0.62rem !important;
     gap: 2px !important;
     flex-shrink: 0 !important;
+    margin-left: 4px !important;
   }
 
   /* Dashboard principal */
