@@ -1245,6 +1245,7 @@ function recordChatGPTCheckpoint({ numStr, mode, sequence, targetPath, hash, con
 async function inspectGeneratedPromptPairs(page, prompts) {
   const expected = prompts.map((item, index) => ({
     sequence: promptSequence(item, index),
+    title: String(item.title || item.sceneTitle || '').trim(),
     prompt: normalizePromptForCheckpoint(item.fullPrompt || item.prompt || '')
   })).filter(item => item.prompt);
 
@@ -1299,16 +1300,44 @@ async function inspectGeneratedPromptPairs(page, prompts) {
         'button[aria-label], button[title], [role="button"][aria-label], [role="button"][title]'
       )).filter(isImageShareControl);
       if (!controls.length) return;
-      const matched = items.find(item => {
-        // O ChatGPT UI oculta o texto longo exibindo 'Mostrar mais' / 'Show more'.
-        // Usamos um prefixo curto de 40 caracteres (as 2-3 primeiras frases do prompt),
-        // que fica 100% visível na caixa do usuário antes do botão 'Mostrar mais'.
-        const prefix = item.prompt.substring(0, 40);
-        return prefix.length >= 8 && latestUserText.includes(prefix);
+
+      let matched = null;
+
+      // 1. Tenta correspondencia por titulo exato da cena contido na mensagem do usuario
+      matched = items.find(item => {
+        if (pairs.some(pair => pair.sequence === item.sequence)) return false;
+        const cleanTitle = (item.title || '').toLowerCase().replace(/['"“”]/g, '').trim();
+        return cleanTitle.length >= 8 && latestUserText.includes(cleanTitle);
       });
-      // Uma mensagem do usuario pode alimentar somente uma resposta com
-      // imagem. Consumir o texto aqui impede que respostas virtualizadas
-      // posteriores sejam atribuidas ao mesmo prompt.
+
+      // 2. Se nao encontrou pelo titulo, tenta similaridade semantica de palavras
+      if (!matched) {
+        const userWords = new Set(latestUserText.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length >= 3));
+        let bestScore = 0;
+        for (const item of items) {
+          if (pairs.some(pair => pair.sequence === item.sequence)) continue;
+          const promptWords = (item.prompt || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length >= 3);
+          let matches = 0;
+          for (const w of promptWords) {
+            if (userWords.has(w)) matches++;
+          }
+          const score = promptWords.length > 0 ? (matches / promptWords.length) : 0;
+          if (score > bestScore && score >= 0.35) {
+            bestScore = score;
+            matched = item;
+          }
+        }
+      }
+
+      // 3. Fallback: prefixo do prompt
+      if (!matched) {
+        matched = items.find(item => {
+          if (pairs.some(pair => pair.sequence === item.sequence)) return false;
+          const prefix = item.prompt.substring(0, 40);
+          return prefix.length >= 8 && latestUserText.includes(prefix);
+        });
+      }
+
       latestUserText = '';
       if (!matched) return;
       if (pairs.some(pair => pair.sequence === matched.sequence)) return;
@@ -2522,6 +2551,27 @@ async function recoverChatGPTDownloadsCurrentTab({ numStr, mode = 'minisseries',
       .filter(pair => pair && Number.isInteger(pair.sequence) && pair.imageKey)
       .map(pair => [Number(pair.sequence), String(pair.imageKey)]));
 
+    // Determina as sequencias que serao realmente resgatadas
+    let targetSequencesForRescue = [];
+    if (Array.isArray(sequences) && sequences.length > 0 && sequences !== 'auto') {
+      targetSequencesForRescue = sequences.map(Number).filter(s => Number.isInteger(s) && s > 0);
+    } else if (exactPairs.length > 0) {
+      // Se detectou imagens com correspondencia no chat, resgata exatamente essas sequencias
+      targetSequencesForRescue = exactPairs.map(p => Number(p.sequence)).sort((a, b) => a - b);
+    } else {
+      // Fallback: consulta posicoes registradas como geradas no checkpoint da conversa aberta
+      const checkpoint = readChatGPTCheckpoint(numStr, mode);
+      const currentUrl = page.url();
+      const convGroup = (checkpoint.conversations && checkpoint.conversations[currentUrl]) ? checkpoint.conversations[currentUrl] : checkpoint;
+      const genSequences = Object.keys(convGroup.generated || {})
+        .map(Number)
+        .filter(s => Number.isInteger(s) && s > 0 && !(checkpoint.completed && checkpoint.completed[String(s)]))
+        .sort((a, b) => a - b);
+      if (genSequences.length > 0) {
+        targetSequencesForRescue = genSequences;
+      }
+    }
+
     const recovery = robotManifest.beginRun({
       numStr,
       mode,
@@ -2531,7 +2581,9 @@ async function recoverChatGPTDownloadsCurrentTab({ numStr, mode = 'minisseries',
       conversationUrl: page.url(),
       total
     });
-    const requestedSequences = recovery.runnableSequences;
+    const existingSet = new Set(robotManifest.existingSequences({ numStr, mode, total }));
+    const requestedSequences = (targetSequencesForRescue.length ? targetSequencesForRescue : recovery.runnableSequences)
+      .filter(seq => !existingSet.has(seq));
     if (!requestedSequences.length) {
       robotManifest.finishRun({ numStr, mode, provider: 'chatgpt', runId, status: 'completed' });
       return { savedFiles: [], skipped: recovery.skipped, conversationUrl: page.url() };
