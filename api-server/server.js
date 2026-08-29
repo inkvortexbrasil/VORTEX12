@@ -947,34 +947,6 @@ function validateScenes50Output(rawScenes) {
   });
 }
 
-function ensureTitleInPrompt(prompt, title) {
-  if (!prompt || !title) return String(prompt || '').trim();
-  const cleanTitle = String(title).replace(/^["“]|["”]$/g, '').trim();
-  let res = String(prompt).trim();
-  
-  res = res.replace(/^\s*TITLE EXACT\s*:\s*["“].*?["”]\s*\r?\n\r?\n?/i, '').trim();
-
-  if (res.includes(`'${cleanTitle}'`) || res.includes(`"${cleanTitle}"`)) {
-    return res;
-  }
-
-  if (/inscrição do título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
-    return res.replace(/(inscrição do título)\s+/i, `$1 '${cleanTitle}' `);
-  }
-  if (/do título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
-    return res.replace(/(do título)\s+/i, `$1 '${cleanTitle}' `);
-  }
-  if (/o título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
-    return res.replace(/(o título)\s+/i, `$1 '${cleanTitle}' `);
-  }
-
-  if (res.includes('Assinatura')) {
-    return res.replace(/(Assinatura\s+['"“]?InkVortex Brasil)/i, `Com a inscrição do título '${cleanTitle}' em letras elegantes e legíveis sobre uma superfície cenográfica do ambiente. $1`);
-  }
-
-  return `${res} Com a inscrição do título '${cleanTitle}' em letras elegantes e legíveis sobre uma superfície do cenário.`;
-}
-
 function validateScenes45Output(rawScenes) {
   if (!Array.isArray(rawScenes) || rawScenes.length !== 10) {
     const received = Array.isArray(rawScenes) ? rawScenes.length : 0;
@@ -995,7 +967,7 @@ function validateScenes45Output(rawScenes) {
     if (!title) throw new Error(`Scenes45 inválido: o título da cena ${expectedNumber} está vazio.`);
     if (!prompt) throw new Error(`Scenes45 inválido: o prompt da cena ${expectedNumber} está vazio.`);
 
-    return { number: expectedNumber, title, prompt: ensureTitleInPrompt(prompt, title) };
+    return { number: expectedNumber, title, prompt };
   });
 }
 

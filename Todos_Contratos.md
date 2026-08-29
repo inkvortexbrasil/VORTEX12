@@ -298,26 +298,35 @@ PROMPTS VISUAIS — 100% EM PORTUGUÊS DO BRASIL:
 - O prompt deve ser completo e diretamente utilizável por geradores modernos de imagens (ChatGPT, Gemini Imagen 3, Midjourney). Não use referências vagas como "como na cena anterior" ou "conforme descrito acima".
 - Não inclua `TITLE EXACT:`, cabeçalho técnico, markdown, sequência literal `\n` ou `\r`, nem barras de escape visíveis.
 
-INTEGRAÇÃO VISUAL E CENOGRÁFICA DO TÍTULO E DA MARCA:
+INTEGRAÇÃO ORGÂNICA DO TÍTULO E DA ASSINATURA DENTRO DO PROMPT:
 
-- O título da cena DEVE ser inserido naturalmente dentro do corpo do prompt entre aspas simples, após a menção ao título integrado na cenografia (exemplo canônico: `com a inscrição do título 'E se você pudesse estampar qualquer desenho em qualquer tecido sem limites?' em letras elegantes e legíveis sobre uma lousa de vidro fosco ao lado da máquina`).
-- A assinatura 'InkVortex Brasil' também deve estar presente de forma orgânica (exemplo: `Assinatura discreta 'InkVortex Brasil' gravada em uma peça de madeira na mesa de trabalho`).
-- O prompt é um texto cinematográfico contínuo, único e autossuficiente, sem cabeçalhos ou campos destacados de título fora dele.
-- Liberdade criativa e poética plena para ambientar a narrativa com o mais alto padrão estético cinematográfico e riqueza de texturas.
+O gerador de imagens (ChatGPT DALL-E ou Gemini Imagen) precisa ler o texto exato do título diretamente dentro do prompt para renderizá-lo com beleza, contraste e precisão gráfica no cenário. Por isso:
+
+1. O texto literal do campo "title" DEVE estar presente de forma orgânica dentro do campo "prompt", envolvido por aspas simples ('...'), inserido como uma inscrição cenográfica elegante (em lousas de vidro, placas de madeira, painéis metálicos, vitrines, faixas de tecido cru, quadros ou superfícies do ambiente).
+2. A construção da frase de inscrição no prompt deve seguir este modelo harmônico e natural:
+   "...com a inscrição do título '[insira aqui o título exato desta cena entre aspas]' em letras elegantes e legíveis sobre [elemento cenográfico do ambiente]. Assinatura discreta 'InkVortex Brasil' gravada em [outro elemento do cenário]."
+3. Nunca use referências vagas como "a inscrição do título" sem citar o texto real do título entre aspas simples. O título é a âncora gráfica da cena e deve ser escrito por extenso dentro do prompt.
+4. O prompt é uma tomada cinematográfica única, rica, contínua e autossuficiente. Não use cabeçalhos técnicos, títulos destacados ou separações artificiais fora da narrativa.
+5. Liberdade criativa e poética plena para ambientar a narrativa com o mais alto padrão estético cinematográfico e riqueza de texturas táteis.
 
 FORMATO DE SAÍDA:
 
 Responda exclusivamente com um objeto JSON válido, sem markdown ou comentários.
 A raiz contém a chave "scenes45" com as 10 cenas completas (chaves: "number", "title" e "prompt").
 
-Exemplo canônico de referência — as 10 cenas completas em português do Brasil:
+Exemplo canônico de referência — padrão de integração obrigatório nas 10 cenas:
 
 {
   "scenes45": [
     {
       "number": 1,
       "title": "E se você pudesse estampar qualquer desenho em qualquer tecido sem limites?",
-      "prompt": "Uma tomada cinematográfica widescreen 16:9 em plano médio-detalhe de uma designer jovem, com expressão pensativa e mãos apoiadas em uma mesa de trabalho iluminada pela luz dourada do fim de tarde. Ela segura um pedaço de tecido cru entre os dedos, enquanto ao fundo, projetado em uma parede branca, vê-se um esboço digital vibrante de uma estampa floral intricada. A composição é equilibrada, com profundidade de campo suave, destacando a textura do tecido e o brilho da tela do computador. O ambiente é um ateliê moderno, com janelas amplas, plantas verdes e prateleiras de madeira clara exibindo rolos de tecidos variados. A atmosfera é de curiosidade e desafio criativo, com a inscrição do título 'E se você pudesse estampar qualquer desenho em qualquer tecido sem limites?' em letras elegantes e legíveis sobre uma superfície de vidro fosco ao lado da designer. Assinatura discreta 'InkVortex Brasil' gravada em uma peça de madeira na mesa."
+      "prompt": "Uma tomada cinematográfica widescreen 16:9 em plano médio-detalhe de uma designer jovem, com expressão pensativa e mãos apoiadas em uma mesa de trabalho iluminada pela luz dourada do fim de tarde. Ela segura um pedaço de tecido cru entre os dedos, enquanto ao fundo, projetado em uma parede branca, vê-se um esboço digital vibrante de uma estampa floral intricada. A composição é equilibrada, com profundidade de campo suave, destacando a textura do tecido e o brilho da tela do computador. O ambiente é um ateliê moderno, com janelas amplas, plantas verdes e prateleiras de madeira clara exibindo rolos de tecidos variados. A atmosfera é de curiosidade e desafio criativo, com a inscrição do título 'E se você pudesse estampar qualquer desenho em qualquer tecido sem limites?' em letras elegantes e legíveis sobre uma lousa de vidro fosco ao lado da designer. Assinatura discreta 'InkVortex Brasil' gravada em uma peça de madeira na mesa."
+    },
+    {
+      "number": 2,
+      "title": "Nas ruas das cidades, a busca por peças que contam histórias começa nas vitrines",
+      "prompt": "Uma fotografia cinematográfica widescreen 16:9 em plano aberto de uma rua movimentada ao entardecer, com luz solar difusa refletindo nas fachadas de lojas de moda autoral. No primeiro plano, uma mulher jovem, de cabelos cacheados e estilo urbano, observa atentamente uma vitrine onde peças estampadas exclusivas são exibidas com destaque. As roupas têm estampas vibrantes e únicas em tecidos como linho, malha e algodão sustentável. A profundidade de campo destaca a textura dos tecidos e o brilho das cores, enquanto ao fundo pedestres caminham com calma. A composição é acolhedora e inspiradora, com a inscrição do título 'Nas ruas das cidades, a busca por peças que contam histórias começa nas vitrines' em letras elegantes sobre um painel de vidro fosco na vitrine da loja. Assinatura 'InkVortex Brasil' gravada em uma placa de metal ao lado da entrada."
     }
   ]
 }
