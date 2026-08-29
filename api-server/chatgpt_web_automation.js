@@ -2486,10 +2486,6 @@ async function recoverGPTImageMetadataFromChat(page, sourcePrompts, shouldCancel
 async function recoverChatGPTDownloadsCurrentTab({ numStr, mode = 'minisseries', runId = `chatgpt-recovery-${String(numStr)}-${Date.now()}`, sequences, prompts = [], onProgress, shouldCancel }) {
   const total = mode === 'flow' ? 7 : 50;
   let effectivePrompts = Array.isArray(prompts) ? prompts : [];
-  if (mode !== 'flow' && (sequences === 'auto' || !Array.isArray(sequences) || !sequences.length)) {
-    const gptOnly = effectivePrompts.filter(item => item.source === 'gpt' || item.type === 'gpt');
-    if (gptOnly.length) effectivePrompts = gptOnly;
-  }
   const requestedFilter = sequences === 'auto'
     ? (mode !== 'flow' ? effectivePrompts.map(item => Number(item.sequence || item.finalSequence)).filter(Boolean) : [])
     : (Array.isArray(sequences)

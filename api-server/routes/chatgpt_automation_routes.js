@@ -596,14 +596,12 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
           prompts: readFinalChatGPTQueue(ROOT, numStr).queue
         };
         const finalQueue = isFlow ? [] : defaultPrompts.prompts;
-        const gptOnlyQueue = finalQueue.filter(item => item.source === 'gpt' || item.type === 'gpt');
-        const effectiveDefault = gptOnlyQueue.length ? gptOnlyQueue : finalQueue;
         const targetPrompts = isFlow
           ? (Array.isArray(payload.prompts) && payload.prompts.length ? payload.prompts : readFlowChatGPTQueue(ROOT, numStr).queue)
-          : effectiveDefault;
-        const targetSequences = scenes === 'auto' || !Array.isArray(scenes) || !scenes.length
-          ? (isFlow ? 'auto' : targetPrompts.map(item => Number(item.sequence || item.finalSequence)))
-          : scenes;
+          : finalQueue;
+        const targetSequences = Array.isArray(scenes) && scenes.length
+          ? scenes.map(s => Number(s))
+          : (isFlow ? 'auto' : targetPrompts.map(item => Number(item.sequence || item.finalSequence)));
 
         activeChatGPTWebJobs[jobId] = {
           jobId,
@@ -612,7 +610,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
           mode,
           status: 'running',
           progress: 5,
-          message: `Iniciando Resgate GPT no Chrome (${mode === 'flow' ? 'Flow 7 Cenas' : 'Minissérie ' + numStr})...`
+          message: `Iniciando Resgate GPT (${mode === 'flow' ? 'Flow' : 'Minissérie ' + numStr + ' - 50 Posições'})...`
         };
 
         send(res, 200, { jobId, status: 'running' });
