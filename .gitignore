@@ -18,6 +18,7 @@ desktop.ini
 .DS_Store
 .gemini/
 .vscode/
+.hintrc
 .idea/
 
 # === PASTAS DE MÍDIA PESADA E RASCUNHOS LOCAIS ===
