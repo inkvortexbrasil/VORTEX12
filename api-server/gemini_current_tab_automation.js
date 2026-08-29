@@ -1372,6 +1372,8 @@ function ordinalTo0Based(ordinal) {
   return Number.isInteger(ordinal) && ordinal >= 0 ? ordinal : null;
 }
 
+const GPT_ANCHOR_SEQUENCES = new Set([1, 6, 11, 16, 21, 26, 31, 36, 41, 46]);
+
 async function recoverGeminiFlowDownloadsCurrentTab({ numStr, mode = 'minisseries', runId = `gemini-recovery-${String(numStr)}-${Date.now()}`, expectedCount, sequences, onProgress, shouldCancel }) {
   const total = mode === 'flow' ? 7 : 50;
   const manifest = robotManifest.reconcileManifest({ numStr, mode, total });
@@ -1386,7 +1388,9 @@ async function recoverGeminiFlowDownloadsCurrentTab({ numStr, mode = 'minisserie
     } else {
       const existing = robotManifest.existingSequences({ numStr, mode, total });
       const existingSet = new Set(existing);
-      requestedSequences = Array.from({ length: total }, (_, index) => index + 1).filter(sequence => !existingSet.has(sequence));
+      // Na minissérie oficial, o Gemini cuida exclusivamente das 40 posições complementares
+      requestedSequences = Array.from({ length: total }, (_, index) => index + 1)
+        .filter(sequence => (mode === 'flow' || !GPT_ANCHOR_SEQUENCES.has(sequence)) && !existingSet.has(sequence));
     }
   } else {
     requestedSequences = Array.isArray(sequences)
@@ -1411,8 +1415,32 @@ async function recoverGeminiFlowDownloadsCurrentTab({ numStr, mode = 'minisserie
     });
     const pages = await browser.pages();
     const page = pages.find(candidate => candidate.url().includes('gemini.google.com'));
-    if (!page) throw new Error('A guia Gemini preparada nao foi localizada na sessao atual do Edge.');
+    if (!page) throw new Error('A guia Gemini preparada não foi localizada no navegador aberto.');
     await waitForComposer(page, 300000);
+
+    // Se sequences era 'auto', sincroniza com o checkpoint de posições geradas da conversa aberta
+    if (sequences === 'auto' || !sequences || (Array.isArray(sequences) && sequences.length === 0)) {
+      const checkpoint = readGeminiCheckpoint(numStr);
+      const currentUrl = canonicalGeminiConversationUrl(page.url());
+      const convGroup = (checkpoint.conversations && checkpoint.conversations[currentUrl]) ? checkpoint.conversations[currentUrl] : checkpoint;
+      const checkpointGenSequences = Object.entries(convGroup.generated || {})
+        .map(([seq, data]) => ({
+          sequence: Number(seq),
+          ordinal: data.imageOrdinal,
+          generatedAt: data.generatedAt || ''
+        }))
+        .filter(entry => Number.isInteger(entry.sequence) && entry.sequence > 0 && !(checkpoint.completed && checkpoint.completed[String(entry.sequence)]))
+        .sort((a, b) => {
+          if (Number.isInteger(a.ordinal) && Number.isInteger(b.ordinal)) return a.ordinal - b.ordinal;
+          return a.generatedAt > b.generatedAt ? 1 : -1;
+        })
+        .map(entry => entry.sequence);
+
+      if (checkpointGenSequences.length > 0) {
+        requestedSequences = checkpointGenSequences;
+      }
+    }
+
     // O chat que o Diretor deixou aberto e a fonte direta do Resgate. Nenhuma
     // URL antiga e reaberta ou validada contra historico de conversa.
     const recovery = robotManifest.beginRecoveryRun({
