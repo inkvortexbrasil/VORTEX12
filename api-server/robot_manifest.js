@@ -19,7 +19,7 @@ function safeMode(value) {
 
 function safeProvider(value) {
   const provider = String(value || '').toLowerCase();
-  if (provider !== 'chatgpt' && provider !== 'gemini' && provider !== 'dalle') {
+  if (provider !== 'chatgpt' && provider !== 'gemini') {
     throw new Error(`Provedor inválido para o manifesto: ${provider || 'vazio'}.`);
   }
   return provider;

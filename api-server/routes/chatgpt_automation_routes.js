@@ -98,7 +98,9 @@ function writeGPTSourcePrompts({ ROOT, numStr, gptScenes }) {
   const jsonPath = path.join(promptsDir, `10_prompts_gpt_${numStr}.json`);
   const txtPath = path.join(promptsDir, `10_prompts_gpt_${numStr}.txt`);
   const text = prompts.map(item => {
-    return `GPT CENA #${String(item.gptSceneRef).padStart(2, '0')} [BLOCO ${item.block}] [POSIÇÃO 1]\nPrompt: ${item.fullPrompt}`;
+    let header = `GPT CENA #${String(item.gptSceneRef).padStart(2, '0')} [BLOCO ${item.block}] [POSIÇÃO 1]`;
+    if (item.title) header += `\nTítulo: ${item.title}`;
+    return `${header}\nPrompt: ${item.fullPrompt}`;
   }).join('\n\n----------------------------------------\n\n');
 
   fs.writeFileSync(jsonPath, JSON.stringify(prompts, null, 2), 'utf8');
@@ -191,9 +193,10 @@ function readFlowChatGPTQueue(ROOT, numStr) {
 }
 
 function buildChatGPTQueue({ ROOT, numStr, gptScenes }) {
-  const anchors = Array.isArray(gptScenes) && gptScenes.length >= 10
-    ? gptScenes.slice(0, 10)
-    : readGPTSourcePrompts(ROOT, numStr);
+  const diskPath = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `10_prompts_gpt_${numStr}.json`);
+  const anchors = fs.existsSync(diskPath)
+    ? readGPTSourcePrompts(ROOT, numStr)
+    : (Array.isArray(gptScenes) && gptScenes.length >= 10 ? gptScenes.slice(0, 10) : readGPTSourcePrompts(ROOT, numStr));
   if (anchors.length < 10) throw new Error(`A minissérie ${numStr} precisa das 10 cenas GPT antes de montar a esteira.`);
   const complementary = readComplementaryScenes(ROOT, numStr);
   const queue = [];
@@ -243,7 +246,9 @@ function buildChatGPTQueue({ ROOT, numStr, gptScenes }) {
   const txtPath = path.join(promptsDir, `50_prompts_esteira_chatgpt_${numStr}.txt`);
   const text = queue.map(item => {
     const origin = item.source === 'gpt' ? `GPT CENA ${item.gptSceneRef}` : `COMPLEMENTAR ${item.sourceIndex} / GPT CENA ${item.gptSceneRef}`;
-    return `IMAGEM FINAL #${item.sceneNum} [${origin}] [BLOCO ${item.block}] [POSIÇÃO ${item.positionInBlock}]\nPrompt: ${item.fullPrompt}`;
+    let header = `IMAGEM FINAL #${item.sceneNum} [${origin}] [BLOCO ${item.block}] [POSIÇÃO ${item.positionInBlock}]`;
+    if (item.title && item.source === 'gpt') header += `\nTítulo: ${item.title}`;
+    return `${header}\nPrompt: ${item.fullPrompt}`;
   }).join('\n\n----------------------------------------\n\n');
   fs.writeFileSync(jsonPath, JSON.stringify(queue, null, 2), 'utf8');
   fs.writeFileSync(txtPath, text, 'utf8');
@@ -380,7 +385,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
       try {
         const url = new URL(req.url, 'http://localhost');
         const param = url.searchParams.get('platform');
-        const platform = param === 'gemini' ? 'gemini' : (param === 'qwen' ? 'qwen' : 'chatgpt');
+        const platform = param === 'gemini' ? 'gemini' : 'chatgpt';
         const tab = await browserExtensionBridge.ensurePlatformTab(platform, { activate: false });
         send(res, 200, { ok: true, platform, tab });
       } catch (error) {
@@ -403,8 +408,11 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
       try {
         const payload = await readBody(req);
         const numStr = sanitizeNumericId(payload.number || payload.campaignId || '01');
-        writeGPTSourcePrompts({ ROOT, numStr, gptScenes: payload.gptScenes });
-        const built = buildChatGPTQueue({ ROOT, numStr, gptScenes: payload.gptScenes });
+        const diskPath = path.join(ROOT, 'minisseries', String(numStr), 'prompts', `10_prompts_gpt_${numStr}.json`);
+        if (!fs.existsSync(diskPath) && Array.isArray(payload.gptScenes) && payload.gptScenes.length >= 10) {
+          writeGPTSourcePrompts({ ROOT, numStr, gptScenes: payload.gptScenes });
+        }
+        const built = buildChatGPTQueue({ ROOT, numStr });
         send(res, 200, { ok: true, number: numStr, total: built.queue.length, queue: built.queue, text: built.text, files: { json: built.jsonPath, txt: built.txtPath } });
       } catch (error) {
         sendApiError(res, error);

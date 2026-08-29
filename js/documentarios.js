@@ -1399,7 +1399,6 @@ window.openDocPhase2Submenu = function(targetCNum = null) {
                   <div style="display: flex; gap: 6px;">
                     <button class="actionBtn" onclick="window.selectRobotBatch('phase2-block-M${cNum}', 'gpt')" style="padding: 4px 12px; font-size: 0.75rem; font-weight:bold; background: rgba(0,255,0,0.1); color: #0f0; border: 1px solid rgba(0,255,0,0.4); border-radius: 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(0,255,0,0.2)'" onmouseout="this.style.background='rgba(0,255,0,0.1)'">🟢 GPT</button>
                     <button class="actionBtn" onclick="window.selectRobotBatch('phase2-block-M${cNum}', 'gemini')" style="padding: 4px 12px; font-size: 0.75rem; font-weight:bold; background: rgba(0,174,239,0.1); color: var(--cyan); border: 1px solid var(--cyan); border-radius: 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(0,174,239,0.2)'" onmouseout="this.style.background='rgba(0,174,239,0.1)'">🔵 GEMINI</button>
-                    <button class="actionBtn" onclick="window.selectRobotBatch('phase2-block-M${cNum}', 'qwen')" style="padding: 4px 12px; font-size: 0.75rem; font-weight:bold; background: rgba(147,112,219,0.1); color: #cba6ff; border: 1px solid #cba6ff; border-radius: 6px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(147,112,219,0.2)'" onmouseout="this.style.background='rgba(147,112,219,0.1)'">🟣 QWEN</button>
                   </div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -1428,11 +1427,9 @@ window.openDocPhase2Submenu = function(targetCNum = null) {
       const checkboxes = block.querySelectorAll('.gemini-img-check');
       const gptSet = new Set([1, 6, 11, 16, 21, 26, 31, 36, 41, 46]);
       const geminiSet = new Set([2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 32, 33, 34, 35, 37, 38, 39, 40, 42, 43, 44, 45, 47, 48, 49, 50]);
-      const qwenSet = new Set([27, 28, 29, 30, 32, 33, 34, 35, 37, 38, 39, 40, 42, 43, 44, 45, 47, 48, 49, 50]);
       let targetSet;
       if (robot === 'gpt') targetSet = gptSet;
       if (robot === 'gemini') targetSet = geminiSet;
-      if (robot === 'qwen') targetSet = qwenSet;
       checkboxes.forEach(cb => {
         const val = Number(cb.value);
         cb.checked = targetSet.has(val);

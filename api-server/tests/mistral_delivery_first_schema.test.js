@@ -20,7 +20,7 @@ assert.ok(schemaStart >= 0 && schemaEnd > schemaStart, 'Os esquemas estruturados
 const schemaSandbox = {};
 vm.runInNewContext(`${serverSource.slice(schemaStart, schemaEnd)}\nthis.schemas = STRUCTURED_OUTPUT_SCHEMAS;`, schemaSandbox);
 
-const expectedSchemas = ['themes', 'scenes50', 'scenes45', 'scenes916', 'flowMaster', 'caption', 'flowMusic'];
+const expectedSchemas = ['themes', 'scenes50', 'scenes45', 'caption', 'flowMusic'];
 assert.deepEqual(Object.keys(schemaSandbox.schemas).sort(), expectedSchemas.sort());
 for (const name of expectedSchemas) {
   const descriptor = schemaSandbox.schemas[name];
@@ -35,14 +35,11 @@ assert.doesNotMatch(serverSource, /responseSchema:\s*true/);
 assert.match(llmSource, /type:\s*'json_schema'/);
 assert.match(llmSource, /Math\.min\(1, Number\(validationRetries\)/);
 assert.match(serverSource, /As 10 cenas foram preservadas/);
-assert.match(serverSource, /O FlowMaster foi preservado/);
 
 for (const [name, temperature] of [
   ['Themes', '0.82'],
   ['Scenes50', '0.82'],
   ['Scenes45', '0.82'],
-  ['Scenes916', '0.82'],
-  ['FlowMaster', '0.82'],
   ['Caption', '0.82'],
   ['FlowMusic', '0.82']
 ]) {

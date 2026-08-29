@@ -9,17 +9,19 @@ const contracts = fs.readFileSync(path.join(root, 'Todos_Contratos.md'), 'utf8')
 const uiSource = fs.readFileSync(path.join(root, 'js', 'ui.js'), 'utf8');
 const appSource = fs.readFileSync(path.join(root, 'js', 'app.js'), 'utf8');
 
-// 1. Validação dos 22 Eixos Tecnológicos
+// 1. Validação dos 40 Eixos Tecnológicos e Humanos
 assert.equal(Array.isArray(TECH_THEMES), true, 'TECH_THEMES deve ser um array.');
-assert.equal(TECH_THEMES.length, 22, 'Devem existir exatamente 22 temas cadastrados.');
+assert.equal(TECH_THEMES.length, 40, 'Devem existir exatamente 40 temas cadastrados.');
 
-const textileTheme = TECH_THEMES.find(t => t.number === 21);
-assert.ok(textileTheme, 'O tema 21 de Impressão Têxtil deve existir.');
-assert.equal(textileTheme.title, 'Impressão Têxtil Digital & Estamparia de Vanguarda', 'O tema 21 deve ter o título limpo e amplo sem parênteses.');
+const customTheme = TECH_THEMES.find(t => t.number === 1);
+assert.ok(customTheme, 'O tema 1 de Tema Livre / Personalizado deve existir.');
+assert.equal(customTheme.title, 'Tema Livre / Personalizado', 'O tema 1 deve ser o Tema Livre.');
 
-const customTheme = TECH_THEMES.find(t => t.number === 22);
-assert.ok(customTheme, 'O tema 22 de Tema Livre / Personalizado deve existir.');
-assert.equal(customTheme.title, 'Tema Livre / Personalizado', 'O tema 22 deve ser o Tema Livre.');
+const dtfTheme = TECH_THEMES.find(t => t.number === 2);
+assert.ok(dtfTheme, 'O tema 2 de DTF deve existir.');
+
+const laserTheme = TECH_THEMES.find(t => t.number === 21);
+assert.ok(laserTheme, 'O tema 21 de Corte e Estamparia deve existir.');
 
 TECH_THEMES.forEach((theme, index) => {
   assert.equal(theme.number, index + 1, `O tema ${index + 1} deve possuir número sequencial correto.`);

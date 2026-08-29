@@ -19,7 +19,6 @@ const robotManifest = require('./robot_manifest');
 const { TECH_THEMES } = require('./utils/tech_themes');
 const systemZipService = require('./services/system_zip_service');
 const socialMixerService = require('./services/social_mixer_service');
-const createqwenAutomationRouter = require('./routes/qwen_automation_routes');
 
 
 
@@ -357,12 +356,12 @@ function sendApiError(res,error){
   send(res,descriptor.status,{error:descriptor.error,code:descriptor.code,detail:descriptor.detail});
 }
 
-function readBody(req) {
+function readBody(req, maxSize = 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', chunk => {
       body += chunk;
-      if (body.length > 1024 * 1024) {
+      if (body.length > maxSize) {
         reject(new Error('Corpo da requisicao muito grande.'));
         req.destroy();
       }
@@ -808,15 +807,6 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
                 required: ['keyFacts', 'keywords'],
                 additionalProperties: false
               },
-              motionBlueprint: {
-                type: 'object',
-                properties: {
-                  actionVector: REQUIRED_TEXT_SCHEMA,
-                  dynamicElements: REQUIRED_TEXT_SCHEMA
-                },
-                required: ['actionVector', 'dynamicElements'],
-                additionalProperties: false
-              },
               musicStoryArc: {
                 type: 'object',
                 properties: {
@@ -839,7 +829,6 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
               'visualDirection',
               'visualUniverse',
               'socialNarrative',
-              'motionBlueprint',
               'musicStoryArc'
             ],
             additionalProperties: false
@@ -898,52 +887,6 @@ const STRUCTURED_OUTPUT_SCHEMAS = Object.freeze({
       additionalProperties: false
     }
   },
-  scenes916: {
-    name: 'vortex_scenes916',
-    schema: {
-      type: 'object',
-      properties: {
-        motionScenes: {
-          type: 'array', minItems: 7, maxItems: 7,
-          items: {
-            type: 'object',
-            properties: {
-              number: { type: 'integer' },
-              motionPrompt: REQUIRED_TEXT_SCHEMA
-            },
-            required: ['number', 'motionPrompt'],
-            additionalProperties: false
-          }
-        }
-      },
-      required: ['motionScenes'],
-      additionalProperties: false
-    }
-  },
-  flowMaster: {
-    name: 'vortex_flow_master',
-    schema: {
-      type: 'object',
-      properties: {
-        scenes: {
-          type: 'array', minItems: 5, maxItems: 5,
-          items: {
-            type: 'object',
-            properties: {
-              number: { type: 'integer' },
-              imageReference: REQUIRED_TEXT_SCHEMA,
-              timeRange: REQUIRED_TEXT_SCHEMA,
-              omniFlashPrompt: REQUIRED_TEXT_SCHEMA
-            },
-            required: ['number', 'imageReference', 'timeRange', 'omniFlashPrompt'],
-            additionalProperties: false
-          }
-        }
-      },
-      required: ['scenes'],
-      additionalProperties: false
-    }
-  },
   caption: {
     name: 'vortex_social_caption',
     schema: {
@@ -991,37 +934,18 @@ function validateScenes50Output(rawScenes) {
       throw new Error(`Scenes50 inválido: o item ${expectedIndex} não é um objeto JSON.`);
     }
 
-    const receivedFields = Object.keys(scene).sort();
-    if (receivedFields.length !== SCENES50_REQUIRED_FIELDS.length
-      || receivedFields.some((field, index) => field !== SCENES50_REQUIRED_FIELDS[index])) {
-      throw new Error(`Scenes50 inválido: o item ${expectedIndex} deve conter somente index, gptSceneRef, block, positionInBlock e prompt.`);
-    }
-
-    const index = Number(scene.index);
-    const gptSceneRef = Number(scene.gptSceneRef);
-    const block = Number(scene.block);
-    const positionInBlock = Number(scene.positionInBlock);
     const prompt = typeof scene.prompt === 'string' ? scene.prompt.trim() : '';
-
-    if (!Number.isInteger(index) || index !== expectedIndex) {
-      throw new Error(`Scenes50 inválido: o item ${expectedIndex} deve ter index=${expectedIndex}.`);
-    }
-    if (!Number.isInteger(gptSceneRef) || gptSceneRef !== expectedBlock) {
-      throw new Error(`Scenes50 inválido: o item ${expectedIndex} deve referenciar gptSceneRef=${expectedBlock}.`);
-    }
-    if (!Number.isInteger(block) || block !== expectedBlock) {
-      throw new Error(`Scenes50 inválido: o item ${expectedIndex} deve pertencer ao block=${expectedBlock}.`);
-    }
-    if (!Number.isInteger(positionInBlock) || positionInBlock !== expectedPosition) {
-      throw new Error(`Scenes50 inválido: o item ${expectedIndex} deve ocupar positionInBlock=${expectedPosition}.`);
-    }
     if (!prompt) throw new Error(`Scenes50 inválido: o prompt ${expectedIndex} está vazio.`);
 
-    return { index, gptSceneRef, block, positionInBlock, prompt };
+    return {
+      index: expectedIndex,
+      gptSceneRef: expectedBlock,
+      block: expectedBlock,
+      positionInBlock: expectedPosition,
+      prompt
+    };
   });
 }
-
-const SCENES45_REQUIRED_FIELDS = Object.freeze(['number', 'prompt', 'title']);
 
 function validateScenes45Output(rawScenes) {
   if (!Array.isArray(rawScenes) || rawScenes.length !== 10) {
@@ -1035,25 +959,15 @@ function validateScenes45Output(rawScenes) {
       throw new Error(`Scenes45 inválido: a cena ${expectedNumber} não é um objeto JSON.`);
     }
 
-    const receivedFields = Object.keys(scene).sort();
-    if (receivedFields.length !== SCENES45_REQUIRED_FIELDS.length
-      || receivedFields.some((field, index) => field !== SCENES45_REQUIRED_FIELDS[index])) {
-      throw new Error(`Scenes45 inválido: a cena ${expectedNumber} deve conter somente number, title e prompt.`);
-    }
-
-    const number = Number(scene.number);
     const rawTitle = typeof scene.title === 'string' ? scene.title : '';
     const rawPrompt = typeof scene.prompt === 'string' ? scene.prompt : '';
     const title = rawTitle.trim();
     const prompt = rawPrompt.trim();
 
-    if (!Number.isInteger(number) || number !== expectedNumber) {
-      throw new Error(`Scenes45 inválido: a cena ${expectedNumber} deve ter number=${expectedNumber}.`);
-    }
     if (!title) throw new Error(`Scenes45 inválido: o título da cena ${expectedNumber} está vazio.`);
     if (!prompt) throw new Error(`Scenes45 inválido: o prompt da cena ${expectedNumber} está vazio.`);
 
-    return { number, title, prompt };
+    return { number: expectedNumber, title, prompt };
   });
 }
 
@@ -1168,142 +1082,9 @@ function validateFlowMasterOutput(rawFlowMaster) {
 }
 
 const FLOW_MUSIC_ROOT_FIELDS = Object.freeze(['coverPrompt', 'lyrics', 'musicalComposition']);
-const FLOW_MUSIC_LYRICS_OPENING = 'Create an original song in Brazilian Portuguese based on the following narrative.';
-const FLOW_MUSIC_LYRICS_DIRECTION = 'Develop the lyrics as one continuous emotional journey. Begin with Scene 01, introduce the conflict exactly where it occurs, preserve all ten events in order, intensify the transformation progressively, and resolve it in Scene 10.';
-const FLOW_MUSIC_LYRICS_TECHNICAL_FILTER = 'Do not describe cameras, framing, lighting, image generation or visual effects. Convert the events into singable Brazilian Portuguese lyrics with clear language and natural rhymes. Treat the technical title as narrative context, not as a mandatory sung line. Build a concise recurring hook from the central transformation and use it to anchor a memorable chorus.';
-const FLOW_MUSIC_LYRICS_BRAND_RULE = 'Mention InkVortex Brasil only in the [Outro].';
-const FLOW_MUSIC_VISUAL_TERMS = /\b(camera|framing|lighting|lens|image generation|visual effects?|shot|close-up|wide shot|depth of field)\b/i;
 
-function validateFlowMusicString(value, label) {
-  const raw = typeof value === 'string' ? value : '';
-  if (!raw || raw !== raw.trim() || /\r/u.test(raw) || /```/u.test(raw)) {
-    throw new Error(`FlowMusic inválido: ${label} está vazio, contém espaços externos, quebra de linha incompatível ou markdown.`);
-  }
-  return raw;
-}
-
-function auditFlowMusicOutput(rawFlowMusic, expected = {}) {
-  if (!rawFlowMusic || typeof rawFlowMusic !== 'object' || Array.isArray(rawFlowMusic)) {
-    throw new Error('FlowMusic inválido: a resposta deve ser um objeto JSON.');
-  }
-
-  const rootFields = Object.keys(rawFlowMusic).sort();
-  if (!rootFields.includes('lyrics') || (!rootFields.includes('musicalComposition') && !rootFields.includes('sound'))) {
-    throw new Error('FlowMusic inválido: a raiz deve conter lyrics e musicalComposition.');
-  }
-
-  const title = String(expected.title || '').replace(/\s+/gu, ' ').trim();
-  const style = String(expected.style || '').replace(/\s+/gu, ' ').trim();
-  const variation = String(expected.variation || '').replace(/\s+/gu, ' ').trim();
-  const expectedVoice = String(expected.voice || '').replace(/\s+/gu, ' ').trim();
-  if (!title || !style || !variation || !expectedVoice) {
-    throw new Error('FlowMusic inválido: título, estilo, variação e voz esperados são obrigatórios.');
-  }
-
-  const lyrics = validateFlowMusicString(rawFlowMusic.lyrics, 'lyrics');
-  const musicalComposition = validateFlowMusicString(rawFlowMusic.musicalComposition, 'musicalComposition');
-  const voice = validateFlowMusicString(rawFlowMusic.voice, 'voice');
-
-  const lyricLines = lyrics.split('\n');
-  if (lyricLines.length !== 17) {
-    throw new Error(`FlowMusic inválido: lyrics possui ${lyricLines.length} linhas; o contrato exige exatamente 17.`);
-  }
-  if (lyricLines[0] !== FLOW_MUSIC_LYRICS_OPENING) {
-    throw new Error('FlowMusic inválido: lyrics não começa com a instrução oficial ao compositor.');
-  }
-  if (lyricLines[1] !== `Title: ${title}`) {
-    throw new Error(`FlowMusic inválido: a linha Title deve preservar exatamente o título "${title}".`);
-  }
-  if (!lyricLines[2].startsWith('Core story: ')) {
-    throw new Error('FlowMusic inválido: a terceira linha deve começar com "Core story: ".');
-  }
-  const coreStory = lyricLines[2].slice('Core story: '.length);
-  const coreWordCount = countPromptWords(coreStory);
-  if (coreWordCount < 35 || coreWordCount > 70) {
-    throw new Error(`FlowMusic inválido: Core story possui ${coreWordCount} palavras; use de 35 a 70.`);
-  }
-  if (lyricLines[3] !== 'Narrative progression:') {
-    throw new Error('FlowMusic inválido: a quarta linha deve ser "Narrative progression:".');
-  }
-
-  const narrativeSummaries = [];
-  for (let index = 0; index < 10; index += 1) {
-    const sceneNumber = String(index + 1).padStart(2, '0');
-    const prefix = `${sceneNumber}. `;
-    const line = lyricLines[index + 4];
-    if (!line.startsWith(prefix)) {
-      throw new Error(`FlowMusic inválido: a progressão deve conter a linha ${sceneNumber}. na posição correta.`);
-    }
-    const summary = line.slice(prefix.length);
-    const summaryWordCount = countPromptWords(summary);
-    if (summaryWordCount < 8 || summaryWordCount > 22) {
-      throw new Error(`FlowMusic inválido: o resumo da cena ${sceneNumber} possui ${summaryWordCount} palavras; use de 8 a 22.`);
-    }
-    narrativeSummaries.push(summary);
-  }
-
-  if (lyricLines[14] !== FLOW_MUSIC_LYRICS_DIRECTION
-    || lyricLines[15] !== FLOW_MUSIC_LYRICS_TECHNICAL_FILTER
-    || lyricLines[16] !== FLOW_MUSIC_LYRICS_BRAND_RULE) {
-    throw new Error('FlowMusic inválido: as três instruções finais de lyrics foram alteradas.');
-  }
-  const narrativeSource = [coreStory, ...narrativeSummaries].join(' ');
-  if (FLOW_MUSIC_VISUAL_TERMS.test(narrativeSource)) {
-    throw new Error('FlowMusic inválido: Core story e progressão não podem conter instruções visuais ou de câmera.');
-  }
-  if (/InkVortex Brasil/i.test(narrativeSource) || (lyrics.match(/InkVortex Brasil/g) || []).length !== 1) {
-    throw new Error('FlowMusic inválido: InkVortex Brasil deve aparecer somente na regra final do [Outro].');
-  }
-
-  const compositionOpening = `Immediate vocals starting at the very first second, 180 seconds track length, ${style}, ${variation};`;
-  if (!musicalComposition.startsWith(compositionOpening)) {
-    throw new Error(`FlowMusic inválido: musicalComposition deve começar exatamente com "${compositionOpening}".`);
-  }
-  const compositionWordCount = countPromptWords(musicalComposition);
-  if (compositionWordCount < 60 || compositionWordCount > 150) {
-    throw new Error(`FlowMusic inválido: musicalComposition possui ${compositionWordCount} palavras; use de 60 a 150.`);
-  }
-  const compositionPattern = /; Tempo: (\d{2,3}) BPM; Meter: ([^;]+); Tonal center: ([^;]+); Emotional arc: ([^;]+); Signature motif: ([^;]+); Groove: ([^;]+); Instruments: ([^;]+); Dynamics: ([^;]+); Structure: (.+)$/u;
-  const compositionMatch = musicalComposition.match(compositionPattern);
-  if (!compositionMatch) {
-    throw new Error('FlowMusic inválido: musicalComposition não respeita a sequência técnica oficial.');
-  }
-  const bpm = Number(compositionMatch[1]);
-  if (!Number.isInteger(bpm) || bpm < 60 || bpm > 220) {
-    throw new Error('FlowMusic inválido: Tempo deve usar um BPM inteiro entre 60 e 220.');
-  }
-  const structure = compositionMatch[9];
-  if (!/^\[[^\]]+\](?: -> \[[^\]]+\]){5,9}$/u.test(structure)) {
-    throw new Error('FlowMusic inválido: Structure deve conter de 6 a 10 seções em notação de setas.');
-  }
-  const sections = [...structure.matchAll(/\[([^\]]+)\]/gu)].map(match => match[1]);
-  if (!/^(Vocal Intro|Verse 1)$/i.test(sections[0])) {
-    throw new Error('FlowMusic inválido: Structure deve começar com [Vocal Intro] ou [Verse 1], nunca [Intro].');
-  }
-  if (sections[sections.length - 1].toLowerCase() !== 'outro') {
-    throw new Error('FlowMusic inválido: Structure deve terminar com [Outro].');
-  }
-  if (!sections.some(section => /^Chorus(?:\s+\d+)?$/i.test(section))) {
-    throw new Error('FlowMusic inválido: Structure deve conter [Chorus].');
-  }
-  if (!sections.slice(0, -1).some(section => /^(Bridge|Instrumental Solo)$/i.test(section))) {
-    throw new Error('FlowMusic inválido: Structure deve conter [Bridge] ou [Instrumental Solo] antes do [Outro].');
-  }
-
-  const voiceOpening = `${expectedVoice}. Language: Brazilian Portuguese (pt-BR);`;
-  if (!voice.startsWith(voiceOpening)) {
-    throw new Error(`FlowMusic inválido: voice deve começar exatamente com "${voiceOpening}".`);
-  }
-  const voiceWordCount = countPromptWords(voice);
-  if (voiceWordCount < 25 || voiceWordCount > 80) {
-    throw new Error(`FlowMusic inválido: voice possui ${voiceWordCount} palavras; use de 25 a 80.`);
-  }
-  const voicePattern = /\. Language: Brazilian Portuguese \(pt-BR\); Register: ([^;]+); Timbre: ([^;]+); Articulation: ([^;]+); Dynamics: ([^;]+); Delivery: ([^;]+)$/u;
-  if (!voicePattern.test(voice)) {
-    throw new Error('FlowMusic inválido: voice não respeita a sequência técnica oficial.');
-  }
-
-  return { lyrics, musicalComposition, voice };
+function auditFlowMusicOutput(rawFlowMusic) {
+  return validateFlowMusicOutput(rawFlowMusic);
 }
 
 function validateFlowMusicOutput(rawFlowMusic) {
@@ -1325,99 +1106,9 @@ function validateFlowMusicOutput(rawFlowMusic) {
 }
 
 const CAPTION_ROOT_FIELDS = Object.freeze(['socialCaption']);
-const CAPTION_EMOJI_PREFIX = /^(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)\s+/u;
-const CAPTION_FORBIDDEN_COMMERCIAL = /\b(Mercado Livre|link na bio|loja oficial|compre agora|promo(?:ç|c)ão|produto à venda|merchandising)\b/i;
 
-function auditCaptionOutput(rawCaptionResult, expectedNumber, expectedTitle) {
-  if (!rawCaptionResult || typeof rawCaptionResult !== 'object' || Array.isArray(rawCaptionResult)) {
-    throw new Error('Caption inválido: a resposta deve ser um objeto JSON.');
-  }
-
-  const rootFields = Object.keys(rawCaptionResult).sort();
-  if (rootFields.length !== CAPTION_ROOT_FIELDS.length
-    || rootFields.some((field, index) => field !== CAPTION_ROOT_FIELDS[index])) {
-    throw new Error('Caption inválido: a raiz deve conter somente socialCaption.');
-  }
-
-  const rawCaption = typeof rawCaptionResult.socialCaption === 'string' ? rawCaptionResult.socialCaption : '';
-  if (!rawCaption || rawCaption !== rawCaption.trim() || /\r/u.test(rawCaption)) {
-    throw new Error('Caption inválido: socialCaption está vazio, contém espaços externos ou usa quebra de linha incompatível.');
-  }
-
-  const number = sanitizeNumericId(expectedNumber, '00');
-  const title = String(expectedTitle || '').replace(/\s+/gu, ' ').trim();
-  if (!title) throw new Error('Caption inválido: o título esperado está vazio.');
-
-  const lines = rawCaption.split('\n');
-  if (lines.length !== 14) {
-    throw new Error(`Caption inválido: socialCaption possui ${lines.length} linhas; o contrato exige exatamente 14.`);
-  }
-
-  const expectedHeader = `MINISSÉRIE ${number} — ${title}`;
-  if (lines[0] !== expectedHeader) {
-    throw new Error(`Caption inválido: o cabeçalho deve ser exatamente "${expectedHeader}".`);
-  }
-  if (lines[1] !== '' || lines[12] !== '') {
-    throw new Error('Caption inválido: deve existir exatamente uma linha vazia após o cabeçalho e antes das hashtags.');
-  }
-
-  const bodyLines = lines.slice(2, 12);
-  const seenEmojis = new Set();
-  const seenBodyLines = new Set();
-  bodyLines.forEach((line, index) => {
-    const lineNumber = index + 1;
-    const emojiMatch = line.match(CAPTION_EMOJI_PREFIX);
-    if (!emojiMatch) {
-      throw new Error(`Caption inválido: a frase ${lineNumber} deve começar com um emoji seguido de espaço.`);
-    }
-    if (seenEmojis.has(emojiMatch[1])) {
-      throw new Error(`Caption inválido: o emoji inicial da frase ${lineNumber} está repetido.`);
-    }
-    seenEmojis.add(emojiMatch[1]);
-
-    const sentence = line.slice(emojiMatch[0].length).trim();
-    const wordCount = countPromptWords(sentence);
-    if (wordCount < 16 || wordCount > 28) {
-      throw new Error(`Caption inválido: a frase ${lineNumber} possui ${wordCount} palavras; o contrato exige de 16 a 28.`);
-    }
-    if (sentence.includes('#')) {
-      throw new Error(`Caption inválido: a frase ${lineNumber} não pode conter hashtag.`);
-    }
-    const identity = sentence.toLocaleLowerCase('pt-BR').replace(/\s+/gu, ' ');
-    if (seenBodyLines.has(identity)) {
-      throw new Error(`Caption inválido: a frase ${lineNumber} está duplicada.`);
-    }
-    seenBodyLines.add(identity);
-  });
-
-  const bodyText = bodyLines.join('\n');
-  const brandOccurrences = (bodyText.match(/InkVortex Brasil/g) || []).length;
-  if (brandOccurrences !== 1 || !bodyLines[8].includes('InkVortex Brasil')) {
-    throw new Error('Caption inválido: InkVortex Brasil deve aparecer exatamente uma vez no corpo e somente na frase 9.');
-  }
-  if (!bodyLines[9].trim().endsWith('?')) {
-    throw new Error('Caption inválido: a frase 10 deve terminar com uma pergunta direta.');
-  }
-  if (CAPTION_FORBIDDEN_COMMERCIAL.test(bodyText)) {
-    throw new Error('Caption inválido: o contrato editorial não permite publicidade ou merchandising.');
-  }
-
-  const hashtagLine = lines[13];
-  const hashtags = hashtagLine.split(' ');
-  if (hashtags.length !== 5 || hashtags.join(' ') !== hashtagLine) {
-    throw new Error('Caption inválido: a última linha deve conter exatamente cinco hashtags separadas por um único espaço.');
-  }
-  if (hashtags.some(hashtag => !/^#[A-Za-z0-9_]+$/.test(hashtag))) {
-    throw new Error('Caption inválido: hashtags aceitam somente letras sem acento, números ou sublinhado.');
-  }
-  if (new Set(hashtags.map(hashtag => hashtag.toLowerCase())).size !== 5) {
-    throw new Error('Caption inválido: as cinco hashtags devem ser diferentes.');
-  }
-  if (hashtags[4] !== '#InkVortexBrasil') {
-    throw new Error('Caption inválido: a quinta e última hashtag deve ser #InkVortexBrasil.');
-  }
-
-  return { socialCaption: rawCaption };
+function auditCaptionOutput(rawCaptionResult) {
+  return validateCaptionOutput(rawCaptionResult);
 }
 
 function validateCaptionOutput(rawCaptionResult) {
@@ -1438,6 +1129,7 @@ function validateCaptionOutput(rawCaptionResult) {
   if (!socialCaption) throw new Error('Caption inválido: a resposta não contém texto utilizável.');
   return { socialCaption: socialCaption.trim() };
 }
+
 
 function parseCaptionResult(result, expectedNumber, expectedTitle) {
   let parsed = result;
@@ -1579,10 +1271,10 @@ async function renderAudioAssSinglePass(assets, assContent) {
   const singlePass = `${ffmpegPath} -y -loop 1 -framerate 25 -i "${assets.coverImagePath}" -i "${assets.audioPath}" -map 0:v:0 -map 1:a:0 -vf "${videoFilter}" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -c:a aac -b:a 192k -t ${durationArg} -shortest -movflags +faststart "${outputLegendadoMp4Path}"`;
 
   try {
-    console.log(`ðŸŽµ ÃUDIO #${assets.campNum} â€” PASSAGEM ÃšNICA: capa + M4A + ASS TikTok â†’ MP4 final.`);
+    console.log(`🎵 ÁUDIO #${assets.campNum} — PASSAGEM ÚNICA: capa + M4A + ASS TikTok → MP4 final.`);
     await videoService.execFfmpegAsync(singlePass);
   } catch (error) {
-    throw new Error(`RenderizaÃ§Ã£o de Ã¡udio interrompida: ${error.message || error}`);
+    throw new Error(`Renderização de áudio interrompida: ${error.message || error}`);
   }
 
   return {
@@ -1603,23 +1295,23 @@ async function renderAudioAssSinglePass(assets, assContent) {
 async function apiGenerateM4AASS(payload) {
   const assets = resolveAudioRenderAssets(payload, { requireCover: false });
   const targetAudio = assets.vocalPath || assets.audioPath;
-  console.log(`ðŸŽ™ï¸ ÃUDIO #${assets.campNum}: Transcrevendo via OpenAI Whisper-1 (${path.basename(targetAudio)})...`);
+  console.log(`🎙️ ÁUDIO #${assets.campNum}: Transcrevendo via OpenAI Whisper-1 (${path.basename(targetAudio)})...`);
   const result = await alignM4AText(targetAudio, AUDIO_TIKTOK_ASS_OPTIONS);
   const assContent = typeof result === 'object' ? result.assContent : result;
   const rawText = typeof result === 'object' ? result.rawText : '';
   const alignedWords = typeof result === 'object' ? result.alignedWords : [];
 
-  // GravaÃ§Ã£o automÃ¡tica do arquivo .ass no disco
+  // Gravação automática do arquivo .ass no disco
   const assFilePath = path.join(assets.assDir, `${assets.baseName} legendado.ass`);
   fs.mkdirSync(assets.assDir, { recursive: true });
   fs.writeFileSync(assFilePath, assContent, 'utf8');
-  console.log(`âœ… Arquivo ASS gravado no disco: ${path.basename(assFilePath)}`);
+  console.log(`✅ Arquivo ASS gravado no disco: ${path.basename(assFilePath)}`);
 
-  // RenderizaÃ§Ã£o automÃ¡tica do MP4 em passagem Ãºnica no disco se houver capa
+  // Renderização automática do MP4 em passagem única no disco se houver capa
   const mp4Files = fs.existsSync(assets.mp4Dir) ? fs.readdirSync(assets.mp4Dir) : [];
   const coverFile = mp4Files.find(file => /^(capa|cover)\.(jpg|jpeg|png|webp)$/i.test(file));
   if (coverFile) {
-    console.log(`ðŸŽ¬ Renderizando MP4 final no disco via FFmpeg em passagem Ãºnica...`);
+    console.log(`🎬 Renderizando MP4 final no disco via FFmpeg em passagem única...`);
     await renderAudioAssSinglePass(assets, assContent);
   }
 
@@ -1648,7 +1340,7 @@ function findFirstExt(targetDir, ext) {
 async function renderAudioM4AForCampaign(payload) {
   const assets = resolveAudioRenderAssets(payload);
   const targetAudio = assets.vocalPath || assets.audioPath;
-  console.log(`ðŸŽ™ï¸ ÃUDIO #${assets.campNum}: Transcrevendo via OpenAI Whisper-1 (${path.basename(targetAudio)})...`);
+  console.log(`🎙️ ÁUDIO #${assets.campNum}: Transcrevendo via OpenAI Whisper-1 (${path.basename(targetAudio)})...`);
   const result = await alignM4AText(targetAudio, AUDIO_TIKTOK_ASS_OPTIONS);
   const assContent = typeof result === 'object' ? result.assContent : result;
   return renderAudioAssSinglePass(assets, assContent);
@@ -2170,7 +1862,7 @@ CONTEXTO DA MINISSÉRIE: ${topicDesc}`;
     userPrompt += '\nCENAS:\n' + sourceScenes.map((s, i) => `Cena ${i+1}: ${s.prompt || s.title || ''}`).join('\n');
   }
 
-  console.log(`🎬 Gerando Roteiro Master Flow via OpenAI para: ${topicTitle} (Minissérie #${cNum})...`);
+  console.log(`🎬 Gerando Roteiro Master Flow via Mistral AI para: ${topicTitle} (Minissérie #${cNum})...`);
 
   const result = await generateStage({
     taskName: 'flowMaster',
@@ -2205,14 +1897,17 @@ async function generateScenes50Prompt(payload) {
   const cNum = sanitizeNumericId(campaignNum || campaignId || '01');
   const topicTitle = title || (topic && topic.title) || `Minissérie #${cNum}`;
   const topicContext = context || (topic && topic.description) || topicTitle;
-  const anchors = Array.isArray(gptScenes) ? gptScenes.slice(0, 10) : [];
-  if (anchors.length < 10) {
-    throw new Error(`A minissérie ${cNum} precisa das 10 cenas GPT preparadas antes de gerar os 40 complementares.`);
+  const diskSourcePath = path.join(ROOT, 'minisseries', String(cNum), 'prompts', `10_prompts_gpt_${cNum}.json`);
+  if (!fs.existsSync(diskSourcePath)) {
+    const anchors = Array.isArray(gptScenes) ? gptScenes.slice(0, 10) : [];
+    if (anchors.length < 10) {
+      throw new Error(`A minissérie ${cNum} precisa das 10 cenas GPT preparadas antes de gerar os 40 complementares.`);
+    }
+    writeGPTSourcePrompts({ ROOT, numStr: cNum, gptScenes: anchors });
   }
-  writeGPTSourcePrompts({ ROOT, numStr: cNum, gptScenes: anchors });
   const sourceAnchors = readGPTSourcePrompts(ROOT, cNum);
 
-  console.log(`🎬 Gerando 40 prompts complementares via OpenAI para Minissérie #${cNum}: ${topicTitle}...`);
+  console.log(`🎬 Gerando 40 prompts complementares via Mistral AI para Minissérie #${cNum}: ${topicTitle}...`);
 
   let userPrompt = `TÍTULO DA MINISSÉRIE: ${topicTitle}
 CONTEXTO DO ASSUNTO: ${topicContext}`;
@@ -2327,10 +2022,10 @@ async function runCompleteGenerationJob(job, payload) {
 TÍTULO EXATO DA MINISSÉRIE: ${title}
 CONTEXTO MESTRE: ${description}${topic.socialNarrative && typeof topic.socialNarrative === 'object' ? `${Array.isArray(topic.socialNarrative.keyFacts) && topic.socialNarrative.keyFacts.length > 0 ? `\nFATOS TÉCNICOS CHAVE (PROGRESSÃO DAS 10 LINHAS):\n${topic.socialNarrative.keyFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')}` : ''}${Array.isArray(topic.socialNarrative.keywords) && topic.socialNarrative.keywords.length > 0 ? `\nPALAVRAS-CHAVE / TEMAS PARA HASHTAGS: ${topic.socialNarrative.keywords.join(', ')}` : ''}` : ''}`;
 
-    job.stage = 'FASE 1: DIREÇÃO DE ARTE (GPT)';
+    job.stage = 'FASE 1: DIREÇÃO DE ARTE (MISTRAL)';
     job.step = 1;
-    job.total = 3;
-    job.detail = 'Gerando 10 cenas estáticas e prompts em inglês...';
+    job.total = 2;
+    job.detail = 'Gerando 10 cenas cinematográficas e prompts em português do Brasil...';
 
     const scenesRes = await generateStage({
       taskName: 'scenes45',
@@ -2526,7 +2221,6 @@ function listDocumentaries() {
 
 let automationRoutes;
 let chatGPTAutomationRoutes;
-let qwenAutomationRoutes;
 async function handleApi(req, res) {
   if (!automationRoutes) {
     automationRoutes = createAutomationRouter({
@@ -2537,15 +2231,6 @@ async function handleApi(req, res) {
     chatGPTAutomationRoutes = createChatGPTAutomationRouter({
       activeChatGPTWebJobs, activeGeminiWebJobs, send, sendApiError, readBody, ROOT, sanitizeNumericId
     });
-  }
-  if (!qwenAutomationRoutes) {
-    qwenAutomationRoutes = createqwenAutomationRouter(ROOT);
-  }
-  if (req.url.startsWith('/api/automate-qwen')) {
-    const parsedUrl = new URL(req.url, `http://127.0.0.1:${PORT}`);
-    const query = Object.fromEntries(parsedUrl.searchParams.entries());
-    const handled = await qwenAutomationRoutes(req, res, parsedUrl.pathname, query, readBody, send, sendApiError);
-    if (handled !== false) return;
   }
   if (req.url.startsWith('/api/automate-chatgpt')
     || req.url.startsWith('/api/automate-gemini-vortex')
@@ -2916,7 +2601,7 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
 
   if ((req.url === '/api/backup/export-to-root' || req.url === '/api/minisseries/export-backup-root') && req.method === 'POST') {
     try {
-      const payload = await readBody(req);
+      const payload = await readBody(req, 10 * 1024 * 1024); // 10 MB — backup pode ser grande
       const clientCampaigns = payload.campaigns || [];
       const extraMeta = {
         activeStage: payload.activeStage,
@@ -2926,7 +2611,7 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
         suggestedSubjects: payload.suggestedSubjects
       };
       const options = { isPreReset: !!payload.isPreReset };
-      const result = miniseriesWorkspaceService.saveOfficialBackupToRoot(CODE_ROOT, ROOT, clientCampaigns, extraMeta, options);
+      const result = miniseriesWorkspaceService.saveOfficialBackupToRoot(CODE_ROOT, FILES_ROOT, clientCampaigns, extraMeta, options);
       send(res, 200, result);
     } catch(err) {
       sendApiError(res, err);
@@ -2936,7 +2621,7 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
 
   if ((req.url === '/api/backup/import-latest-root' || req.url === '/api/minisseries/import-latest-root') && (req.method === 'POST' || req.method === 'GET')) {
     try {
-      const result = miniseriesWorkspaceService.restoreLatestBackupFromRoot(CODE_ROOT, ROOT);
+      const result = miniseriesWorkspaceService.restoreLatestBackupFromRoot(CODE_ROOT, FILES_ROOT);
       send(res, 200, result);
     } catch(err) {
       sendApiError(res, err);
@@ -4510,7 +4195,7 @@ FORMATO DE RESPOSTA (RETORNE ESTRITAMENTE JSON):
         id: `cta_${numStr}`,
         numStr: numStr,
         title: `[CTA ${numStr}] ${parsed.title || userTopic}`,
-        subtitle: parsed.subtitle || `Campanha comercial #${numStr} gerada via OpenAI AI`,
+        subtitle: parsed.subtitle || `Campanha comercial #${numStr} gerada via Mistral AI`,
         category: parsed.category || (payload.isDocumentary ? "DocumentÃ¡rio Original" : "Engajamento & InteraÃ§Ã£o"),
         aspectRatio: payload.isDocumentary ? "16:9" : "9:16",
         image: foundImg || `/minisseries/cta/${numStr}.png`,
@@ -4820,7 +4505,7 @@ if (require.main === module) {
       throw new Error(connectivityFailureMessage(connectivity));
     }
 
-    console.log(`[PRE-FLIGHT APIS] OK — Servidores da Mistral e OpenAI responderam com sucesso.`);
+    console.log(`[PRE-FLIGHT APIS] OK — Conexão estabelecida com Mistral AI (Criação de Conteúdo) e OpenAI (Whisper-1).`);
     server.listen(PORT, '127.0.0.1', () => {
       serverIsUp = true;
       const url = `http://localhost:${PORT}/index.html?v=${encodeURIComponent(STUDIO_VERSION)}&started=${Date.now()}`;

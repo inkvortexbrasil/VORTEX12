@@ -694,9 +694,8 @@ body {
   box-shadow: none !important;
 }
 
-#multiverseWelcome:has(#subjectsGrid[style*="display: flex"]) #activeCampaignPanel,
 #multiverseWelcome:has(#subjectsGrid[style*="display: flex"]) #multiversePromptsArea {
-  display: flex !important;
+  display: none !important;
 }
 
 #subjectsGrid[style*="display: flex"]:not(:has(.subjectCard)) > div {
@@ -2175,5 +2174,73 @@ body.living-stage-active {
   box-shadow: 0 0 16px rgba(0, 198, 255, 0.35);
   transform: translateX(3px);
 }
+
+.ambient-folder-item.is-playing-folder {
+  background: rgba(0, 198, 255, 0.22) !important;
+  border-color: #00c6ff !important;
+  box-shadow: 0 0 16px rgba(0, 198, 255, 0.4) !important;
+}
+
+/* ================================================================
+   PAINEL LATERAL SOM — posicionado espelhando orbitLeft na direita
+   Transparente (glassmorphism), altura total da coluna lateral
+   ================================================================ */
+#ambientSidePanel {
+  position: fixed;
+  z-index: 900;
+  display: none;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* Visual transparente */
+  background: linear-gradient(155deg, rgba(4, 10, 27, 0.22), rgba(7, 10, 26, 0.06));
+  border: 1px solid rgba(0, 198, 255, 0.28);
+  border-radius: 16px;
+  padding: 14px 12px 12px 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 45px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: hidden;
+}
+
+#ambientSidePanel.visible {
+  display: flex !important;
+}
+
+/* Scrollbar do painel SOM */
+#ambientSidePanel #ambientTrackList::-webkit-scrollbar {
+  width: 3px;
+}
+#ambientSidePanel #ambientTrackList::-webkit-scrollbar-thumb {
+  background: rgba(0, 198, 255, 0.35);
+  border-radius: 99px;
+}
+
+/* Posicionamento: viewport <= 1600px */
+@media (max-width: 1600px) {
+  #ambientSidePanel {
+    right: var(--cockpit-left-edge, 8px);
+    top: var(--cockpit-main-top, 108px);
+    bottom: 22px;
+    width: var(--cockpit-left-width, 360px);
+  }
+}
+
+/* Posicionamento: viewport > 1600px */
+@media (min-width: 1601px) {
+  #ambientSidePanel {
+    right: var(--cockpit-left-edge, 20px);
+    top: var(--cockpit-main-top, 108px);
+    bottom: 22px;
+    width: var(--cockpit-left-width, 360px);
+  }
+}
+
+/* Ajuste tela menor */
+@media (max-width: 1280px) {
+  #ambientSidePanel {
+    width: var(--cockpit-left-width, 340px);
+  }
+}
+
 
 

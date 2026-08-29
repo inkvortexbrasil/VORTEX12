@@ -12,10 +12,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=Manrope:wght@400;600;700&family=Noto+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/layout.css?v=292">
-  <link rel="stylesheet" href="css/components.css?v=292">
-  <link rel="stylesheet" href="css/main.css?v=292">
-  <link rel="stylesheet" href="css/extension-mode.css?v=292">
+  <link rel="stylesheet" href="css/layout.css?v=293">
+  <link rel="stylesheet" href="css/components.css?v=293">
+  <link rel="stylesheet" href="css/main.css?v=293">
+  <link rel="stylesheet" href="css/extension-mode.css?v=300">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body class="vortexAppShell dark-theme">
@@ -88,24 +88,6 @@
           </div>
         </div>
 
-        <!-- Caixinha Compacta do QWEN (Web Automation) -->
-        <div id="docQwenMonitorContainer"
-             style="display:none; width: 330px; min-width: 330px; max-width: 330px; flex: 0 0 auto; background:rgba(5,12,28,0.97); border:1.5px solid #a855f7; border-radius:8px; padding:5px 10px; box-shadow:0 3px 16px rgba(168,85,247,0.3); text-align:left; position:relative; margin:0; box-sizing:border-box;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-            <h4 id="docQwenMonitorTitle" style="margin:0; color:#fff; font-family:var(--uiRounded); font-size:0.75rem; font-weight:700; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px;">
-              <span style="font-size:0.82rem;">👾</span> Status do Robô Qwen
-            </h4>
-            <button onclick="window.cancelDocQwenRobot()" style="background:rgba(255,0,0,0.2); border:1px solid rgba(255,0,0,0.5); color:#ff4d4d; width:20px; height:20px; border-radius:50%; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s;" title="Parar Qwen" aria-label="Parar Qwen">✖</button>
-          </div>
-          <div style="background:rgba(255,255,255,0.1); width:100%; height:5px; border-radius:3px; overflow:hidden; margin-bottom:3px;">
-            <div id="docQwenMonitorBar" style="height:100%; width:0%; background:linear-gradient(90deg, #a855f7, #00c6ff); transition:width 0.3s;"></div>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; min-width:0;">
-            <span id="docQwenMonitorLog" style="color:#a855f7; font-family:monospace; font-size:0.68rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">Iniciando Qwen...</span>
-            <span id="docQwenMonitorPercent" style="color:#fff; font-weight:bold; font-size:0.75rem; font-family:monospace; flex-shrink:0;">0%</span>
-          </div>
-        </div>
-
       </div>
 
       <!-- Compatibilidade retroativa com seletores legados -->
@@ -128,48 +110,11 @@
       </button>
 
       <!-- Player de Som Ambiente / Focus Music Studio -->
-      <div style="position: relative;" id="ambientAudioWrapper">
+      <div id="ambientAudioWrapper">
         <button id="btnAmbientAudio" class="actionBtn ambientAudioBtn" style="padding: 5px 9px; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.25); font-weight: bold; cursor: pointer; transition: all 0.25s ease; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 5px; font-size: 0.70rem;" onclick="window.toggleAmbientAudioDropdown()" title="Música Ambiente do Estúdio">
           <span id="ambientAudioIcon" style="font-size: 1.15rem; line-height: 1; transition: transform 0.2s ease;">🔇</span>
           <span id="ambientAudioLabel" style="font-size: 0.78rem; font-family: var(--uiRounded); letter-spacing: 0.5px; text-transform: uppercase;">SOM</span>
         </button>
-        <div id="dropdownAmbientAudio" class="vortexDropdown ambientAudioDropdown" style="display: none; width: 440px; right: 0; top: 100%; margin-top: 10px; z-index: 1000; padding: 14px; background: rgba(5,12,28,0.96); border: 1px solid rgba(0,198,255,0.4); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,198,255,0.25); backdrop-filter: blur(16px);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
-              <span style="font-size: 1.2rem; flex-shrink: 0;">🎧</span>
-              <div style="min-width: 0;">
-                <div style="font-weight: 800; font-size: 0.85rem; color: #fff; font-family: var(--uiRounded); letter-spacing: 0.5px;">SOM AMBIENTE / FOCUS</div>
-                <div id="ambientCurrentTrackName" style="font-size: 0.72rem; color: #00c6ff; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Nenhuma faixa tocando</div>
-              </div>
-            </div>
-            <button id="btnToggleAmbientPlayback" onclick="window.toggleAmbientAudioPlayback()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: var(--uiRounded); flex-shrink: 0;">DESLIGADO</button>
-          </div>
-
-          <!-- Barra de Navegação de Pastas / Breadcrumb -->
-          <div id="ambientNavHeader" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 0.75rem;">
-            <div id="ambientPathLabel" style="color: #00c6ff; font-weight: 700; font-family: var(--uiRounded); display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              <span>📁</span> <span id="ambientPathText">D:\Músicas</span>
-            </div>
-            <button id="btnAmbientBackFolder" onclick="window.backToAmbientFolders()" style="display: none; background: rgba(0,198,255,0.15); border: 1px solid rgba(0,198,255,0.4); color: #00c6ff; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">⬅ Ver Pastas</button>
-          </div>
-
-          <!-- Campo de Busca Rápida (quando dentro de pastas) -->
-          <div id="ambientSearchContainer" style="display: none; margin-bottom: 8px;">
-            <input id="ambientSearchInput" type="text" placeholder="🔍 Filtrar música nesta pasta..." oninput="window.filterAmbientTracks(this.value)" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px; padding: 5px 10px; font-size: 0.72rem; outline: none; box-sizing: border-box;">
-          </div>
-          
-          <div id="ambientTrackList" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
-            <div style="font-size: 0.78rem; color: rgba(255,255,255,0.6); text-align: center; padding: 16px 0;">Carregando pastas de áudio...</div>
-          </div>
-          
-          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-            <span style="font-size: 0.75rem; color: rgba(255,255,255,0.7); font-weight: 600;">Volume:</span>
-            <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
-              <span id="ambientVolumeValue" style="font-size: 0.72rem; color: #00c6ff; font-weight: bold; font-family: monospace;">70%</span>
-              <input id="ambientAudioVolume" type="range" min="0" max="1" step="0.05" value="0.7" oninput="window.setAmbientAudioVolume(this.value)" style="width: 120px; accent-color: #00c6ff; cursor: pointer;">
-            </div>
-          </div>
-        </div>
       </div>
       <div style="position: relative;">
         <button class="iconBtn" id="btnApiConfig" title="Chave da API" aria-label="Configurar Chaves de API" onclick="document.getElementById('modalApiConfig').style.display='flex'">🔑 API</button>
@@ -771,13 +716,13 @@
   <!-- Áudio Ambiente / Focus Studio Background Player -->
   <audio id="ambientStudioAudio" loop preload="none"></audio>
 
-  <script src="js/state.js?v=292"></script>
-  <script src="js/api.js?v=292"></script>
-  <script src="js/ui.js?v=292"></script>
-  <script src="js/audio.js?v=292"></script>
-  <script src="js/app.js?v=292"></script>
-  <script src="js/shorts.js?v=292"></script>
-  <script src="js/documentarios.js?v=292"></script>
+  <script src="js/state.js?v=297"></script>
+  <script src="js/api.js?v=293"></script>
+  <script src="js/ui.js?v=302"></script>
+  <script src="js/audio.js?v=299"></script>
+  <script src="js/app.js?v=301"></script>
+  <script src="js/shorts.js?v=293"></script>
+  <script src="js/documentarios.js?v=301"></script>
   <script src="js/social.js?v=293"></script>
   <script src="js/living-stage.js?v=11"></script>
   <!-- Container Global Unificado para Telemetria de Robôs -->
@@ -828,5 +773,48 @@
         </div>
       </div>
   </div>
+
+  <!-- Painel Lateral SOM — toggle pelo botão SOM no topbar -->
+  <div id="ambientSidePanel" style="display: none;">
+    <!-- Cabeçalho: Nome da faixa + Botão Ligado/Desligado -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+        <span style="font-size: 1.3rem; flex-shrink: 0;">🎧</span>
+        <div style="min-width: 0;">
+          <div style="font-weight: 900; font-size: 0.88rem; color: #fff; font-family: var(--uiRounded); letter-spacing: 0.8px; text-transform: uppercase;">SOM AMBIENTE</div>
+          <div id="ambientCurrentTrackName" style="font-size: 0.70rem; color: #00c6ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">Nenhuma faixa tocando</div>
+        </div>
+      </div>
+      <button id="btnToggleAmbientPlayback" onclick="window.toggleAmbientAudioPlayback()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: var(--uiRounded); flex-shrink: 0; letter-spacing: 0.4px;">DESLIGADO</button>
+    </div>
+
+    <!-- Navegação de Pastas -->
+    <div id="ambientNavHeader" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 0.74rem; flex-shrink: 0;">
+      <div id="ambientPathLabel" style="color: #00c6ff; font-weight: 700; font-family: var(--uiRounded); display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <span>📁</span> <span id="ambientPathText">D:\Músicas</span>
+      </div>
+      <button id="btnAmbientBackFolder" onclick="window.backToAmbientFolders()" style="display: none; background: rgba(0,198,255,0.12); border: 1px solid rgba(0,198,255,0.35); color: #00c6ff; padding: 3px 8px; border-radius: 5px; font-size: 0.68rem; font-weight: 700; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">⬅ Pastas</button>
+    </div>
+
+    <!-- Busca rápida dentro de pastas -->
+    <div id="ambientSearchContainer" style="display: none; margin-bottom: 8px; flex-shrink: 0;">
+      <input id="ambientSearchInput" type="text" placeholder="🔍 Filtrar..." oninput="window.filterAmbientTracks(this.value)"
+        style="width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px; padding: 5px 10px; font-size: 0.72rem; outline: none; box-sizing: border-box;">
+    </div>
+
+    <!-- Lista de Pastas / Faixas -->
+    <div id="ambientTrackList" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; padding-right: 3px;">
+      <div style="font-size: 0.76rem; color: rgba(255,255,255,0.5); text-align: center; padding: 20px 0;">Carregando pastas de áudio...</div>
+    </div>
+
+    <!-- Volume -->
+    <div style="padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-top: 8px;">
+      <span style="font-size: 0.72rem; color: rgba(255,255,255,0.65); font-weight: 600; white-space: nowrap;">🔊 Volume</span>
+      <input id="ambientAudioVolume" type="range" min="0" max="1" step="0.05" value="0.7" oninput="window.setAmbientAudioVolume(this.value)"
+        style="flex: 1; accent-color: #00c6ff; cursor: pointer;">
+      <span id="ambientVolumeValue" style="font-size: 0.70rem; color: #00c6ff; font-weight: bold; font-family: monospace; min-width: 32px; text-align: right;">70%</span>
+    </div>
+  </div>
+
 </body>
 </html>

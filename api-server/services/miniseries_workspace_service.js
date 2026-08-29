@@ -114,15 +114,9 @@ function formatSubjectTextReport(topic, rawCampaignNumber) {
   }
 
   lines.push('');
-  lines.push('--------------------------------------------------------------------------------');
-  lines.push('3. BLUEPRINT DE MOVIMENTO (FLOW MASTER & GEMINI MOTIONS)');
-  lines.push('--------------------------------------------------------------------------------');
-  lines.push(`- Vetor de Ação (10s): ${mb.actionVector || '(Não informado)'}`);
-  lines.push(`- Elementos Dinâmicos: ${mb.dynamicElements || '(Não informado)'}`);
-
   lines.push('');
   lines.push('--------------------------------------------------------------------------------');
-  lines.push('4. ARCO NARRATIVO MUSICAL (FLOW MUSIC)');
+  lines.push('3. ARCO NARRATIVO MUSICAL (FLOW MUSIC)');
   lines.push('--------------------------------------------------------------------------------');
   lines.push(`- Início (Cenas 01–04): ${ma.beginning || '(Não informado)'}`);
   lines.push(`- Ponto de Virada (Cenas 05–08): ${ma.turningPoint || '(Não informado)'}`);

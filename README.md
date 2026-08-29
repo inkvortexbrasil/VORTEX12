@@ -17,11 +17,10 @@ Uma UI de imersão total que atua como central de operações do Diretor-Geral. 
 - Mudar de ambientes (Salas) entre Biblioteca, Documentários, Shorts, Comercial e Som.
 - Visualizar telemetria em tempo real das automações web acontecendo no background.
 
-### 2. Automação de IAs (GPT, Gemini e Qwen)
+### 2. Automação de IAs (GPT e Gemini)
 A espinha dorsal de texto e imagem. O VORTEX12 gerencia filas sequenciais complexas (50 imagens por minissérie).
 - **Robô GPT:** Focado na confecção de scripts precisos e contextuais e orquestração textual contínua.
 - **Robô Gemini:** Atuador visual principal encarregado de rodar em lote e gerar imagens e cenários de forma orquestrada, lendo manifestos e fazendo download validado por *hash*.
-- **Qwen:** Robô auxiliar de alta precisão para a confecção de imagens.
 
 ### 3. Motor de Áudio e Sonoplastia
 Integração massiva com geradores de áudio cantados e instrumentais (Flow Music).

@@ -180,7 +180,7 @@ const UI = {
 
     if (AppState.isGeneratingSubjects) {
       if (activePanel) activePanel.style.display = 'flex';
-      if (rightArea)   rightArea.style.display   = 'flex';
+      if (rightArea)   rightArea.style.display   = 'none';
       
       this.subjectsGrid.style.display = 'flex';
       const nums = AppState.generatingNumbers && AppState.generatingNumbers.length > 0 ? AppState.generatingNumbers.join(', ') : '';
@@ -261,7 +261,7 @@ const UI = {
 
     if (AppState.suggestedSubjects && AppState.suggestedSubjects.length > 0) {
       if (activePanel) activePanel.style.display = 'flex';
-      if (rightArea)   rightArea.style.display   = 'flex';
+      if (rightArea)   rightArea.style.display   = 'none';
       this.subjectsGrid.style.display = 'flex';
       this.subjectsGrid.style.flexDirection = 'column';
       this.subjectsGrid.style.gap = '16px';
@@ -273,7 +273,7 @@ const UI = {
       this.subjectsGrid.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px;">
           <h3 style="color: var(--cyan); font-size: 1rem; font-family: var(--uiRounded); letter-spacing: 1px; margin: 0;">✨ NOVAS MINISSÉRIES DISPONÍVEIS:</h3>
-          <button onclick="AppState.suggestedSubjects=[]; UI.renderWorkspace();" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--ivTextSecondary); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.12)';" onmouseout="this.style.background='rgba(255,255,255,0.06)';">✕ Fechar</button>
+          <button onclick="AppState.suggestedSubjects=[]; const ra=document.getElementById('multiversePromptsArea'); if(ra) ra.style.display='flex'; UI.renderWorkspace();" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--ivTextSecondary); border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.12)';" onmouseout="this.style.background='rgba(255,255,255,0.06)';">✕ Fechar</button>
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; overflow-y: auto;">
           ${campaigns.map(c => {
@@ -313,6 +313,7 @@ const UI = {
 
     this.subjectsGrid.style.display = 'none';
     this.subjectsGrid.innerHTML = '';
+    if (rightArea) rightArea.style.display = 'flex';
   },
 
   openStudioModal(title) {
@@ -338,11 +339,24 @@ const UI = {
     }
   },
 
+  renderPulsePanel() {
+    AppState.save();
+    if (typeof window.renderMultiverseControlPanel === 'function') {
+      window.renderMultiverseControlPanel();
+    }
+    if (typeof this.renderSocialArea === 'function') {
+      this.renderSocialArea();
+    }
+  },
+
   renderStudio() {
     AppState.save();
     if (AppState.isGenerating) return;
     if (typeof window.renderMultiverseControlPanel === 'function') {
         window.renderMultiverseControlPanel();
+    }
+    if (typeof this.renderSocialArea === 'function') {
+      this.renderSocialArea();
     }
   }
 };
@@ -538,14 +552,14 @@ Object.assign(UI, {
     if (!rawCaption) {
       this.contentArea.innerHTML = `
         <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; box-sizing: border-box;">
-          <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.6; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));">📝</div>
-          <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">MINISSÉRIE ${cNum}</h3>
-          <p style="color: #fff; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); text-transform: uppercase;">${title}</p>
-          <p style="color: rgba(255,255,255,0.85); max-width: 440px; font-size: 0.92rem; line-height: 1.5; margin: 0 0 18px 0; text-shadow: 0 1px 4px rgba(0,0,0,0.9);">
-            A narrativa social de apresentação desta obra ainda não foi gerada no estúdio.
+          <div style="font-size: 3rem; margin-bottom: 12px; opacity: 0.85; filter: drop-shadow(0 2px 12px rgba(0,210,106,0.6));">🚀</div>
+          <h3 style="color: #fff; font-family: var(--uiRounded); font-size: 1.35rem; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.95); letter-spacing: 1px;">MINISSÉRIE ${cNum}</h3>
+          <p style="color: #00e5ff; font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); text-transform: uppercase; max-width: 580px; line-height: 1.4;">${title}</p>
+          <p style="color: rgba(255,255,255,0.85); max-width: 460px; font-size: 0.92rem; line-height: 1.5; margin: 0 0 22px 0; text-shadow: 0 1px 4px rgba(0,0,0,0.9);">
+            O Genoma Editorial desta obra está pronto. Clique no botão abaixo para gerar as 10 cenas cinematográficas e a narrativa social de apresentação.
           </p>
-          <button class="neonBtn" onclick="window.handleGenerateSubjects()" style="padding: 10px 22px; font-size: 0.85rem; font-weight: 800;">
-            ✨ EXPANDIR (IA)
+          <button class="neonBtn" onclick="window.handleStartCurrentMinisserie()" style="padding: 13px 32px; font-size: 0.96rem; font-weight: 900; background: linear-gradient(135deg, #00d26a, #00aeef); border: none; border-radius: 30px; color: #fff; cursor: pointer; box-shadow: 0 0 25px rgba(0,210,106,0.5); display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='scale(1)';">
+            🚀 GERAR MINISSÉRIE #${cNum} (IA)
           </button>
         </div>
       `;
@@ -562,24 +576,29 @@ Object.assign(UI, {
       <div style="display: flex; flex-direction: column; height: 100%; min-height: 0; box-sizing: border-box; padding: 4px 6px 12px 6px; position: relative;">
         
         <!-- Topo da Apresentação com Botão Copiar -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-shrink: 0; gap: 16px; border-bottom: 1px solid rgba(0, 174, 239, 0.25); padding-bottom: 12px;">
-          <!-- Cabeçalho Oficial: Minissérie NN e Título -->
-          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">
-            <div style="color: #fff; font-size: 0.92rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.95);">
-              MINISSÉRIE ${cNum}
+        <div style="display: flex; flex-direction: column; margin-bottom: 16px; flex-shrink: 0; border-bottom: 1px solid rgba(0, 174, 239, 0.25); padding-bottom: 12px; gap: 8px;">
+          <!-- Linha Superior: Minissérie NN Centralizada e Botão Copiar na Direita -->
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="width: 120px; flex-shrink: 0;"></div>
+            <div style="flex: 1; text-align: center;">
+              <span style="color: #ffffff; font-size: 1.35rem; font-family: var(--uiRounded); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 14px rgba(0,0,0,0.98), 0 0 16px rgba(255,255,255,0.4); display: inline-block;">
+                MINISSÉRIE ${cNum}
+              </span>
             </div>
-            <h2 style="color: #fff; font-family: var(--uiRounded); font-size: 1.15rem; font-weight: 800; line-height: 1.38; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.95); text-transform: uppercase; letter-spacing: 0.4px;">
-              ${title}
-            </h2>
+            <div style="width: 120px; flex-shrink: 0; display: flex; justify-content: flex-end;">
+              <button id="btnCopySocialCaption" class="actionBtn" 
+                      style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.2)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(0, 174, 239, 0.65)'}; padding: 7px 16px; font-size: 0.82rem; font-weight: 800; border-radius: 8px; box-shadow: 0 0 16px rgba(0,174,239,0.3); display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.5px; flex-shrink: 0; transition: all 0.2s ease;"
+                      onclick="window.copyExpandedContent('social', 0, this)">
+                <span style="font-size: 1.05rem;">${isCopied ? '✓' : '📋'}</span>
+                <span>${isCopied ? 'COPIADO' : 'COPIAR'}</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Botão Copiar no Canto Superior Direito -->
-          <button id="btnCopySocialCaption" class="actionBtn" 
-                  style="cursor: pointer; background: ${isCopied ? 'var(--brandGrad)' : 'rgba(0, 174, 239, 0.2)'}; color: #fff; border: 1px solid ${isCopied ? 'transparent' : 'rgba(0, 174, 239, 0.65)'}; padding: 8px 20px; font-size: 0.86rem; font-weight: 800; border-radius: 8px; box-shadow: 0 0 16px rgba(0,174,239,0.3); display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px; flex-shrink: 0; transition: all 0.2s ease;"
-                  onclick="window.copyExpandedContent('social', 0, this)">
-            <span style="font-size: 1.05rem;">${isCopied ? '✓' : '📋'}</span>
-            <span>${isCopied ? 'COPIADO' : 'COPIAR'}</span>
-          </button>
+          <!-- Título Oficial da Minissérie -->
+          <h2 style="color: #fff; font-family: var(--uiRounded); font-size: 1.15rem; font-weight: 800; line-height: 1.38; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.95); text-transform: uppercase; letter-spacing: 0.4px;">
+            ${title}
+          </h2>
         </div>
 
         <!-- Área de Leitura das 10 Frases e Hashtags (Branco puro forte igual ao título) -->
@@ -636,6 +655,16 @@ Object.assign(UI, {
   },
 
   renderLibrary() {
+    function isCampaignComplete(c) {
+      if (!c) return false;
+      const hasPrompts = (Array.isArray(c.scenes) && c.scenes.length > 0) || 
+                         (Array.isArray(c.gptScenes) && c.gptScenes.length > 0) || 
+                         (Array.isArray(c.scenes50) && c.scenes50.length > 0) ||
+                         Boolean(c.generatedGPT);
+      const hasTopic = Boolean(c.topic && (c.topic.title || c.title));
+      return hasPrompts || hasTopic;
+    }
+
     const grid = document.getElementById('libraryGrid');
     const countEl = document.getElementById('libraryResultCount');
     if (!grid) return;
@@ -662,7 +691,7 @@ Object.assign(UI, {
       }
       
       // 2. Apply Status Filter
-      const isComplete = c.generatedGPT && c.generatedGemini;
+      const isComplete = isCampaignComplete(c);
       if (AppState.libraryFilter === 'completed' && !isComplete) return false;
       if (AppState.libraryFilter === 'pending' && isComplete) return false;
       
@@ -672,7 +701,7 @@ Object.assign(UI, {
     // Sort descending by number (latest to oldest)
     filtered.sort((a, b) => b.number - a.number);
 
-    const completedCount = filtered.filter(c => c.generatedGPT && c.generatedGemini).length;
+    const completedCount = (AppState.campaigns || []).filter(c => isCampaignComplete(c)).length;
     if (countEl) {
       const itemLabel = filtered.length === 1 ? 'minissérie' : 'minisséries';
       const completeLabel = completedCount === 1 ? 'completa' : 'completas';
@@ -690,7 +719,7 @@ Object.assign(UI, {
     grid.style.gap = "24px 32px";
 
     const renderCard = (c) => {
-      const isComplete = c.generatedGPT && c.generatedGemini;
+      const isComplete = isCampaignComplete(c);
       const numDisplay = String(c.number).padStart(2, '0');
       
       // O usuário solicitou que, abaixo do título, seja sempre exibido o conteúdo do próprio "Contexto", até onde couber.
@@ -700,9 +729,9 @@ Object.assign(UI, {
       return `
         <article class="subjectCard" style="position:relative; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--cyan)';" onmouseout="this.style.borderColor='rgba(0,174,239,0.2)';">
           ${isComplete ? '<div style="position:absolute; top:-8px; right:-8px; background:var(--cyan); color:#000; padding:4px 8px; border-radius:12px; font-size:0.7rem; font-weight:bold; z-index: 10;">COMPLETO</div>' : ''}
-          <div class="cardHeader" style="position:relative;">
-            <div style="position: absolute; top: -25px; left: -25px; width: 40px; height: 40px; background: var(--brandGrad); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--uiRounded); font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">${numDisplay}</div>
-            <h2 style="font-size: 1.1rem; line-height: 1.3; margin-left: 24px;">${c.title}</h2>
+          <div class="cardHeader" style="position:relative; padding-top: 8px;">
+            <div style="position: absolute; top: 0; left: 0; width: 38px; height: 38px; background: var(--brandGrad); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--uiRounded); font-weight: bold; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2; flex-shrink: 0;">${numDisplay}</div>
+            <h2 style="font-size: 1.1rem; line-height: 1.3; margin-left: 48px; min-height: 38px; display: flex; align-items: center;">${c.title}</h2>
           </div>
           <p style="font-size: 0.9rem; color: var(--ivTextSecondary); margin-top: 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;">
             ${descText}
@@ -896,7 +925,11 @@ window.syncPhysicalWorkspaceForCampaign = async function(rawNumber) {
     if (!data || !data.ok || !data.campaign) return null;
     
     const physical = data.campaign;
-    let target = (AppState.campaigns || []).find(c => String(c.number || c.cNum || c.id) === String(cNum));
+    let target = (AppState.campaigns || []).find(c => {
+      const cNo = String(c.number || c.cNum || c.id || '').replace(/\D/g, '');
+      const reqNo = String(cNum || '').replace(/\D/g, '');
+      return (cNo && reqNo && Number(cNo) === Number(reqNo)) || String(c.id) === String(rawNumber);
+    });
     if (target) {
       if (physical.topic) target.topic = physical.topic;
       if (physical.title) target.title = physical.title;
@@ -936,6 +969,14 @@ window.syncPhysicalWorkspaceForCampaign = async function(rawNumber) {
 
 window.openCampaignWorkspace = async function(campaignId) {
   AppState.suggestedSubjects = [];
+  const subjectsGrid = document.getElementById('subjectsGrid');
+  if (subjectsGrid) {
+    subjectsGrid.style.display = 'none';
+    subjectsGrid.innerHTML = '';
+  }
+  const rightArea = document.getElementById('multiversePromptsArea');
+  if (rightArea) rightArea.style.display = 'flex';
+
   AppState.selectedCampaignId = String(campaignId);
   AppState.save();
   const c = AppState.getSelectedCampaign();
@@ -991,57 +1032,52 @@ window.exportSystemBackup = async function() {
     };
 
     let serverResult = null;
+    let fetchStatus = null;
+    let fetchError = null;
+    let fetchBodyText = null;
     try {
       const resp = await fetch('/api/backup/export-to-root', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      fetchStatus = resp.status;
       if (resp.ok) {
         serverResult = await resp.json();
+      } else {
+        fetchBodyText = await resp.text().catch(() => '(sem corpo)');
+        console.error('[Backup] Servidor retornou erro HTTP', resp.status, fetchBodyText);
       }
     } catch (e) {
-      console.warn('[Backup] Backend não respondeu na rota /api/backup/export-to-root:', e);
+      fetchError = e.message || String(e);
+      console.error('[Backup] Falha na requisição fetch:', fetchError);
     }
 
     if (serverResult && serverResult.ok) {
       const count = serverResult.campaignsCount || (AppState.campaigns || []).length;
-      alert(`💾 BACKUP OFICIAL SALVO COM SUCESSO!\n\nArquivo gravado diretamente na pasta raiz:\nF:\\VORTEX12\\${serverResult.fileName}\n\nTotal de minisséries salvas: ${count}`);
-      if (typeof showToast === 'function') {
-        showToast(`💾 Backup salvo em F:\\VORTEX12\\${serverResult.fileName}`, 'success');
-      }
+      const savedPath = `F:\\VORTEX12\\${serverResult.fileName}`;
+      console.info(`[Backup] ✅ Arquivo gravado em: ${savedPath} | Minisséries: ${count}`);
+      alert(`💾 BACKUP SALVO COM SUCESSO!\n\nArquivo: ${serverResult.fileName}\nPasta: F:\\VORTEX12\\\nMinisséries: ${count}`);
       return;
     }
 
-    // Fallback apenas se o backend estiver totalmente inacessível
-    const backupData = {
-      systemName: 'InkVortex Brasil VORTEX 12.0',
-      version: '12.0',
-      timestamp: new Date().toISOString(),
-      activeStage: AppState.activeStage || 'multiverse',
-      activeSubTab: AppState.activeSubTab || 'library',
-      selectedCampaignId: AppState.selectedCampaignId,
-      mistralKey: AppState.mistralKey || '',
-      suggestedSubjects: AppState.suggestedSubjects || [],
-      campaignsCount: (AppState.campaigns || []).length,
-      campaigns: AppState.campaigns || []
-    };
-    const jsonStr = JSON.stringify(backupData, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = `VORTEX12-BACKUP-OFICIAL-${dateStr}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    if (typeof showToast === 'function') showToast('💾 Backup exportado!', 'success');
+    // Mostra diagnóstico real para o Diretor poder reportar
+    const diagInfo = fetchError
+      ? `Erro de rede: ${fetchError}`
+      : fetchStatus
+        ? `Servidor respondeu HTTP ${fetchStatus}: ${fetchBodyText || '(sem detalhe)'}`
+        : 'Sem resposta do servidor';
+
+    alert(
+      `⚠️ FALHA NO BACKUP\n\nDiagnóstico: ${diagInfo}\n\n` +
+      'A Central está ativa mas a requisição falhou.\n' +
+      'Verifique o console do navegador (F12 → Console) para mais detalhes.'
+    );
   } catch (err) {
     alert('Erro ao exportar backup VORTEX 12.0: ' + err.message);
   }
 };
+
 
 window.importLatestBackupFromRoot = async function() {
   try {
@@ -1364,324 +1400,324 @@ UI.renderFontOptions = function(fonts) {
  */
 window.VORTEX_TECH_THEMES = [
   {
-    id: 'theme_01',
-    number: 1,
-    title: 'Tema Livre / Personalizado',
-    category: 'Tema Livre',
-    summary: 'Tema Livre / Personalizado [Tema Livre]',
-    briefing: 'Tema Livre / Personalizado [Tema Livre]'
+    "id": "theme_01",
+    "number": 1,
+    "title": "Tema Livre / Personalizado",
+    "category": "Tema Livre",
+    "summary": "Tema Livre / Personalizado [Tema Livre]",
+    "briefing": "Tema Livre / Personalizado [Tema Livre]"
   },
   {
-    id: 'theme_02',
-    number: 2,
-    title: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]',
-    briefing: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]'
+    "id": "theme_02",
+    "number": 2,
+    "title": "Direct-to-Film DTF & Estamparia Sem Limite de Tecidos",
+    "category": "Indústria Têxtil",
+    "summary": "Direct-to-Film DTF & Estamparia Sem Limite de Tecidos: Como marcas e criadores estampam algodão, poliéster, couro e tecidos mistos com cores vibrantes, toque suave e máxima durabilidade [Indústria Têxtil]",
+    "briefing": "Direct-to-Film DTF & Estamparia Sem Limite de Tecidos: Como marcas e criadores estampam algodão, poliéster, couro e tecidos mistos com cores vibrantes, toque suave e máxima durabilidade [Indústria Têxtil]"
   },
   {
-    id: 'theme_03',
-    number: 3,
-    title: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água',
-    category: 'Indústria Têxtil',
-    summary: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]',
-    briefing: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]'
+    "id": "theme_03",
+    "number": 3,
+    "title": "Estamparia 100% Sustentável Sem Água & Moda Limpa",
+    "category": "Indústria Têxtil",
+    "summary": "Estamparia 100% Sustentável Sem Água & Moda Limpa: A tecnologia ecológica que elimina o desperdício de água e efluentes, preservando rios e criando coleções conscientes [Indústria Têxtil]",
+    "briefing": "Estamparia 100% Sustentável Sem Água & Moda Limpa: A tecnologia ecológica que elimina o desperdício de água e efluentes, preservando rios e criando coleções conscientes [Indústria Têxtil]"
   },
   {
-    id: 'theme_04',
-    number: 4,
-    title: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas',
-    category: 'Indústria Têxtil',
-    summary: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]',
-    briefing: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]'
+    "id": "theme_04",
+    "number": 4,
+    "title": "Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda",
+    "category": "Indústria Têxtil",
+    "summary": "Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda: A revolução de imprimir camisetas e peças prontas em minutos, acabando com estoques e acelerando lançamentos [Indústria Têxtil]",
+    "briefing": "Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda: A revolução de imprimir camisetas e peças prontas em minutos, acabando com estoques e acelerando lançamentos [Indústria Têxtil]"
   },
   {
-    id: 'theme_05',
-    number: 5,
-    title: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]',
-    briefing: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]'
+    "id": "theme_05",
+    "number": 5,
+    "title": "Relevos e Texturas 3D Integrados ao Vestuário",
+    "category": "Indústria Têxtil",
+    "summary": "Relevos e Texturas 3D Integrados ao Vestuário: Como designers criam efeitos táteis e geometrias esculturais diretamente sobre as roupas, elevando o padrão para o luxo contemporâneo [Indústria Têxtil]",
+    "briefing": "Relevos e Texturas 3D Integrados ao Vestuário: Como designers criam efeitos táteis e geometrias esculturais diretamente sobre as roupas, elevando o padrão para o luxo contemporâneo [Indústria Têxtil]"
   },
   {
-    id: 'theme_06',
-    number: 6,
-    title: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes',
-    category: 'Indústria Têxtil',
-    summary: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]',
-    briefing: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]'
+    "id": "theme_06",
+    "number": 6,
+    "title": "Sublimação Esportiva com Cores Neon Fluorescentes",
+    "category": "Indústria Têxtil",
+    "summary": "Sublimação Esportiva com Cores Neon Fluorescentes: O impacto visual de uniformes e peças esportivas que vibram em alta intensidade e se destacam sob luz negra em festivais e arenas [Indústria Têxtil]",
+    "briefing": "Sublimação Esportiva com Cores Neon Fluorescentes: O impacto visual de uniformes e peças esportivas que vibram em alta intensidade e se destacam sob luz negra em festivais e arenas [Indústria Têxtil]"
   },
   {
-    id: 'theme_07',
-    number: 7,
-    title: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes',
-    category: 'Indústria Têxtil',
-    summary: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]',
-    briefing: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]'
+    "id": "theme_07",
+    "number": 7,
+    "title": "Cores que Nunca Desbotam & Fixação de Longa Duração",
+    "category": "Indústria Têxtil",
+    "summary": "Cores que Nunca Desbotam & Fixação de Longa Duração: Técnicas modernas que mantêm as estampas vivas e intensas mesmo após dezenas de lavagens, combatendo o descarte precoce [Indústria Têxtil]",
+    "briefing": "Cores que Nunca Desbotam & Fixação de Longa Duração: Técnicas modernas que mantêm as estampas vivas e intensas mesmo após dezenas de lavagens, combatendo o descarte precoce [Indústria Têxtil]"
   },
   {
-    id: 'theme_08',
-    number: 8,
-    title: 'Inteligência Artificial no Design Têxtil & Otimização Automática',
-    category: 'Indústria Têxtil',
-    summary: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]',
-    briefing: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]'
+    "id": "theme_08",
+    "number": 8,
+    "title": "Inteligência Artificial Criativa no Design Têxtil",
+    "category": "Indústria Têxtil",
+    "summary": "Inteligência Artificial Criativa no Design Têxtil: Como estilistas transformam ideias em estampas originais em segundos, acelerando a criatividade e a conexão com tendências globais [Indústria Têxtil]",
+    "briefing": "Inteligência Artificial Criativa no Design Têxtil: Como estilistas transformam ideias em estampas originais em segundos, acelerando a criatividade e a conexão com tendências globais [Indústria Têxtil]"
   },
   {
-    id: 'theme_09',
-    number: 9,
-    title: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]',
-    briefing: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]'
+    "id": "theme_09",
+    "number": 9,
+    "title": "Impressão UV-LED em Calçados, Couro e Acessórios",
+    "category": "Indústria Têxtil",
+    "summary": "Impressão UV-LED em Calçados, Couro e Acessórios: A versatilidade de estampar materiais rígidos e flexíveis com secagem instantânea, criando bolsas, tênis e jaquetas exclusivas [Indústria Têxtil]",
+    "briefing": "Impressão UV-LED em Calçados, Couro e Acessórios: A versatilidade de estampar materiais rígidos e flexíveis com secagem instantânea, criando bolsas, tênis e jaquetas exclusivas [Indústria Têxtil]"
   },
   {
-    id: 'theme_10',
-    number: 10,
-    title: 'Tintas Reativas Digitais & Fixação Contínua em Algodão',
-    category: 'Indústria Têxtil',
-    summary: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]',
-    briefing: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]'
+    "id": "theme_10",
+    "number": 10,
+    "title": "Algodão Nobre com Toque Macio & Tintas Ecológicas",
+    "category": "Indústria Têxtil",
+    "summary": "Algodão Nobre com Toque Macio & Tintas Ecológicas: A busca pelo equilíbrio perfeito entre conforto absoluto na pele, sustentabilidade e cores profundas em peças casuais [Indústria Têxtil]",
+    "briefing": "Algodão Nobre com Toque Macio & Tintas Ecológicas: A busca pelo equilíbrio perfeito entre conforto absoluto na pele, sustentabilidade e cores profundas em peças casuais [Indústria Têxtil]"
   },
   {
-    id: 'theme_11',
-    number: 11,
-    title: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio',
-    category: 'Indústria Têxtil',
-    summary: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]',
-    briefing: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]'
+    "id": "theme_11",
+    "number": 11,
+    "title": "Vestuário Esportivo de Alta Performance com Tecidos Respiráveis",
+    "category": "Indústria Têxtil",
+    "summary": "Vestuário Esportivo de Alta Performance com Tecidos Respiráveis: Roupas de treino estampadas sem obstruir a passagem de ar, garantindo liberdade total de movimento aos atletas [Indústria Têxtil]",
+    "briefing": "Vestuário Esportivo de Alta Performance com Tecidos Respiráveis: Roupas de treino estampadas sem obstruir a passagem de ar, garantindo liberdade total de movimento aos atletas [Indústria Têxtil]"
   },
   {
-    id: 'theme_12',
-    number: 12,
-    title: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos',
-    category: 'Indústria Têxtil',
-    summary: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]',
-    briefing: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]'
+    "id": "theme_12",
+    "number": 12,
+    "title": "Corantes Naturais & A Nova Elegância Orgânica",
+    "category": "Indústria Têxtil",
+    "summary": "Corantes Naturais & A Nova Elegância Orgânica: A conexão da moda com pigmentos extraídos de plantas e elementos botânicos, unindo ancestralidade e tecnologia moderna [Indústria Têxtil]",
+    "briefing": "Corantes Naturais & A Nova Elegância Orgânica: A conexão da moda com pigmentos extraídos de plantas e elementos botânicos, unindo ancestralidade e tecnologia moderna [Indústria Têxtil]"
   },
   {
-    id: 'theme_13',
-    number: 13,
-    title: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll',
-    category: 'Indústria Têxtil',
-    summary: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]',
-    briefing: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]'
+    "id": "theme_13",
+    "number": 13,
+    "title": "Microfábricas Urbanas & Produção Local no Coração da Cidade",
+    "category": "Indústria Têxtil",
+    "summary": "Microfábricas Urbanas & Produção Local no Coração da Cidade: Como pequenos ateliês integrados produzem sob demanda perto do consumidor final, reduzindo emissões de transporte [Indústria Têxtil]",
+    "briefing": "Microfábricas Urbanas & Produção Local no Coração da Cidade: Como pequenos ateliês integrados produzem sob demanda perto do consumidor final, reduzindo emissões de transporte [Indústria Têxtil]"
   },
   {
-    id: 'theme_14',
-    number: 14,
-    title: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]',
-    briefing: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]'
+    "id": "theme_14",
+    "number": 14,
+    "title": "Estamparia Sensorial & Efeitos Hápticos no Vestuário",
+    "category": "Indústria Têxtil",
+    "summary": "Estamparia Sensorial & Efeitos Hápticos no Vestuário: Peças que provocam sensações táteis surpreendentes, criando experiências de moda que vão muito além da visão [Indústria Têxtil]",
+    "briefing": "Estamparia Sensorial & Efeitos Hápticos no Vestuário: Peças que provocam sensações táteis surpreendentes, criando experiências de moda que vão muito além da visão [Indústria Têxtil]"
   },
   {
-    id: 'theme_15',
-    number: 15,
-    title: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos',
-    category: 'Indústria Têxtil',
-    summary: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]',
-    briefing: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]'
+    "id": "theme_15",
+    "number": 15,
+    "title": "Cores Puras por Refração de Luz & O Fim das Químicas Pesadas",
+    "category": "Indústria Têxtil",
+    "summary": "Cores Puras por Refração de Luz & O Fim das Químicas Pesadas: A inspiração nas asas das borboletas para criar tecidos coloridos por estruturas ópticas, sem químicos poluentes [Indústria Têxtil]",
+    "briefing": "Cores Puras por Refração de Luz & O Fim das Químicas Pesadas: A inspiração nas asas das borboletas para criar tecidos coloridos por estruturas ópticas, sem químicos poluentes [Indústria Têxtil]"
   },
   {
-    id: 'theme_16',
-    number: 16,
-    title: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa',
-    category: 'Indústria Têxtil',
-    summary: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]',
-    briefing: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]'
+    "id": "theme_16",
+    "number": 16,
+    "title": "Provador Virtual 3D & Simulação de Estampas em Tempo Real",
+    "category": "Indústria Têxtil",
+    "summary": "Provador Virtual 3D & Simulação de Estampas em Tempo Real: A experiência de visualizar como o tecido veste o corpo antes de estampar, eliminando retrabalhos e desperdícios [Indústria Têxtil]",
+    "briefing": "Provador Virtual 3D & Simulação de Estampas em Tempo Real: A experiência de visualizar como o tecido veste o corpo antes de estampar, eliminando retrabalhos e desperdícios [Indústria Têxtil]"
   },
   {
-    id: 'theme_17',
-    number: 17,
-    title: 'Rastreabilidade Têxtil & Passaporte Digital Impresso',
-    category: 'Indústria Têxtil',
-    summary: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]',
-    briefing: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]'
+    "id": "theme_17",
+    "number": 17,
+    "title": "Rastreabilidade e Passaporte Digital da Moda Consciente",
+    "category": "Indústria Têxtil",
+    "summary": "Rastreabilidade e Passaporte Digital da Moda Consciente: Rótulos e códigos sutis impressos que contam a história completa da peça, garantindo autenticidade e respeito ambiental [Indústria Têxtil]",
+    "briefing": "Rastreabilidade e Passaporte Digital da Moda Consciente: Rótulos e códigos sutis impressos que contam a história completa da peça, garantindo autenticidade e respeito ambiental [Indústria Têxtil]"
   },
   {
-    id: 'theme_18',
-    number: 18,
-    title: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica',
-    category: 'Indústria Têxtil',
-    summary: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]',
-    briefing: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]'
+    "id": "theme_18",
+    "number": 18,
+    "title": "Reciclagem Circular de Roupas & Nova Vida para Fibras",
+    "category": "Indústria Têxtil",
+    "summary": "Reciclagem Circular de Roupas & Nova Vida para Fibras: Peças antigas reprocessadas e reestampadas digitalmente, transformando descarte em novas coleções elegantes [Indústria Têxtil]",
+    "briefing": "Reciclagem Circular de Roupas & Nova Vida para Fibras: Peças antigas reprocessadas e reestampadas digitalmente, transformando descarte em novas coleções elegantes [Indústria Têxtil]"
   },
   {
-    id: 'theme_19',
-    number: 19,
-    title: 'Tintas Termocrômicas Digitais & Estamparia Responsiva',
-    category: 'Indústria Têxtil',
-    summary: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]',
-    briefing: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]'
+    "id": "theme_19",
+    "number": 19,
+    "title": "Roupas que Mudam de Cor com a Luz e a Temperatura",
+    "category": "Indústria Têxtil",
+    "summary": "Roupas que Mudam de Cor com a Luz e a Temperatura: Estampas dinâmicas que reagem ao sol e ao calor do corpo, criando looks interativos e divertidos para o público jovem [Indústria Têxtil]",
+    "briefing": "Roupas que Mudam de Cor com a Luz e a Temperatura: Estampas dinâmicas que reagem ao sol e ao calor do corpo, criando looks interativos e divertidos para o público jovem [Indústria Têxtil]"
   },
   {
-    id: 'theme_20',
-    number: 20,
-    title: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos',
-    category: 'Indústria Têxtil',
-    summary: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]',
-    briefing: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]'
+    "id": "theme_20",
+    "number": 20,
+    "title": "Vestuário Higiênico com Proteção Antibacteriana Duradoura",
+    "category": "Indústria Têxtil",
+    "summary": "Vestuário Higiênico com Proteção Antibacteriana Duradoura: Tratamentos aplicados na estampa que evitam odores e mantêm a sensação de frescor o dia todo em rotinas intensas [Indústria Têxtil]",
+    "briefing": "Vestuário Higiênico com Proteção Antibacteriana Duradoura: Tratamentos aplicados na estampa que evitam odores e mantêm a sensação de frescor o dia todo em rotinas intensas [Indústria Têxtil]"
   },
   {
-    id: 'theme_21',
-    number: 21,
-    title: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil)',
-    category: 'Indústria Têxtil',
-    summary: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]',
-    briefing: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]'
+    "id": "theme_21",
+    "number": 21,
+    "title": "Corte a Laser e Estamparia Digital em Fluxo Único",
+    "category": "Indústria Têxtil",
+    "summary": "Corte a Laser e Estamparia Digital em Fluxo Único: Como a integração direta de impressão e recorte computadorizado agiliza a confecção com precisão milimétrica [Indústria Têxtil]",
+    "briefing": "Corte a Laser e Estamparia Digital em Fluxo Único: Como a integração direta de impressão e recorte computadorizado agiliza a confecção com precisão milimétrica [Indústria Têxtil]"
   },
   {
-    id: 'theme_22',
-    number: 22,
-    title: 'Impressão Digital Single-Pass & Substituição da Rotativa',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]',
-    briefing: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]'
+    "id": "theme_22",
+    "number": 22,
+    "title": "Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica",
+    "category": "Indústria Têxtil",
+    "summary": "Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica: A tecnologia de passagem única que entrega milhares de metros por hora sem perda de definição [Indústria Têxtil]",
+    "briefing": "Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica: A tecnologia de passagem única que entrega milhares de metros por hora sem perda de definição [Indústria Têxtil]"
   },
   {
-    id: 'theme_23',
-    number: 23,
-    title: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica',
-    category: 'Indústria Têxtil',
-    summary: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]',
-    briefing: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]'
+    "id": "theme_23",
+    "number": 23,
+    "title": "Tecidos que Repelem Líquidos e Facilitam a Rotina",
+    "category": "Indústria Têxtil",
+    "summary": "Tecidos que Repelem Líquidos e Facilitam a Rotina: Roupas que não mancham com café, suco ou chuva leve, mantendo a aparência impecável o dia todo com menos lavagens [Indústria Têxtil]",
+    "briefing": "Tecidos que Repelem Líquidos e Facilitam a Rotina: Roupas que não mancham com café, suco ou chuva leve, mantendo a aparência impecável o dia todo com menos lavagens [Indústria Têxtil]"
   },
   {
-    id: 'theme_24',
-    number: 24,
-    title: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem',
-    category: 'Indústria Têxtil',
-    summary: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]',
-    briefing: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]'
+    "id": "theme_24",
+    "number": 24,
+    "title": "Marcas Independentes Conectadas Globalmente em Nuvem",
+    "category": "Indústria Têxtil",
+    "summary": "Marcas Independentes Conectadas Globalmente em Nuvem: Como criadores locais vendem moda personalizada para o mundo inteiro sem precisar de grandes investimentos [Indústria Têxtil]",
+    "briefing": "Marcas Independentes Conectadas Globalmente em Nuvem: Como criadores locais vendem moda personalizada para o mundo inteiro sem precisar de grandes investimentos [Indústria Têxtil]"
   },
   {
-    id: 'theme_25',
-    number: 25,
-    title: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas',
-    category: 'Indústria Têxtil',
-    summary: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]',
-    briefing: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]'
+    "id": "theme_25",
+    "number": 25,
+    "title": "Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo",
+    "category": "Indústria Têxtil",
+    "summary": "Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo: A fusão de engenharia têxtil e conforto elástico que acompanha a silhueta em qualquer atividade com suavidade [Indústria Têxtil]",
+    "briefing": "Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo: A fusão de engenharia têxtil e conforto elástico que acompanha a silhueta em qualquer atividade com suavidade [Indústria Têxtil]"
   },
   {
-    id: 'theme_26',
-    number: 26,
-    title: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas',
-    category: 'Indústria Têxtil',
-    summary: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]',
-    briefing: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]'
+    "id": "theme_26",
+    "number": 26,
+    "title": "Estamparia Nobre em Sedas e Tecidos Leves de Luxo",
+    "category": "Indústria Têxtil",
+    "summary": "Estamparia Nobre em Sedas e Tecidos Leves de Luxo: A precisão das gotas microscópicas preservando o caimento esvoaçante e o brilho acetinado de vestidos e lenços refinados [Indústria Têxtil]",
+    "briefing": "Estamparia Nobre em Sedas e Tecidos Leves de Luxo: A precisão das gotas microscópicas preservando o caimento esvoaçante e o brilho acetinado de vestidos e lenços refinados [Indústria Têxtil]"
   },
   {
-    id: 'theme_27',
-    number: 27,
-    title: 'Tintas Condutivas Transparentes para Vestuário Eletrônico',
-    category: 'Indústria Têxtil',
-    summary: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]',
-    briefing: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]'
+    "id": "theme_27",
+    "number": 27,
+    "title": "Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana",
+    "category": "Indústria Têxtil",
+    "summary": "Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana: Detalhes luminosos que protegem ciclistas e pedestres à noite, combinando segurança e moda contemporânea [Indústria Têxtil]",
+    "briefing": "Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana: Detalhes luminosos que protegem ciclistas e pedestres à noite, combinando segurança e moda contemporânea [Indústria Têxtil]"
   },
   {
-    id: 'theme_28',
-    number: 28,
-    title: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance',
-    category: 'Indústria Têxtil',
-    summary: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]',
-    briefing: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]'
+    "id": "theme_28",
+    "number": 28,
+    "title": "Tênis e Calçados Customizados com Estamparia Exclusiva",
+    "category": "Indústria Têxtil",
+    "summary": "Tênis e Calçados Customizados com Estamparia Exclusiva: A cultura dos calçados personalizados ganhando velocidade com tintas de alta resistência a atritos e flexões [Indústria Têxtil]",
+    "briefing": "Tênis e Calçados Customizados com Estamparia Exclusiva: A cultura dos calçados personalizados ganhando velocidade com tintas de alta resistência a atritos e flexões [Indústria Têxtil]"
   },
   {
-    id: 'theme_29',
-    number: 29,
-    title: 'Impressão Sublimática de Grande Formato para Decoração e Moda',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]',
-    briefing: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]'
+    "id": "theme_29",
+    "number": 29,
+    "title": "Estamparia Gigante para Cenografia, Decoração e Interiores",
+    "category": "Indústria Têxtil",
+    "summary": "Estamparia Gigante para Cenografia, Decoração e Interiores: Painéis de tecido, cortinas e estofados que transformam casas, eventos e palcos com cores impactantes [Indústria Têxtil]",
+    "briefing": "Estamparia Gigante para Cenografia, Decoração e Interiores: Painéis de tecido, cortinas e estofados que transformam casas, eventos e palcos com cores impactantes [Indústria Têxtil]"
   },
   {
-    id: 'theme_30',
-    number: 30,
-    title: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas',
-    category: 'Indústria Têxtil',
-    summary: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]',
-    briefing: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]'
+    "id": "theme_30",
+    "number": 30,
+    "title": "Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros",
+    "category": "Indústria Têxtil",
+    "summary": "Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros: O domínio do contraste perfeito em camisetas pretas sem deixar a estampa com aspecto pesado ou quebradiço [Indústria Têxtil]",
+    "briefing": "Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros: O domínio do contraste perfeito em camisetas pretas sem deixar a estampa com aspecto pesado ou quebradiço [Indústria Têxtil]"
   },
   {
-    id: 'theme_31',
-    number: 31,
-    title: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia',
-    category: 'Indústria Têxtil',
-    summary: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]',
-    briefing: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]'
+    "id": "theme_31",
+    "number": 31,
+    "title": "Roupas com Recarga Solar e Estilo para o Dia a Dia",
+    "category": "Indústria Têxtil",
+    "summary": "Roupas com Recarga Solar e Estilo para o Dia a Dia: Bolsas e casacos que absorvem luz ambiente de forma sutil, oferecendo energia de emergência para celulares em viagens [Indústria Têxtil]",
+    "briefing": "Roupas com Recarga Solar e Estilo para o Dia a Dia: Bolsas e casacos que absorvem luz ambiente de forma sutil, oferecendo energia de emergência para celulares em viagens [Indústria Têxtil]"
   },
   {
-    id: 'theme_32',
-    number: 32,
-    title: 'Personalização em Massa Algorítmica na Estamparia de Vestuário',
-    category: 'Indústria Têxtil',
-    summary: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]',
-    briefing: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]'
+    "id": "theme_32",
+    "number": 32,
+    "title": "Personalização com Nomes e Padrões Exclusivos em Massa",
+    "category": "Indústria Têxtil",
+    "summary": "Personalização com Nomes e Padrões Exclusivos em Massa: A capacidade de produzir centenas de peças onde cada unidade tem um nome ou detalhe diferente sem encarecer o processo [Indústria Têxtil]",
+    "briefing": "Personalização com Nomes e Padrões Exclusivos em Massa: A capacidade de produzir centenas de peças onde cada unidade tem um nome ou detalhe diferente sem encarecer o processo [Indústria Têxtil]"
   },
   {
-    id: 'theme_33',
-    number: 33,
-    title: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada',
-    category: 'Indústria Têxtil',
-    summary: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]',
-    briefing: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]'
+    "id": "theme_33",
+    "number": 33,
+    "title": "Uniformes Profissionais com Conforto, Resistência e Estilo",
+    "category": "Indústria Têxtil",
+    "summary": "Uniformes Profissionais com Conforto, Resistência e Estilo: Transformando roupas de trabalho em peças modernas que transmitem orgulho aos colaboradores e duram muito mais [Indústria Têxtil]",
+    "briefing": "Uniformes Profissionais com Conforto, Resistência e Estilo: Transformando roupas de trabalho em peças modernas que transmitem orgulho aos colaboradores e duram muito mais [Indústria Têxtil]"
   },
   {
-    id: 'theme_34',
-    number: 34,
-    title: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta',
-    category: 'Indústria Têxtil',
-    summary: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]',
-    briefing: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]'
+    "id": "theme_34",
+    "number": 34,
+    "title": "Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água",
+    "category": "Indústria Têxtil",
+    "summary": "Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água: Cores alegres e ilustrações divertidas impressas com total tranquilidade para a pele sensível das crianças [Indústria Têxtil]",
+    "briefing": "Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água: Cores alegres e ilustrações divertidas impressas com total tranquilidade para a pele sensível das crianças [Indústria Têxtil]"
   },
   {
-    id: 'theme_35',
-    number: 35,
-    title: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica',
-    category: 'Indústria Têxtil',
-    summary: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]',
-    briefing: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]'
+    "id": "theme_35",
+    "number": 35,
+    "title": "Tecidos Confortáveis que Monitoram a Postura e o Movimento",
+    "category": "Indústria Têxtil",
+    "summary": "Tecidos Confortáveis que Monitoram a Postura e o Movimento: Fibras elásticas inteligentes que auxiliam na saúde do corpo de forma discreta e agradável no cotidiano [Indústria Têxtil]",
+    "briefing": "Tecidos Confortáveis que Monitoram a Postura e o Movimento: Fibras elásticas inteligentes que auxiliam na saúde do corpo de forma discreta e agradável no cotidiano [Indústria Têxtil]"
   },
   {
-    id: 'theme_36',
-    number: 36,
-    title: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital',
-    category: 'Indústria Têxtil',
-    summary: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]',
-    briefing: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]'
+    "id": "theme_36",
+    "number": 36,
+    "title": "Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos",
+    "category": "Indústria Têxtil",
+    "summary": "Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos: A técnica limpa de preparar a fibra têxtil para receber a tinta digital com nitidez fotográfica e toque aveludado [Indústria Têxtil]",
+    "briefing": "Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos: A técnica limpa de preparar a fibra têxtil para receber a tinta digital com nitidez fotográfica e toque aveludado [Indústria Têxtil]"
   },
   {
-    id: 'theme_37',
-    number: 37,
-    title: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água',
-    category: 'Indústria Têxtil',
-    summary: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]',
-    briefing: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]'
+    "id": "theme_37",
+    "number": 37,
+    "title": "Estamparia que Brilha no Escuro para Festivais e Vida Noturna",
+    "category": "Indústria Têxtil",
+    "summary": "Estamparia que Brilha no Escuro para Festivais e Vida Noturna: Roupas criativas que se recarregam com a luz e iluminam baladas e eventos com efeitos visuais marcantes [Indústria Têxtil]",
+    "briefing": "Estamparia que Brilha no Escuro para Festivais e Vida Noturna: Roupas criativas que se recarregam com a luz e iluminam baladas e eventos com efeitos visuais marcantes [Indústria Têxtil]"
   },
   {
-    id: 'theme_38',
-    number: 38,
-    title: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume',
-    category: 'Indústria Têxtil',
-    summary: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]',
-    briefing: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]'
+    "id": "theme_38",
+    "number": 38,
+    "title": "Fidelidade de Cores da Tela do Computador para o Tecido Real",
+    "category": "Indústria Têxtil",
+    "summary": "Fidelidade de Cores da Tela do Computador para o Tecido Real: O fim das surpresas na produção, garantindo que o tom exato aprovado pelo cliente seja impresso na peça física [Indústria Têxtil]",
+    "briefing": "Fidelidade de Cores da Tela do Computador para o Tecido Real: O fim das surpresas na produção, garantindo que o tom exato aprovado pelo cliente seja impresso na peça física [Indústria Têxtil]"
   },
   {
-    id: 'theme_39',
-    number: 39,
-    title: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil)',
-    category: 'Indústria Têxtil',
-    summary: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]',
-    briefing: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]'
+    "id": "theme_39",
+    "number": 39,
+    "title": "União da Serigrafia Tradicional com o Detalhe Infinito do Digital",
+    "category": "Indústria Têxtil",
+    "summary": "União da Serigrafia Tradicional com o Detalhe Infinito do Digital: A força da estamparia clássica combinada à liberdade das cores fotográficas em coleções exclusivas [Indústria Têxtil]",
+    "briefing": "União da Serigrafia Tradicional com o Detalhe Infinito do Digital: A força da estamparia clássica combinada à liberdade das cores fotográficas em coleções exclusivas [Indústria Têxtil]"
   },
   {
-    id: 'theme_40',
-    number: 40,
-    title: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital',
-    category: 'Indústria Têxtil',
-    summary: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]',
-    briefing: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]'
+    "id": "theme_40",
+    "number": 40,
+    "title": "Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita",
+    "category": "Indústria Têxtil",
+    "summary": "Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita: O encontro das matérias-primas mais sustentáveis do planeta com a arte da estamparia digital contemporânea [Indústria Têxtil]",
+    "briefing": "Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita: O encontro das matérias-primas mais sustentáveis do planeta com a arte da estamparia digital contemporânea [Indústria Têxtil]"
   }
 ];
 
@@ -1698,14 +1734,24 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
   const numFormatted = String(nextNumber).padStart(2, '0');
   const themes = window.VORTEX_TECH_THEMES || [];
   
-  if (typeof window.VORTEX_LAST_THEME_INDEX === 'undefined') {
-    const storedTheme = localStorage.getItem('VORTEX_LAST_THEME_INDEX');
-    window.VORTEX_LAST_THEME_INDEX = storedTheme !== null ? parseInt(storedTheme, 10) : 0;
+  // Calibração Sequencial Solicitada pelo Diretor-Geral:
+  // A Minissérie 01 inicia obrigatoriamente no Tema 02 (índice 1).
+  // A cada nova minissérie gerada, o sistema sugere o próximo tema em ordem (02 -> 03 -> 04...).
+  let selectedIndex = 1;
+  const storedTheme = localStorage.getItem('VORTEX_LAST_THEME_INDEX');
+  const hasCampaigns = Array.isArray(AppState.campaigns) && AppState.campaigns.length > 0;
+
+  if (nextNumber === 1 || !hasCampaigns) {
+    selectedIndex = 1; // Sempre inicia no Tema 02
+  } else if (storedTheme !== null) {
+    const lastIdx = parseInt(storedTheme, 10);
+    selectedIndex = lastIdx + 1;
+  } else if (nextNumber && nextNumber > 1) {
+    selectedIndex = nextNumber; // Minissérie 2 sugere Tema 3 (índice 2), etc.
   }
   
-  let selectedIndex = window.VORTEX_LAST_THEME_INDEX + 1;
-  // Nunca sugere o Tema Livre (índice 0) automaticamente
-  if (selectedIndex >= themes.length || selectedIndex === 0) {
+  // Nunca sugere o Tema Livre (índice 0) automaticamente e faz loop seguro ao atingir o fim da lista
+  if (selectedIndex >= themes.length || selectedIndex <= 0) {
     selectedIndex = 1;
   }
 

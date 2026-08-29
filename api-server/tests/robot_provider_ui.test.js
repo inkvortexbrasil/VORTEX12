@@ -54,7 +54,7 @@ assert(dashboardSwitcher.includes("button.id = 'btnAutomateChatGPTFlow'"));
 assert(dashboardSwitcher.includes("spans[1].textContent = 'ROBÔ GPT'"));
 assert(!dashboardSwitcher.includes('compactGPTLayout'));
 
-assert(bridgeExtension.includes("Math.abs(candidate.index - central.index) === 1"));
+assert(bridgeExtension.includes("Math.abs(candidate.index - central.index) === 1") || bridgeExtension.includes("candidate.windowId === central.windowId"));
 assert(bridgeExtension.includes('AGUARDANDO A GUIA'));
 assert(bridgeExtension.includes('if (activate) await chrome.tabs.update'));
 assert(bridgeExtension.includes('autoDiscardable: false'));
@@ -65,7 +65,7 @@ assert(!bridgeExtension.includes('chrome.tabs.create'));
 assert(!bridgeExtension.includes('chrome.tabs.move'));
 assert(manifest.host_permissions.includes('https://chatgpt.com/*'));
 assert(manifest.host_permissions.includes('https://gemini.google.com/*'));
-assert.ok(manifest.version === '1.1.7' || manifest.version === '1.2.0');
+assert.ok(manifest.version === '1.1.7' || manifest.version === '1.2.0' || manifest.version === '1.3.0' || manifest.version === '1.3.1');
 assert(serverBridge.includes('A Ponte VORTEX 1.1.5 ou superior ainda nao foi ativada'));
 assert(bridgeExtension.includes('begin-native-download-session'));
 assert(bridgeExtension.includes('end-native-download-session'));

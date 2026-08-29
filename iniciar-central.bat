@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal
 title Central VORTEX 12.0
 color 0B
@@ -9,7 +10,7 @@ echo ===================================================
 cd /d F:\VORTEX12
 
 echo.
-echo [1/3] Verificando acesso HTTPS as APIs LLM (OpenAI e Mistral)...
+echo [1/3] Verificando acesso HTTPS as APIs (Mistral AI para Criacao e OpenAI para Whisper)...
 node api-server\llm_connectivity_check.js
 if errorlevel 1 (
   color 0C

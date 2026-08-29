@@ -11,11 +11,6 @@ const ROBOT_PLATFORMS = {
     url: GEMINI_URL,
     pattern: 'https://gemini.google.com/*',
     origin: 'https://gemini.google.com/'
-  },
-  qwen: {
-    url: 'https://chat.qwen.ai/',
-    pattern: 'https://chat.qwen.ai/*',
-    origin: 'https://chat.qwen.ai/'
   }
 };
 const CENTRAL_PATTERNS = [
@@ -129,9 +124,6 @@ function platformFromRequest(platform, url) {
   if (platform === 'gemini' || String(url || '').startsWith(ROBOT_PLATFORMS.gemini.origin)) {
     return ROBOT_PLATFORMS.gemini;
   }
-  if (platform === 'qwen' || String(url || '').startsWith(ROBOT_PLATFORMS.qwen.origin)) {
-    return ROBOT_PLATFORMS.qwen;
-  }
   return ROBOT_PLATFORMS.chatgpt;
 }
 
@@ -148,7 +140,7 @@ async function ensureRobotTab(platform = 'chatgpt', requestedUrl = '', activate 
   const tab = adjacentTabs[0];
 
   if (!tab) {
-    const label = config === ROBOT_PLATFORMS.gemini ? 'GEMINI' : (config === ROBOT_PLATFORMS.qwen ? 'QWEN' : 'GPT');
+    const label = config === ROBOT_PLATFORMS.gemini ? 'GEMINI' : 'GPT';
     throw new Error(`AGUARDANDO A GUIA ${label}: abra a sessao desejada imediatamente ao lado da Central e confirme novamente.`);
   }
   if (activate) await chrome.tabs.update(tab.id, { active: true });

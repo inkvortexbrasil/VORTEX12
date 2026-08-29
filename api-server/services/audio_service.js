@@ -36,9 +36,9 @@ async function transcribeAudioWithOpenAIWhisper(audioPath) {
   const fs = require('fs');
   const path = require('path');
   const openaiApiKey = env('OPENAI_API_KEY', '');
-  if (!openaiApiKey) throw new Error('OPENAI_API_KEY nÃ£o configurada no .env');
+  if (!openaiApiKey) throw new Error('OPENAI_API_KEY não configurada no .env');
 
-  console.log(`ðŸŽ™ï¸ Transcrevendo Ã¡udio via OpenAI Whisper-1 (somente M4A)...`);
+  console.log(`🎙️ Transcrevendo áudio via OpenAI Whisper-1 (somente M4A)...`);
   const fileBuffer = fs.readFileSync(audioPath);
   const fileBlob = new Blob([fileBuffer], { type: 'audio/m4a' });
   const form = new FormData();
@@ -388,7 +388,7 @@ function autocorrectPortugueseWords(alignedWords) {
 async function alignM4AText(audioPath, assOptions = {}) {
   const fs = require('fs');
   const path = require('path');
-  console.log(`ðŸŽ™ï¸ Alinhando Ã¡udio integral via OpenAI Whisper-1...`);
+  console.log(`🎙️ Alinhando áudio integral via OpenAI Whisper-1...`);
 
   let lyricsTxt = assOptions.lyricsTxt || null;
   if (!lyricsTxt && fs.existsSync(path.dirname(audioPath))) {
@@ -398,13 +398,13 @@ async function alignM4AText(audioPath, assOptions = {}) {
 
     if (fs.existsSync(exactTxtPath)) {
       lyricsTxt = fs.readFileSync(exactTxtPath, 'utf8');
-      console.log(`ðŸ“„ Letra mestre lida com nome idÃªntico ao M4A: ${baseName}.txt`);
+      console.log(`📄 Letra mestre lida com nome idêntico ao M4A: ${baseName}.txt`);
     } else {
       const files = fs.readdirSync(m4aDir);
       const txtFile = files.find(f => f.toLowerCase() === `${baseName.toLowerCase()}.txt`) || files.find(f => f.toLowerCase().endsWith('.txt'));
       if (txtFile) {
         lyricsTxt = fs.readFileSync(path.join(m4aDir, txtFile), 'utf8');
-        console.log(`ðŸ“„ Letra mestre lida do arquivo: ${txtFile}`);
+        console.log(`📄 Letra mestre lida do arquivo: ${txtFile}`);
       }
     }
   }

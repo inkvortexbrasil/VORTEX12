@@ -81,6 +81,6 @@ assert.ok(!fs.existsSync(path.join(root, 'flow')), 'A pasta raiz flow deve perma
 assert.ok(!appSource.includes("fetchPrefix('./flow/flow.txt')"), 'app.js não pode concatenar o prefixo legado.');
 assert.ok(!uiSource.includes("fetchPrefix('./flow/flow.txt')"), 'ui.js não pode exibir o prefixo legado.');
 assert.ok(appSource.includes('isSelfContainedFlowPrompt'), 'Prompts Flow legados devem ser bloqueados na cópia.');
-assert.ok(contractSource.includes('"imageReference": "[01]"'), 'O contrato oficial deve incorporar a referência visual.');
+assert.ok(!contractSource.includes('## Contrato: FlowMaster'), 'O contrato FlowMaster aposentado deve permanecer retirado dos contratos ativos.');
 
 console.log('flowmaster_self_contained_prompt.test.js: OK');

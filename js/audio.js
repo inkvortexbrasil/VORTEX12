@@ -41,7 +41,20 @@ window.openAudioRoom = function() {
     AppState.selectedCampaignId = campaign.id || campaign.number;
   }
   if (!campaign) {
+    window.updateTopbarTitle('🎧 Multiverso Flow Music', 'Aguardando Minissérie #01');
     window.switchMultiverseRoom('audioRoomView', 'btnNavAudio');
+    const contentDiv = document.getElementById('audioRoomContent');
+    if (contentDiv) {
+      contentDiv.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center;gap:16px;">
+          <div style="font-size:3.5rem;">🎵</div>
+          <h2 style="color:#fff;font-family:var(--uiRounded);margin:0;font-size:1.35rem;font-weight:900;letter-spacing:0.5px;">MULTIVERSO FLOW MUSIC</h2>
+          <p style="color:var(--ivTextSecondary);max-width:520px;margin:0;font-size:0.95rem;line-height:1.6;">
+            O estúdio está pronto no <strong>Estado Zero</strong>. Clique no botão <strong style="color:var(--cyan);">✨ ASSUNTO</strong> no topo para gerar a <strong>Minissérie #01</strong>. Assim que ela for gerada, o console exibirá todos os 20 estilos musicais, as 200 variações e os seletores de voz para produção da trilha!
+          </p>
+        </div>
+      `;
+    }
     return;
   }
   
@@ -264,7 +277,6 @@ function renderAudioRoomLayout(videoUrl, videoTitle, videosList = [], dedicatedL
           <div id="audioVocalList" style="display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: rgba(8,10,20,0.97); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; z-index: 9999; max-height: 200px; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.95);">
             <div style="padding: 8px 12px; color: #fff; font-size: 0.8rem; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''" onclick="window.selectAudioVocal('Voz Masculina (PT-BR)')">Voz Masculina (PT-BR)</div>
             <div style="padding: 8px 12px; color: #fff; font-size: 0.8rem; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''" onclick="window.selectAudioVocal('Voz Feminina (PT-BR)')">Voz Feminina (PT-BR)</div>
-            <div style="padding: 8px 12px; color: #fff; font-size: 0.8rem; cursor: pointer;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''" onclick="window.selectAudioVocal('Coral Épico (PT-BR)')">Coral Épico (PT-BR)</div>
           </div>
         </div>
       </div>
@@ -999,8 +1011,10 @@ async function loadAudioLibrary() {
     const catList = document.getElementById('audioCatList');
     if (catList && globalAudioLibrary) {
       catList.innerHTML = '';
-      for (const cat in globalAudioLibrary) {
-        if (cat === 'error') continue;
+      const sortedCats = Object.keys(globalAudioLibrary)
+        .filter(c => c !== 'error')
+        .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+      for (const cat of sortedCats) {
         const escapedCat = cat.replace(/'/g, "\\'");
         catList.innerHTML += `<div style="padding: 9px 12px; color: #fff; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(0,210,106,0.15)'" onmouseout="this.style.background=''" onclick="window.selectAudioCat('${escapedCat}')">${cat}</div>`;
       }
@@ -1074,7 +1088,8 @@ window.selectAudioCat = function(cat) {
     varList.innerHTML = '';
     const lib = globalAudioLibrary || {};
     if (lib[cat]) {
-      for (const variation of lib[cat]) {
+      const sortedVars = [...lib[cat]].sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+      for (const variation of sortedVars) {
         const escapedVar = variation.replace(/'/g, "\\'");
         varList.innerHTML += `<div style="padding: 9px 12px; color: #fff; font-size: 0.85rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(0,174,239,0.15)'" onmouseout="this.style.background=''" onclick="window.selectAudioVar('${escapedVar}')">${variation}</div>`;
       }
@@ -1987,42 +2002,29 @@ window.initAmbientStudioAudio = function() {
     window.updateAmbientAudioUI();
   });
 
-  // Fechar dropdown ao clicar fora
-  document.addEventListener('click', (e) => {
-    const wrapper = document.getElementById('ambientAudioWrapper');
-    const dropdown = document.getElementById('dropdownAmbientAudio');
-    if (wrapper && dropdown && !wrapper.contains(e.target) && dropdown.style.display !== 'none') {
-      dropdown.style.display = 'none';
-    }
-  });
+  // Painel lateral SOM não fecha ao clicar fora (só pelo botão SOM)
+  // Listener mantido vazio para compatibilidade futura
 
-  // Pré-carrega
-  if (window.ambientCurrentFolder) {
-    window.openAmbientAudioFolder(window.ambientCurrentFolder, false);
-  } else {
-    window.loadAmbientAudioFolders();
-  }
+  // Sempre inicializa e abre na visão das pastas principais
+  window.loadAmbientAudioFolders();
 };
 
 window.toggleAmbientAudioDropdown = function(forceState) {
-  const dropdown = document.getElementById('dropdownAmbientAudio');
-  if (!dropdown) return;
-  
-  const isCurrentlyOpen = dropdown.style.display === 'block';
+  const panel = document.getElementById('ambientSidePanel');
+  if (!panel) return;
+
+  const isCurrentlyOpen = panel.classList.contains('visible');
   const shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
 
   if (shouldOpen) {
+    // Fecha outros dropdowns abertos
     const stageDropdown = document.getElementById('dropdownStage');
     if (stageDropdown) stageDropdown.style.display = 'none';
-    
-    dropdown.style.display = 'block';
-    if (window.ambientCurrentFolder) {
-      window.openAmbientAudioFolder(window.ambientCurrentFolder, false);
-    } else {
-      window.loadAmbientAudioFolders();
-    }
+
+    panel.classList.add('visible');
+    window.loadAmbientAudioFolders();
   } else {
-    dropdown.style.display = 'none';
+    panel.classList.remove('visible');
   }
 };
 
@@ -2060,7 +2062,12 @@ window.loadAmbientAudioFolders = async function() {
 
 window.renderAmbientFolderView = function() {
   const listEl = document.getElementById('ambientTrackList');
+  const btnBack = document.getElementById('btnAmbientBackFolder');
+  const searchBox = document.getElementById('ambientSearchContainer');
   if (!listEl) return;
+
+  if (btnBack) btnBack.style.display = 'none';
+  if (searchBox) searchBox.style.display = 'none';
 
   const folders = window.ambientFolders || [];
   const rootTracks = window.ambientRootTracks || [];
@@ -2076,30 +2083,34 @@ window.renderAmbientFolderView = function() {
 
   listEl.innerHTML = '';
 
-  // 1. Renderiza Pastas
+  // 1. Renderiza Pastas como Playlists de 1-Clique Aleatório
   folders.forEach(folder => {
     const item = document.createElement('div');
     item.className = 'ambient-folder-item';
-    item.title = `Clique para abrir a pasta ${folder.name} (${folder.trackCount} músicas)`;
+    item.dataset.folderName = folder.name;
+    const isPlayingThisFolder = window.ambientCurrentFolder === folder.name && window.isAmbientAudioPlaying;
+    if (isPlayingThisFolder) item.classList.add('is-playing-folder');
+
+    item.title = `Clique para tocar a pasta "${folder.name}" em ordem aleatória (${folder.trackCount} músicas)`;
 
     item.innerHTML = `
       <div style="display:flex; align-items:center; gap:9px; overflow:hidden; flex:1;">
-        <span style="font-size:1.15rem; flex-shrink:0;">📁</span>
+        <span style="font-size:1.15rem; flex-shrink:0;">${isPlayingThisFolder ? '🎧' : '📁'}</span>
         <div style="overflow:hidden; display:flex; flex-direction:column;">
           <span style="font-size:0.82rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${folder.name}">${folder.name}</span>
-          <span style="font-size:0.68rem; color:rgba(0,198,255,0.8); font-family:monospace;">${folder.trackCount} ${folder.trackCount === 1 ? 'música' : 'músicas'}</span>
+          <span style="font-size:0.68rem; color:rgba(0,198,255,0.8); font-family:monospace;">${folder.trackCount} ${folder.trackCount === 1 ? 'música' : 'músicas'} • Aleatório</span>
         </div>
       </div>
       <div style="flex-shrink:0; margin-left:8px;">
-        <span style="font-size:0.7rem; font-weight:bold; padding:3px 8px; border-radius:5px; background:rgba(0,198,255,0.18); color:#00c6ff; border:1px solid rgba(0,198,255,0.4);">
-          ABRIR ❯
+        <span class="folder-action-badge" style="font-size:0.7rem; font-weight:bold; padding:3px 8px; border-radius:5px; transition: all 0.2s ease; ${isPlayingThisFolder ? 'background:rgba(0,198,255,0.25); color:#00c6ff; border:1px solid #00c6ff;' : 'background:rgba(0,198,255,0.18); color:#00c6ff; border:1px solid rgba(0,198,255,0.4);'}">
+          ${isPlayingThisFolder ? '🎵 TOCANDO' : '▶ TOCAR'}
         </span>
       </div>
     `;
 
     item.onclick = (e) => {
       e.stopPropagation();
-      window.openAmbientAudioFolder(folder.name, true);
+      window.playAmbientFolderRandomly(folder.name);
     };
 
     listEl.appendChild(item);
@@ -2115,6 +2126,53 @@ window.renderAmbientFolderView = function() {
     rootTracks.forEach(track => {
       listEl.appendChild(window.createAmbientTrackItemElement(track));
     });
+  }
+};
+
+window.playAmbientFolderRandomly = async function(folderName) {
+  const folder = (window.ambientFolders || []).find(f => f.name === folderName);
+  if (folder && folder.trackCount === 0) {
+    if (typeof showToast === 'function') {
+      showToast(`A pasta "${folderName}" não possui músicas.`, 'warning');
+    } else {
+      alert(`A pasta "${folderName}" não possui arquivos de música.`);
+    }
+    return;
+  }
+
+  window.ambientCurrentFolder = folderName;
+  localStorage.setItem('vortex_ambient_folder', folderName);
+
+  try {
+    let tracks = (window.ambientAudioTracks && window.ambientAudioTracks.length > 0 && window.ambientAudioTracks[0]?.folder === folderName)
+      ? window.ambientAudioTracks
+      : null;
+
+    if (!tracks) {
+      const res = await fetch('/api/ambient-audio/list?folder=' + encodeURIComponent(folderName));
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.tracks) && data.tracks.length > 0) {
+        window.ambientAudioTracks = data.tracks;
+        tracks = data.tracks;
+      }
+    }
+
+    if (!tracks || tracks.length === 0) {
+      alert(`Nenhuma música encontrada na pasta ${folderName}.`);
+      return;
+    }
+
+    // Sorteia uma música aleatória da pasta
+    const currentUrl = window.currentAmbientTrack ? window.currentAmbientTrack.url : '';
+    const pool = (tracks.length > 1) ? tracks.filter(t => t.url !== currentUrl) : tracks;
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const chosenTrack = pool[randomIndex];
+
+    window.selectAmbientAudioTrack(chosenTrack.url, chosenTrack.name, chosenTrack.fileName, folderName);
+    window.updateAmbientAudioUI();
+  } catch (err) {
+    console.error('[AMBIENT AUDIO] Erro ao tocar pasta aleatória:', err);
+    alert('Erro ao carregar músicas da pasta: ' + err.message);
   }
 };
 
@@ -2250,9 +2308,15 @@ window.selectAmbientAudioTrack = function(url, trackName, fileName, folderName) 
 
 window.playNextAmbientTrack = function() {
   if (!window.ambientAudioTracks || window.ambientAudioTracks.length === 0) return;
-  const currentIndex = window.ambientAudioTracks.findIndex(t => window.currentAmbientTrack && window.currentAmbientTrack.url === t.url);
-  const nextIndex = (currentIndex + 1) % window.ambientAudioTracks.length;
-  const nextTrack = window.ambientAudioTracks[nextIndex];
+  if (window.ambientAudioTracks.length === 1) {
+    const track = window.ambientAudioTracks[0];
+    window.selectAmbientAudioTrack(track.url, track.name, track.fileName, track.folder);
+    return;
+  }
+  // Sorteia próxima música de forma 100% aleatória da pasta
+  const currentUrl = window.currentAmbientTrack ? window.currentAmbientTrack.url : '';
+  const pool = window.ambientAudioTracks.filter(t => t.url !== currentUrl);
+  const nextTrack = pool[Math.floor(Math.random() * pool.length)] || window.ambientAudioTracks[0];
   if (nextTrack) {
     window.selectAmbientAudioTrack(nextTrack.url, nextTrack.name, nextTrack.fileName, nextTrack.folder);
   }
@@ -2343,9 +2407,32 @@ window.updateAmbientAudioUI = function() {
     }
   }
 
-  // Atualiza destaque visual na lista caso esteja visível
+  // Atualiza destaque visual das pastas e faixas na lista
   const listEl = document.getElementById('ambientTrackList');
-  if (listEl && window.ambientCurrentFolder) {
+  if (listEl) {
+    listEl.querySelectorAll('.ambient-folder-item').forEach(el => {
+      const folderName = el.dataset.folderName;
+      const isCurrent = window.ambientCurrentFolder === folderName && window.isAmbientAudioPlaying;
+      const badge = el.querySelector('.folder-action-badge');
+      if (isCurrent) {
+        el.classList.add('is-playing-folder');
+        if (badge) {
+          badge.textContent = '🎵 TOCANDO';
+          badge.style.background = 'rgba(0,198,255,0.25)';
+          badge.style.color = '#00c6ff';
+          badge.style.borderColor = '#00c6ff';
+        }
+      } else {
+        el.classList.remove('is-playing-folder');
+        if (badge) {
+          badge.textContent = '▶ TOCAR';
+          badge.style.background = 'rgba(0,198,255,0.18)';
+          badge.style.color = '#00c6ff';
+          badge.style.borderColor = 'rgba(0,198,255,0.4)';
+        }
+      }
+    });
+
     listEl.querySelectorAll('.ambient-track-item').forEach(el => {
       const isSelected = window.currentAmbientTrack && el.title.includes(window.currentAmbientTrack.name);
       if (isSelected) el.classList.add('is-selected');

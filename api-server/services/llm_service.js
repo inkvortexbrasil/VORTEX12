@@ -274,7 +274,7 @@ async function generateStage({ taskName, profileName, prompt, responseSchema, st
          console.warn(`[QC Algorítmico] Falha na validação do ${profileName} (Tentativa ${r+1}): ${validation.error}`);
          lastErrorMsg = validation.error;
          body.messages.push({ role: 'assistant', content: textOut });
-         body.messages.push({ role: 'user', content: `CRITICAL ERROR: ${validation.error} Fix this strictly in the next output.` });
+         body.messages.push({ role: 'user', content: `Por favor, forneça a resposta estritamente no formato JSON solicitado: ${validation.error}` });
       }
     } catch(e) {
       if (!responseSchema) return { rawText: textOut };

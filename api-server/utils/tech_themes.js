@@ -1,6 +1,7 @@
 /**
- * tech_themes.js — Banco de 21 Eixos Tecnológicos de Vanguarda
- * Indústria Gráfica, Têxtil, Eletrônica Impressa e Embalagens Inteligentes (InkVortex Brasil)
+ * tech_themes.js — Banco de 40 Eixos de Vanguarda do Mercado Mundial
+ * Indústria Têxtil, Estamparia Digital (DTF, DTG, Sublimação), Moda e Inovação (InkVortex Brasil)
+ * Reformulação Humana, Dinâmica e de Alta Conexão com o Público.
  */
 
 const TECH_THEMES = Object.freeze([
@@ -15,317 +16,315 @@ const TECH_THEMES = Object.freeze([
   {
     id: 'theme_02',
     number: 2,
-    title: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras',
+    title: 'Direct-to-Film DTF & Estamparia Sem Limite de Tecidos',
     category: 'Indústria Têxtil',
-    summary: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]',
-    briefing: 'Impressão Direct-to-Film (DTF) Híbrida & Estamparia Sem Limite de Fibras [Indústria Têxtil]'
+    summary: 'Direct-to-Film DTF & Estamparia Sem Limite de Tecidos: Como marcas e criadores estampam algodão, poliéster, couro e tecidos mistos com cores vibrantes, toque suave e máxima durabilidade [Indústria Têxtil]',
+    briefing: 'Direct-to-Film DTF & Estamparia Sem Limite de Tecidos: Como marcas e criadores estampam algodão, poliéster, couro e tecidos mistos com cores vibrantes, toque suave e máxima durabilidade [Indústria Têxtil]'
   },
   {
     id: 'theme_03',
     number: 3,
-    title: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água',
+    title: 'Estamparia 100% Sustentável Sem Água & Moda Limpa',
     category: 'Indústria Têxtil',
-    summary: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]',
-    briefing: 'Estamparia Digital Sustentável & Tecnologias Pigmentares sem Água [Indústria Têxtil]'
+    summary: 'Estamparia 100% Sustentável Sem Água & Moda Limpa: A tecnologia ecológica que elimina o desperdício de água e efluentes, preservando rios e criando coleções conscientes [Indústria Têxtil]',
+    briefing: 'Estamparia 100% Sustentável Sem Água & Moda Limpa: A tecnologia ecológica que elimina o desperdício de água e efluentes, preservando rios e criando coleções conscientes [Indústria Têxtil]'
   },
   {
     id: 'theme_04',
     number: 4,
-    title: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas',
+    title: 'Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda',
     category: 'Indústria Têxtil',
-    summary: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]',
-    briefing: 'Estamparia Direct-to-Garment (DTG) de Alta Velocidade & Microfábricas [Indústria Têxtil]'
+    summary: 'Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda: A revolução de imprimir camisetas e peças prontas em minutos, acabando com estoques e acelerando lançamentos [Indústria Têxtil]',
+    briefing: 'Direct-to-Garment DTG de Alta Velocidade & Moda Sob Demanda: A revolução de imprimir camisetas e peças prontas em minutos, acabando com estoques e acelerando lançamentos [Indústria Têxtil]'
   },
   {
     id: 'theme_05',
     number: 5,
-    title: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido',
+    title: 'Relevos e Texturas 3D Integrados ao Vestuário',
     category: 'Indústria Têxtil',
-    summary: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]',
-    briefing: 'Impressão 3D Têxtil & Estruturas Poliméricas Integradas ao Tecido [Indústria Têxtil]'
+    summary: 'Relevos e Texturas 3D Integrados ao Vestuário: Como designers criam efeitos táteis e geometrias esculturais diretamente sobre as roupas, elevando o padrão para o luxo contemporâneo [Indústria Têxtil]',
+    briefing: 'Relevos e Texturas 3D Integrados ao Vestuário: Como designers criam efeitos táteis e geometrias esculturais diretamente sobre as roupas, elevando o padrão para o luxo contemporâneo [Indústria Têxtil]'
   },
   {
     id: 'theme_06',
     number: 6,
-    title: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes',
+    title: 'Sublimação Esportiva com Cores Neon Fluorescentes',
     category: 'Indústria Têxtil',
-    summary: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]',
-    briefing: 'Sublimação Digital de Alta Performance & Tintas Fluorescentes [Indústria Têxtil]'
+    summary: 'Sublimação Esportiva com Cores Neon Fluorescentes: O impacto visual de uniformes e peças esportivas que vibram em alta intensidade e se destacam sob luz negra em festivais e arenas [Indústria Têxtil]',
+    briefing: 'Sublimação Esportiva com Cores Neon Fluorescentes: O impacto visual de uniformes e peças esportivas que vibram em alta intensidade e se destacam sob luz negra em festivais e arenas [Indústria Têxtil]'
   },
   {
     id: 'theme_07',
     number: 7,
-    title: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes',
+    title: 'Cores que Nunca Desbotam & Fixação de Longa Duração',
     category: 'Indústria Têxtil',
-    summary: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]',
-    briefing: 'Nanorevestimentos Funcionais & Estamparia de Tecidos Inteligentes [Indústria Têxtil]'
+    summary: 'Cores que Nunca Desbotam & Fixação de Longa Duração: Técnicas modernas que mantêm as estampas vivas e intensas mesmo após dezenas de lavagens, combatendo o descarte precoce [Indústria Têxtil]',
+    briefing: 'Cores que Nunca Desbotam & Fixação de Longa Duração: Técnicas modernas que mantêm as estampas vivas e intensas mesmo após dezenas de lavagens, combatendo o descarte precoce [Indústria Têxtil]'
   },
   {
     id: 'theme_08',
     number: 8,
-    title: 'Inteligência Artificial no Design Têxtil & Otimização Automática',
+    title: 'Inteligência Artificial Criativa no Design Têxtil',
     category: 'Indústria Têxtil',
-    summary: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]',
-    briefing: 'Inteligência Artificial no Design Têxtil & Otimização Automática [Indústria Têxtil]'
+    summary: 'Inteligência Artificial Criativa no Design Têxtil: Como estilistas transformam ideias em estampas originais em segundos, acelerando a criatividade e a conexão com tendências globais [Indústria Têxtil]',
+    briefing: 'Inteligência Artificial Criativa no Design Têxtil: Como estilistas transformam ideias em estampas originais em segundos, acelerando a criatividade e a conexão com tendências globais [Indústria Têxtil]'
   },
   {
     id: 'theme_09',
     number: 9,
-    title: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas',
+    title: 'Impressão UV-LED em Calçados, Couro e Acessórios',
     category: 'Indústria Têxtil',
-    summary: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]',
-    briefing: 'Impressão Têxtil UV-LED & Estamparia de Superfícies Híbridas [Indústria Têxtil]'
+    summary: 'Impressão UV-LED em Calçados, Couro e Acessórios: A versatilidade de estampar materiais rígidos e flexíveis com secagem instantânea, criando bolsas, tênis e jaquetas exclusivas [Indústria Têxtil]',
+    briefing: 'Impressão UV-LED em Calçados, Couro e Acessórios: A versatilidade de estampar materiais rígidos e flexíveis com secagem instantânea, criando bolsas, tênis e jaquetas exclusivas [Indústria Têxtil]'
   },
   {
     id: 'theme_10',
     number: 10,
-    title: 'Tintas Reativas Digitais & Fixação Contínua em Algodão',
+    title: 'Algodão Nobre com Toque Macio & Tintas Ecológicas',
     category: 'Indústria Têxtil',
-    summary: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]',
-    briefing: 'Tintas Reativas Digitais & Fixação Contínua em Algodão [Indústria Têxtil]'
+    summary: 'Algodão Nobre com Toque Macio & Tintas Ecológicas: A busca pelo equilíbrio perfeito entre conforto absoluto na pele, sustentabilidade e cores profundas em peças casuais [Indústria Têxtil]',
+    briefing: 'Algodão Nobre com Toque Macio & Tintas Ecológicas: A busca pelo equilíbrio perfeito entre conforto absoluto na pele, sustentabilidade e cores profundas em peças casuais [Indústria Têxtil]'
   },
   {
     id: 'theme_11',
     number: 11,
-    title: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio',
+    title: 'Vestuário Esportivo de Alta Performance com Tecidos Respiráveis',
     category: 'Indústria Têxtil',
-    summary: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]',
-    briefing: 'E-Textiles & Circuitos Condutivos Impressos Diretamente no Fio [Indústria Têxtil]'
+    summary: 'Vestuário Esportivo de Alta Performance com Tecidos Respiráveis: Roupas de treino estampadas sem obstruir a passagem de ar, garantindo liberdade total de movimento aos atletas [Indústria Têxtil]',
+    briefing: 'Vestuário Esportivo de Alta Performance com Tecidos Respiráveis: Roupas de treino estampadas sem obstruir a passagem de ar, garantindo liberdade total de movimento aos atletas [Indústria Têxtil]'
   },
   {
     id: 'theme_12',
     number: 12,
-    title: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos',
+    title: 'Corantes Naturais & A Nova Elegância Orgânica',
     category: 'Indústria Têxtil',
-    summary: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]',
-    briefing: 'Biotecnologia Têxtil & Estamparia com Corantes Vivos [Indústria Têxtil]'
+    summary: 'Corantes Naturais & A Nova Elegância Orgânica: A conexão da moda com pigmentos extraídos de plantas e elementos botânicos, unindo ancestralidade e tecnologia moderna [Indústria Têxtil]',
+    briefing: 'Corantes Naturais & A Nova Elegância Orgânica: A conexão da moda com pigmentos extraídos de plantas e elementos botânicos, unindo ancestralidade e tecnologia moderna [Indústria Têxtil]'
   },
   {
     id: 'theme_13',
     number: 13,
-    title: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll',
+    title: 'Microfábricas Urbanas & Produção Local no Coração da Cidade',
     category: 'Indústria Têxtil',
-    summary: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]',
-    briefing: 'Automação Robótica na Estamparia & Manuseio Roll-to-Roll [Indústria Têxtil]'
+    summary: 'Microfábricas Urbanas & Produção Local no Coração da Cidade: Como pequenos ateliês integrados produzem sob demanda perto do consumidor final, reduzindo emissões de transporte [Indústria Têxtil]',
+    briefing: 'Microfábricas Urbanas & Produção Local no Coração da Cidade: Como pequenos ateliês integrados produzem sob demanda perto do consumidor final, reduzindo emissões de transporte [Indústria Têxtil]'
   },
   {
     id: 'theme_14',
     number: 14,
-    title: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital',
+    title: 'Estamparia Sensorial & Efeitos Hápticos no Vestuário',
     category: 'Indústria Têxtil',
-    summary: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]',
-    briefing: 'Impressão Têxtil Háptica & Efeitos de Relevo Digital [Indústria Têxtil]'
+    summary: 'Estamparia Sensorial & Efeitos Hápticos no Vestuário: Peças que provocam sensações táteis surpreendentes, criando experiências de moda que vão muito além da visão [Indústria Têxtil]',
+    briefing: 'Estamparia Sensorial & Efeitos Hápticos no Vestuário: Peças que provocam sensações táteis surpreendentes, criando experiências de moda que vão muito além da visão [Indústria Têxtil]'
   },
   {
     id: 'theme_15',
     number: 15,
-    title: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos',
+    title: 'Cores Puras por Refração de Luz & O Fim das Químicas Pesadas',
     category: 'Indústria Têxtil',
-    summary: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]',
-    briefing: 'Tingimento Estrutural Digital & Cores sem Pigmentos Químicos [Indústria Têxtil]'
+    summary: 'Cores Puras por Refração de Luz & O Fim das Químicas Pesadas: A inspiração nas asas das borboletas para criar tecidos coloridos por estruturas ópticas, sem químicos poluentes [Indústria Têxtil]',
+    briefing: 'Cores Puras por Refração de Luz & O Fim das Químicas Pesadas: A inspiração nas asas das borboletas para criar tecidos coloridos por estruturas ópticas, sem químicos poluentes [Indústria Têxtil]'
   },
   {
     id: 'theme_16',
     number: 16,
-    title: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa',
+    title: 'Provador Virtual 3D & Simulação de Estampas em Tempo Real',
     category: 'Indústria Têxtil',
-    summary: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]',
-    briefing: 'Gêmeo Digital Têxtil & Simulação Virtual de Estampa [Indústria Têxtil]'
+    summary: 'Provador Virtual 3D & Simulação de Estampas em Tempo Real: A experiência de visualizar como o tecido veste o corpo antes de estampar, eliminando retrabalhos e desperdícios [Indústria Têxtil]',
+    briefing: 'Provador Virtual 3D & Simulação de Estampas em Tempo Real: A experiência de visualizar como o tecido veste o corpo antes de estampar, eliminando retrabalhos e desperdícios [Indústria Têxtil]'
   },
   {
     id: 'theme_17',
     number: 17,
-    title: 'Rastreabilidade Têxtil & Passaporte Digital Impresso',
+    title: 'Rastreabilidade e Passaporte Digital da Moda Consciente',
     category: 'Indústria Têxtil',
-    summary: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]',
-    briefing: 'Rastreabilidade Têxtil & Passaporte Digital Impresso [Indústria Têxtil]'
+    summary: 'Rastreabilidade e Passaporte Digital da Moda Consciente: Rótulos e códigos sutis impressos que contam a história completa da peça, garantindo autenticidade e respeito ambiental [Indústria Têxtil]',
+    briefing: 'Rastreabilidade e Passaporte Digital da Moda Consciente: Rótulos e códigos sutis impressos que contam a história completa da peça, garantindo autenticidade e respeito ambiental [Indústria Têxtil]'
   },
   {
     id: 'theme_18',
     number: 18,
-    title: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica',
+    title: 'Reciclagem Circular de Roupas & Nova Vida para Fibras',
     category: 'Indústria Têxtil',
-    summary: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]',
-    briefing: 'Reciclagem Circular de Tecidos & Desentintagem Ecológica [Indústria Têxtil]'
+    summary: 'Reciclagem Circular de Roupas & Nova Vida para Fibras: Peças antigas reprocessadas e reestampadas digitalmente, transformando descarte em novas coleções elegantes [Indústria Têxtil]',
+    briefing: 'Reciclagem Circular de Roupas & Nova Vida para Fibras: Peças antigas reprocessadas e reestampadas digitalmente, transformando descarte em novas coleções elegantes [Indústria Têxtil]'
   },
   {
     id: 'theme_19',
     number: 19,
-    title: 'Tintas Termocrômicas Digitais & Estamparia Responsiva',
+    title: 'Roupas que Mudam de Cor com a Luz e a Temperatura',
     category: 'Indústria Têxtil',
-    summary: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]',
-    briefing: 'Tintas Termocrômicas Digitais & Estamparia Responsiva [Indústria Têxtil]'
+    summary: 'Roupas que Mudam de Cor com a Luz e a Temperatura: Estampas dinâmicas que reagem ao sol e ao calor do corpo, criando looks interativos e divertidos para o público jovem [Indústria Têxtil]',
+    briefing: 'Roupas que Mudam de Cor com a Luz e a Temperatura: Estampas dinâmicas que reagem ao sol e ao calor do corpo, criando looks interativos e divertidos para o público jovem [Indústria Têxtil]'
   },
   {
     id: 'theme_20',
     number: 20,
-    title: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos',
+    title: 'Vestuário Higiênico com Proteção Antibacteriana Duradoura',
     category: 'Indústria Têxtil',
-    summary: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]',
-    briefing: 'Acabamento Têxtil Digital & Tratamentos Antimicrobianos Impressos [Indústria Têxtil]'
+    summary: 'Vestuário Higiênico com Proteção Antibacteriana Duradoura: Tratamentos aplicados na estampa que evitam odores e mantêm a sensação de frescor o dia todo em rotinas intensas [Indústria Têxtil]',
+    briefing: 'Vestuário Higiênico com Proteção Antibacteriana Duradoura: Tratamentos aplicados na estampa que evitam odores e mantêm a sensação de frescor o dia todo em rotinas intensas [Indústria Têxtil]'
   },
   {
     id: 'theme_21',
     number: 21,
-    title: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil)',
+    title: 'Corte a Laser e Estamparia Digital em Fluxo Único',
     category: 'Indústria Têxtil',
-    summary: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]',
-    briefing: 'Estamparia Direta Integrada a Corte a Laser (Print & Cut Têxtil) [Indústria Têxtil]'
+    summary: 'Corte a Laser e Estamparia Digital em Fluxo Único: Como a integração direta de impressão e recorte computadorizado agiliza a confecção com precisão milimétrica [Indústria Têxtil]',
+    briefing: 'Corte a Laser e Estamparia Digital em Fluxo Único: Como a integração direta de impressão e recorte computadorizado agiliza a confecção com precisão milimétrica [Indústria Têxtil]'
   },
   {
     id: 'theme_22',
     number: 22,
-    title: 'Impressão Digital Single-Pass & Substituição da Rotativa',
+    title: 'Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica',
     category: 'Indústria Têxtil',
-    summary: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]',
-    briefing: 'Impressão Digital Single-Pass & Substituição da Rotativa [Indústria Têxtil]'
+    summary: 'Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica: A tecnologia de passagem única que entrega milhares de metros por hora sem perda de definição [Indústria Têxtil]',
+    briefing: 'Impressão Digital Single-Pass: Grandes Volumes com Qualidade Fotográfica: A tecnologia de passagem única que entrega milhares de metros por hora sem perda de definição [Indústria Têxtil]'
   },
   {
     id: 'theme_23',
     number: 23,
-    title: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica',
+    title: 'Tecidos que Repelem Líquidos e Facilitam a Rotina',
     category: 'Indústria Têxtil',
-    summary: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]',
-    briefing: 'Tecidos Biodegradáveis Autolimpantes & Nanotecnologia Fotocatalítica [Indústria Têxtil]'
+    summary: 'Tecidos que Repelem Líquidos e Facilitam a Rotina: Roupas que não mancham com café, suco ou chuva leve, mantendo a aparência impecável o dia todo com menos lavagens [Indústria Têxtil]',
+    briefing: 'Tecidos que Repelem Líquidos e Facilitam a Rotina: Roupas que não mancham com café, suco ou chuva leve, mantendo a aparência impecável o dia todo com menos lavagens [Indústria Têxtil]'
   },
   {
     id: 'theme_24',
     number: 24,
-    title: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem',
+    title: 'Marcas Independentes Conectadas Globalmente em Nuvem',
     category: 'Indústria Têxtil',
-    summary: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]',
-    briefing: 'Produção Têxtil Hiperlocal & Microfábricas Conectadas em Nuvem [Indústria Têxtil]'
+    summary: 'Marcas Independentes Conectadas Globalmente em Nuvem: Como criadores locais vendem moda personalizada para o mundo inteiro sem precisar de grandes investimentos [Indústria Têxtil]',
+    briefing: 'Marcas Independentes Conectadas Globalmente em Nuvem: Como criadores locais vendem moda personalizada para o mundo inteiro sem precisar de grandes investimentos [Indústria Têxtil]'
   },
   {
     id: 'theme_25',
     number: 25,
-    title: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas',
+    title: 'Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo',
     category: 'Indústria Têxtil',
-    summary: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]',
-    briefing: 'Metamateriais Têxteis & Impressão de Estruturas Auxéticas Adaptativas [Indústria Têxtil]'
+    summary: 'Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo: A fusão de engenharia têxtil e conforto elástico que acompanha a silhueta em qualquer atividade com suavidade [Indústria Têxtil]',
+    briefing: 'Tecidos Ergonômicos que se Ajustam aos Movimentos do Corpo: A fusão de engenharia têxtil e conforto elástico que acompanha a silhueta em qualquer atividade com suavidade [Indústria Têxtil]'
   },
   {
     id: 'theme_26',
     number: 26,
-    title: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas',
+    title: 'Estamparia Nobre em Sedas e Tecidos Leves de Luxo',
     category: 'Indústria Têxtil',
-    summary: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]',
-    briefing: 'Estamparia Digital de Alta Resolução em Sedas e Fibras Delicadas [Indústria Têxtil]'
+    summary: 'Estamparia Nobre em Sedas e Tecidos Leves de Luxo: A precisão das gotas microscópicas preservando o caimento esvoaçante e o brilho acetinado de vestidos e lenços refinados [Indústria Têxtil]',
+    briefing: 'Estamparia Nobre em Sedas e Tecidos Leves de Luxo: A precisão das gotas microscópicas preservando o caimento esvoaçante e o brilho acetinado de vestidos e lenços refinados [Indústria Têxtil]'
   },
   {
     id: 'theme_27',
     number: 27,
-    title: 'Tintas Condutivas Transparentes para Vestuário Eletrônico',
+    title: 'Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana',
     category: 'Indústria Têxtil',
-    summary: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]',
-    briefing: 'Tintas Condutivas Transparentes para Vestuário Eletrônico [Indústria Têxtil]'
+    summary: 'Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana: Detalhes luminosos que protegem ciclistas e pedestres à noite, combinando segurança e moda contemporânea [Indústria Têxtil]',
+    briefing: 'Jaquetas e Acessórios com Iluminação Discreta para Segurança Urbana: Detalhes luminosos que protegem ciclistas e pedestres à noite, combinando segurança e moda contemporânea [Indústria Têxtil]'
   },
   {
     id: 'theme_28',
     number: 28,
-    title: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance',
+    title: 'Tênis e Calçados Customizados com Estamparia Exclusiva',
     category: 'Indústria Têxtil',
-    summary: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]',
-    briefing: 'Manufatura Aditiva Têxtil para Vestuário Esportivo de Alta Performance [Indústria Têxtil]'
+    summary: 'Tênis e Calçados Customizados com Estamparia Exclusiva: A cultura dos calçados personalizados ganhando velocidade com tintas de alta resistência a atritos e flexões [Indústria Têxtil]',
+    briefing: 'Tênis e Calçados Customizados com Estamparia Exclusiva: A cultura dos calçados personalizados ganhando velocidade com tintas de alta resistência a atritos e flexões [Indústria Têxtil]'
   },
   {
     id: 'theme_29',
     number: 29,
-    title: 'Impressão Sublimática de Grande Formato para Decoração e Moda',
+    title: 'Estamparia Gigante para Cenografia, Decoração e Interiores',
     category: 'Indústria Têxtil',
-    summary: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]',
-    briefing: 'Impressão Sublimática de Grande Formato para Decoração e Moda [Indústria Têxtil]'
+    summary: 'Estamparia Gigante para Cenografia, Decoração e Interiores: Painéis de tecido, cortinas e estofados que transformam casas, eventos e palcos com cores impactantes [Indústria Têxtil]',
+    briefing: 'Estamparia Gigante para Cenografia, Decoração e Interiores: Painéis de tecido, cortinas e estofados que transformam casas, eventos e palcos com cores impactantes [Indústria Têxtil]'
   },
   {
     id: 'theme_30',
     number: 30,
-    title: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas',
+    title: 'Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros',
     category: 'Indústria Têxtil',
-    summary: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]',
-    briefing: 'Tintas Pigmentares de Baixa Viscosidade para Cabeças Piezoelétricas [Indústria Têxtil]'
+    summary: 'Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros: O domínio do contraste perfeito em camisetas pretas sem deixar a estampa com aspecto pesado ou quebradiço [Indústria Têxtil]',
+    briefing: 'Pretos Profundos e Branco Puro na Estamparia em Tecidos Escuros: O domínio do contraste perfeito em camisetas pretas sem deixar a estampa com aspecto pesado ou quebradiço [Indústria Têxtil]'
   },
   {
     id: 'theme_31',
     number: 31,
-    title: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia',
+    title: 'Roupas com Recarga Solar e Estilo para o Dia a Dia',
     category: 'Indústria Têxtil',
-    summary: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]',
-    briefing: 'Revestimentos Fotovoltaicos Têxteis & Tecidos Geradores de Energia [Indústria Têxtil]'
+    summary: 'Roupas com Recarga Solar e Estilo para o Dia a Dia: Bolsas e casacos que absorvem luz ambiente de forma sutil, oferecendo energia de emergência para celulares em viagens [Indústria Têxtil]',
+    briefing: 'Roupas com Recarga Solar e Estilo para o Dia a Dia: Bolsas e casacos que absorvem luz ambiente de forma sutil, oferecendo energia de emergência para celulares em viagens [Indústria Têxtil]'
   },
   {
     id: 'theme_32',
     number: 32,
-    title: 'Personalização em Massa Algorítmica na Estamparia de Vestuário',
+    title: 'Personalização com Nomes e Padrões Exclusivos em Massa',
     category: 'Indústria Têxtil',
-    summary: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]',
-    briefing: 'Personalização em Massa Algorítmica na Estamparia de Vestuário [Indústria Têxtil]'
+    summary: 'Personalização com Nomes e Padrões Exclusivos em Massa: A capacidade de produzir centenas de peças onde cada unidade tem um nome ou detalhe diferente sem encarecer o processo [Indústria Têxtil]',
+    briefing: 'Personalização com Nomes e Padrões Exclusivos em Massa: A capacidade de produzir centenas de peças onde cada unidade tem um nome ou detalhe diferente sem encarecer o processo [Indústria Têxtil]'
   },
   {
     id: 'theme_33',
     number: 33,
-    title: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada',
+    title: 'Uniformes Profissionais com Conforto, Resistência e Estilo',
     category: 'Indústria Têxtil',
-    summary: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]',
-    briefing: 'Impressão de Compósitos Têxteis para Proteção Industrial Avançada [Indústria Têxtil]'
+    summary: 'Uniformes Profissionais com Conforto, Resistência e Estilo: Transformando roupas de trabalho em peças modernas que transmitem orgulho aos colaboradores e duram muito mais [Indústria Têxtil]',
+    briefing: 'Uniformes Profissionais com Conforto, Resistência e Estilo: Transformando roupas de trabalho em peças modernas que transmitem orgulho aos colaboradores e duram muito mais [Indústria Têxtil]'
   },
   {
     id: 'theme_34',
     number: 34,
-    title: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta',
+    title: 'Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água',
     category: 'Indústria Têxtil',
-    summary: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]',
-    briefing: 'Corantes Sintéticos Sustentáveis para Impressão Jato de Tinta [Indústria Têxtil]'
+    summary: 'Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água: Cores alegres e ilustrações divertidas impressas com total tranquilidade para a pele sensível das crianças [Indústria Têxtil]',
+    briefing: 'Moda Infantil Segura com Tintas Hipoalergênicas à Base de Água: Cores alegres e ilustrações divertidas impressas com total tranquilidade para a pele sensível das crianças [Indústria Têxtil]'
   },
   {
     id: 'theme_35',
     number: 35,
-    title: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica',
+    title: 'Tecidos Confortáveis que Monitoram a Postura e o Movimento',
     category: 'Indústria Têxtil',
-    summary: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]',
-    briefing: 'Tecidos Piezoelétricos Impressos & Captura de Energia Biomecânica [Indústria Têxtil]'
+    summary: 'Tecidos Confortáveis que Monitoram a Postura e o Movimento: Fibras elásticas inteligentes que auxiliam na saúde do corpo de forma discreta e agradável no cotidiano [Indústria Têxtil]',
+    briefing: 'Tecidos Confortáveis que Monitoram a Postura e o Movimento: Fibras elásticas inteligentes que auxiliam na saúde do corpo de forma discreta e agradável no cotidiano [Indústria Têxtil]'
   },
   {
     id: 'theme_36',
     number: 36,
-    title: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital',
+    title: 'Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos',
     category: 'Indústria Têxtil',
-    summary: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]',
-    briefing: 'Processos Fotoquímicos Avançados no Pré-tratamento Digital [Indústria Têxtil]'
+    summary: 'Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos: A técnica limpa de preparar a fibra têxtil para receber a tinta digital com nitidez fotográfica e toque aveludado [Indústria Têxtil]',
+    briefing: 'Preparação Suave de Tecidos para Cores Perfeitas sem Resíduos: A técnica limpa de preparar a fibra têxtil para receber a tinta digital com nitidez fotográfica e toque aveludado [Indústria Têxtil]'
   },
   {
     id: 'theme_37',
     number: 37,
-    title: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água',
+    title: 'Estamparia que Brilha no Escuro para Festivais e Vida Noturna',
     category: 'Indústria Têxtil',
-    summary: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]',
-    briefing: 'Tintas Fluorescentes e Fotoluminescentes de Base de Água [Indústria Têxtil]'
+    summary: 'Estamparia que Brilha no Escuro para Festivais e Vida Noturna: Roupas criativas que se recarregam com a luz e iluminam baladas e eventos com efeitos visuais marcantes [Indústria Têxtil]',
+    briefing: 'Estamparia que Brilha no Escuro para Festivais e Vida Noturna: Roupas criativas que se recarregam com a luz e iluminam baladas e eventos com efeitos visuais marcantes [Indústria Têxtil]'
   },
   {
     id: 'theme_38',
     number: 38,
-    title: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume',
+    title: 'Fidelidade de Cores da Tela do Computador para o Tecido Real',
     category: 'Indústria Têxtil',
-    summary: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]',
-    briefing: 'Controle Espectral Inline IA na Estamparia Têxtil de Grande Volume [Indústria Têxtil]'
+    summary: 'Fidelidade de Cores da Tela do Computador para o Tecido Real: O fim das surpresas na produção, garantindo que o tom exato aprovado pelo cliente seja impresso na peça física [Indústria Têxtil]',
+    briefing: 'Fidelidade de Cores da Tela do Computador para o Tecido Real: O fim das surpresas na produção, garantindo que o tom exato aprovado pelo cliente seja impresso na peça física [Indústria Têxtil]'
   },
   {
     id: 'theme_39',
     number: 39,
-    title: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil)',
+    title: 'União da Serigrafia Tradicional com o Detalhe Infinito do Digital',
     category: 'Indústria Têxtil',
-    summary: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]',
-    briefing: 'Estamparia Híbrida Analógico-Digital (Screen-to-Digital Textil) [Indústria Têxtil]'
+    summary: 'União da Serigrafia Tradicional com o Detalhe Infinito do Digital: A força da estamparia clássica combinada à liberdade das cores fotográficas em coleções exclusivas [Indústria Têxtil]',
+    briefing: 'União da Serigrafia Tradicional com o Detalhe Infinito do Digital: A força da estamparia clássica combinada à liberdade das cores fotográficas em coleções exclusivas [Indústria Têxtil]'
   },
   {
     id: 'theme_40',
     number: 40,
-    title: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital',
+    title: 'Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita',
     category: 'Indústria Têxtil',
-    summary: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]',
-    briefing: 'Fibras Nanocelulósicas Funcionalizadas para Revestimento Digital [Indústria Têxtil]'
+    summary: 'Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita: O encontro das matérias-primas mais sustentáveis do planeta com a arte da estamparia digital contemporânea [Indústria Têxtil]',
+    briefing: 'Fibras Naturais de Bambu e Cânhamo com Estampa Digital Perfeita: O encontro das matérias-primas mais sustentáveis do planeta com a arte da estamparia digital contemporânea [Indústria Têxtil]'
   }
 ]);
 
 module.exports = { TECH_THEMES };
-
-

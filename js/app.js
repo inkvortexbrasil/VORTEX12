@@ -521,6 +521,28 @@ async function handleGenerateSubjects() {
   }
 }
 
+window.handleStartCurrentMinisserie = function() {
+  const campaign = AppState.getSelectedCampaign();
+  if (!campaign) {
+    alert('Nenhuma minissérie ativa no estúdio. Clique em ✨ ASSUNTO para criar uma nova obra.');
+    return;
+  }
+  const cNum = String(campaign.number || campaign.no || '01').padStart(2, '0');
+  
+  if (campaign.generatedGPT && Array.isArray(campaign.scenes) && campaign.scenes.length >= 10) {
+    const confirmRegen = confirm(`A Minissérie #${cNum} já possui as 10 cenas e a legenda geradas.\n\nDeseja abrir o Multiverso Minisséries para ver as cenas?`);
+    if (confirmRegen) {
+      if (typeof window.openDocumentarios === 'function') {
+        window.openDocumentarios();
+      }
+      return;
+    }
+  }
+
+  // Dispara a geração da minissérie (Scenes45 + Caption em português)
+  window.handleGenerateAction('minisserie', campaign.id, true);
+};
+
 async function executeGenerateSubject(briefVal = null, targetNumber = null) {
   if (AppState.isGeneratingSubjects) {
     console.warn("Geração de assuntos já em andamento. Ignorando clique duplicado.");
@@ -918,9 +940,9 @@ window.handleGenerateAction = async function(type, campaignId, fromDashboard = f
   const rightPanel = document.getElementById('multiversePromptsArea');
   const controlPanel = document.getElementById('multiverseControlPanel');
   
-  // Preserva os painéis laterais (esquerdo e direito) visíveis durante a animação central
-  if (leftPanel) leftPanel.style.display = 'flex';
-  if (rightPanel) rightPanel.style.display = 'flex';
+  // Oculta o painel central da minissérie para a animação da IA reinar sozinha sem sobreposições
+  if (rightPanel) rightPanel.style.display = 'none';
+  if (leftPanel) leftPanel.style.display = 'none';
   
   if (contentArea && contentArea.id === 'subjectsGrid') {
     contentArea.style.display = 'flex';
@@ -1010,13 +1032,39 @@ window.handleGenerateAction = async function(type, campaignId, fromDashboard = f
       controlPanel.style.boxShadow = 'inset 0 0 15px rgba(0,174,239,0.06), 0 0 20px rgba(0,174,239,0.1)';
       controlPanel.style.backdropFilter = 'blur(1px)';
     }
+
+    // Retira a animação do palco central e limpa o container
+    if (contentArea && contentArea.id === 'subjectsGrid') {
+      contentArea.style.display = 'none';
+      contentArea.innerHTML = '';
+    }
+
+    // Devolve o palco central limpo para a apresentação editorial da obra gerada
+    if (rightPanel) {
+      rightPanel.style.display = 'flex';
+    }
+    if (leftPanel) {
+      leftPanel.style.display = 'flex';
+    }
   }
   
   if (fromDashboard) {
     UI.closeStudioModal();
-    UI.renderPulsePanel();
-  } else {
-    UI.renderStudio();
+  }
+  
+  // Sincroniza a campanha física gerada com os arquivos gravados em disco
+  const selCamp = AppState.getSelectedCampaign();
+  if (selCamp) {
+    const cNum = String(selCamp.number || selCamp.no || selCamp.id || '01').padStart(2, '0');
+    if (typeof window.syncPhysicalWorkspaceForCampaign === 'function') {
+      await window.syncPhysicalWorkspaceForCampaign(cNum);
+    }
+  }
+  
+  AppState.save();
+  UI.renderWorkspace();
+  if (typeof UI.renderSocialArea === 'function') {
+    UI.renderSocialArea();
   }
 };
 
@@ -1515,7 +1563,7 @@ window.mountVisualRobotSwitcher = function(campaignId) {
       const text = element.textContent.replace(/\s+/g, ' ').trim();
       return text === 'GEMINI WEB (7 MOVIMENTOS)' || text === 'GEMINI WEB (5 MOVIMENTOS)';
     });
-    if (title) title.textContent = 'CHATGPT WEB (7 IMAGENS)';
+    if (title) title.textContent = 'CHATGPT WEB (5 IMAGENS)';
 
     const selectAll = template.content.querySelector('#geminiTodas');
     if (selectAll) {
@@ -1679,27 +1727,21 @@ window.isDocGeminiRobotRunning = function() {
   return !!(window.activeDocGeminiJobId || (typeof window.getActiveDocGeminiJob === 'function' && window.getActiveDocGeminiJob()));
 };
 
-window.isDocqwenRobotRunning = function() {
-  return Boolean(window.activeDocqwenJobActive);
-};
-
 window.isDocRobotRunning = function() {
-  return window.isDocGptRobotRunning() || window.isDocGeminiRobotRunning() || window.isDocqwenRobotRunning() || !!(window.activeDocChatGPTJobId || (typeof window.getActiveDocRobotJob === 'function' && window.getActiveDocRobotJob()));
+  return window.isDocGptRobotRunning() || window.isDocGeminiRobotRunning() || !!(window.activeDocChatGPTJobId || (typeof window.getActiveDocRobotJob === 'function' && window.getActiveDocRobotJob()));
 };
 
 window.syncTopbarTitlesAndTelemetries = function() {
   const gptMonitor = document.getElementById('docGptMonitorContainer');
   const geminiMonitor = document.getElementById('docGeminiMonitorContainer');
-  const qwenMonitor = document.getElementById('docqwenMonitorContainer');
   const oldMonitor = document.getElementById('docMonitorContainer');
   const title = document.getElementById('topbarTitle');
   const subtitle = document.getElementById('topbarSubtitle');
 
   const gptVisible = gptMonitor && gptMonitor.style.display !== 'none';
   const geminiVisible = geminiMonitor && geminiMonitor.style.display !== 'none';
-  const qwenVisible = qwenMonitor && qwenMonitor.style.display !== 'none';
   const oldVisible = oldMonitor && oldMonitor.style.display !== 'none' && oldMonitor.offsetWidth > 0;
-  const anyVisible = gptVisible || geminiVisible || qwenVisible || oldVisible || window.isDocRobotRunning();
+  const anyVisible = gptVisible || geminiVisible || oldVisible || window.isDocRobotRunning();
 
   if (title) title.style.display = anyVisible ? 'none' : '';
   if (subtitle) subtitle.style.display = anyVisible ? 'none' : '';
@@ -1763,29 +1805,6 @@ window.ensureDocTopbarTelemetryElement = function() {
     row.appendChild(geminiMonitor);
   }
 
-  let qwenMonitor = document.getElementById('docqwenMonitorContainer');
-  if (!qwenMonitor) {
-    qwenMonitor = document.createElement('div');
-    qwenMonitor.id = 'docqwenMonitorContainer';
-    qwenMonitor.style.cssText = 'display:none; width: 100%; flex: 1; min-width: 250px; background:rgba(5,12,28,0.97); border:1.5px solid #10b981; border-radius:8px; padding:6px 12px; box-shadow:0 3px 16px rgba(16,185,129,0.3); text-align:left; position:relative; margin:0; box-sizing:border-box;';
-    qwenMonitor.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-        <h4 id="docqwenMonitorTitle" style="margin:0; color:#fff; font-family:var(--uiRounded); font-size:0.75rem; font-weight:700; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px;">
-          <span style="font-size:0.82rem;">⚡</span> Status QWEN
-        </h4>
-        <button onclick="window.cancelDocqwenRobot()" style="background:rgba(255,0,0,0.2); border:1px solid rgba(255,0,0,0.5); color:#ff4d4d; width:20px; height:20px; border-radius:50%; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s;" title="Parar Qwen" aria-label="Parar Qwen">✕</button>
-      </div>
-      <div style="background:rgba(255,255,255,0.1); width:100%; height:5px; border-radius:3px; overflow:hidden; margin-bottom:3px;">
-        <div id="docqwenMonitorBar" style="height:100%; width:0%; background:linear-gradient(90deg, #10b981, #00c6ff); transition:width 0.3s;"></div>
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; min-width:0;">
-        <span id="docqwenMonitorLog" style="color:#10b981; font-family:monospace; font-size:0.68rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0;">Iniciando...</span>
-        <span id="docqwenMonitorPercent" style="color:#fff; font-weight:bold; font-size:0.75rem; font-family:monospace; flex-shrink:0;">0%</span>
-      </div>
-    `;
-    row.appendChild(qwenMonitor);
-  }
-
   let monitor = document.getElementById('docMonitorContainer');
   if (!monitor) {
     monitor = document.createElement('div');
@@ -1842,39 +1861,16 @@ window.hideDocGeminiTopbarTelemetry = function(delay = 2500) {
   }, delay);
 };
 
-window.showDocqwenTopbarTelemetry = function() {
-  if (window.docqwenTelemetryHideTimer) clearTimeout(window.docqwenTelemetryHideTimer);
-  window.docqwenTelemetryHideTimer = null;
-  window.ensureDocTopbarTelemetryElement();
-  const monitor = document.getElementById('docqwenMonitorContainer');
-  if (monitor) monitor.style.display = 'block';
-  window.syncTopbarTitlesAndTelemetries();
-};
-
-window.hideDocqwenTopbarTelemetry = function(delay = 2500) {
-  if (window.docqwenTelemetryHideTimer) clearTimeout(window.docqwenTelemetryHideTimer);
-  window.docqwenTelemetryHideTimer = setTimeout(() => {
-    const monitor = document.getElementById('docqwenMonitorContainer');
-    if (monitor) monitor.style.display = 'none';
-    window.syncTopbarTitlesAndTelemetries();
-    window.docqwenTelemetryHideTimer = null;
-  }, delay);
-};
-
 window.showDocTopbarTelemetry = function(provider) {
   if (provider === 'gemini') {
     window.showDocGeminiTopbarTelemetry();
   } else if (provider === 'chatgpt' || provider === 'gpt') {
     window.showDocGptTopbarTelemetry();
-  } else if (provider === 'qwen') {
-    window.showDocqwenTopbarTelemetry();
   } else {
     if (window.isDocGptRobotRunning()) window.showDocGptTopbarTelemetry();
     if (window.isDocGeminiRobotRunning()) window.showDocGeminiTopbarTelemetry();
-    if (window.isDocqwenRobotRunning && window.isDocqwenRobotRunning()) window.showDocqwenTopbarTelemetry();
-    if (!window.isDocGptRobotRunning() && !window.isDocGeminiRobotRunning() && !(window.isDocqwenRobotRunning && window.isDocqwenRobotRunning())) {
+    if (!window.isDocGptRobotRunning() && !window.isDocGeminiRobotRunning()) {
       if (typeof AppState !== 'undefined' && AppState.visualRobotProvider === 'gemini') window.showDocGeminiTopbarTelemetry();
-      else if (typeof AppState !== 'undefined' && AppState.visualRobotProvider === 'qwen') window.showDocqwenTopbarTelemetry();
       else window.showDocGptTopbarTelemetry();
     }
   }
@@ -1883,7 +1879,6 @@ window.showDocTopbarTelemetry = function(provider) {
 window.hideDocTopbarTelemetry = function(delay = 2500) {
   window.hideDocGptTopbarTelemetry(delay);
   window.hideDocGeminiTopbarTelemetry(delay);
-  window.hideDocqwenTopbarTelemetry(delay);
 };
 
 window.autoResumeAllRobotTelemetries = async function() {
@@ -2005,23 +2000,6 @@ window.autoResumeAllRobotTelemetries = async function() {
   } catch (e) {
     console.warn('Erro ao auto-retomar telemetria flow gpt:', e);
   }
-
-  // 5. Minisséries Qwen API Telemetry
-  try {
-    const resqwen = await fetch('/api/automate-qwen/status');
-    if (resqwen.ok) {
-      const data = await resqwen.json();
-      const job = data?.status;
-      if (job && job.active && job.status === 'running') {
-        window.activeDocqwenCampaignNumber = job.campaignNumber;
-        window.activeDocqwenJobActive = true;
-        window.showDocqwenTopbarTelemetry();
-        window.pollDocqwenAutomationStatus(job.campaignNumber);
-      }
-    }
-  } catch (e) {
-    console.warn('Erro ao auto-retomar telemetria doc Qwen:', e);
-  }
 };
 
 window.mountDocVisualRobotSwitcher = function(numDisplay) {
@@ -2046,7 +2024,6 @@ window.mountDocVisualRobotSwitcher = function(numDisplay) {
     <select id="docVisualRobotProvider" onchange="window.setDocVisualRobotProvider(this.value)" title="Escolher plataforma da esteira" style="background:rgba(0,0,0,0.45); color:#fff; border:1px solid rgba(0,174,239,0.55); border-radius:7px; padding:8px 12px; font-weight:900; letter-spacing:1px; cursor:pointer;">
       <option value="chatgpt" ${AppState.visualRobotProvider === 'chatgpt' ? 'selected' : ''}>GPT</option>
       <option value="gemini" ${AppState.visualRobotProvider === 'gemini' ? 'selected' : ''}>GEMINI</option>
-      <option value="qwen" ${AppState.visualRobotProvider === 'qwen' ? 'selected' : ''}>QWEN</option>
     </select>`;
   header.insertBefore(providerArea, actionArea);
 
@@ -2060,7 +2037,7 @@ window.mountDocVisualRobotSwitcher = function(numDisplay) {
 };
 
 window.setDocVisualRobotProvider = function(provider) {
-  AppState.visualRobotProvider = (provider === 'chatgpt' || provider === 'qwen') ? provider : 'gemini';
+  AppState.visualRobotProvider = provider === 'chatgpt' ? 'chatgpt' : 'gemini';
   AppState.save();
   window.applyDocVisualRobotProvider();
 };
@@ -2071,14 +2048,11 @@ window.applyDocVisualRobotProvider = function() {
   const currentProvider = AppState.visualRobotProvider || 'gemini';
   const providerSelect = document.getElementById('docVisualRobotProvider');
   if (providerSelect) providerSelect.value = currentProvider;
-  wrapper.querySelectorAll('button[data-gemini-onclick], button[onclick*="startGeminiDocMiniseries"], button[onclick*="startDocChatGPTFullAutomation"], button[onclick*="startDocqwenAutomation"]').forEach(button => {
+  wrapper.querySelectorAll('button[data-gemini-onclick], button[onclick*="startGeminiDocMiniseries"], button[onclick*="startDocChatGPTFullAutomation"]').forEach(button => {
     const cNum = (button.getAttribute('onclick') || button.dataset.geminiOnclick || '').match(/'([^']+)'/)?.[1] || '';
     if (currentProvider === 'chatgpt') {
       button.setAttribute('onclick', `window.startDocChatGPTFullAutomation('${cNum}')`);
       button.innerHTML = '🚀 INICIAR ROBÔ GPT ' + (cNum ? 'M' + cNum : '');
-    } else if (currentProvider === 'qwen') {
-      button.setAttribute('onclick', `window.startDocqwenAutomation('${cNum}')`);
-      button.innerHTML = '⚡ GERAR QWEN ' + (cNum ? 'M' + cNum : '');
     } else {
       button.setAttribute('onclick', `window.startDocGeminiPreparedAutomation('${cNum}')`);
       button.innerHTML = '🚀 INICIAR ROBÔ GEMINI ' + (cNum ? 'M' + cNum : '');
@@ -2087,10 +2061,9 @@ window.applyDocVisualRobotProvider = function() {
   const monitorTitle = document.querySelector('#docMonitorContainer h4');
   if (monitorTitle) {
     if (currentProvider === 'chatgpt') monitorTitle.textContent = 'Status do Robô GPT';
-    else if (currentProvider === 'qwen') monitorTitle.textContent = 'Status QWEN';
     else monitorTitle.textContent = 'Status do Robô Gemini';
   }
-  const stopButton = wrapper.querySelector('button[onclick*="forceStopGeminiDocRobot"], button[onclick*="cancelDocChatGPTRobot"], button[onclick*="cancelDocqwenRobot"]');
+  const stopButton = wrapper.querySelector('button[onclick*="forceStopGeminiDocRobot"], button[onclick*="cancelDocChatGPTRobot"]');
   if (stopButton) {
     stopButton.setAttribute('onclick', 'window.cancelDocVisualRobot()');
   }
@@ -2385,7 +2358,6 @@ window.pollDocGeminiAutomationStatus = function() {
 window.pollDocChatGPTAutomationStatus = function() {
   if (window.activeDocGptJobId) window.pollDocGptAutomationStatus();
   if (window.activeDocGeminiJobId) window.pollDocGeminiAutomationStatus();
-  if (window.activeDocqwenJobActive) window.pollDocqwenAutomationStatus();
   if (!window.activeDocGptJobId && !window.activeDocGeminiJobId && window.activeDocChatGPTJobId) {
     if (window.activeDocRobotProvider === 'gemini') {
       window.activeDocGeminiJobId = window.activeDocChatGPTJobId;
@@ -2395,148 +2367,6 @@ window.pollDocChatGPTAutomationStatus = function() {
       window.pollDocGptAutomationStatus();
     }
   }
-};
-
-window.startDocqwenAutomation = async function(cNum) {
-  const cleanNumber = String(cNum || '01').padStart(2, '0');
-  const block = document.getElementById('phase2-block-M' + cleanNumber);
-  const checkedBoxes = block ? block.querySelectorAll('.gemini-img-check:checked') : [];
-  
-  let sequences = [];
-  if (checkedBoxes.length > 0) {
-    sequences = Array.from(checkedBoxes).map(cb => Number(cb.value)).filter(Boolean);
-  }
-  
-  const seqLabel = sequences.length > 0 ? `${sequences.length} posições marcadas (${sequences.join(', ')})` : 'todas as 50 posições da esteira (pulando as que já existem)';
-  const confirmStart = confirm(`⚡ Iniciar geração direta via Qwen (OpenAI API)?\n\nMinissérie: #${cleanNumber}\nAlvo: ${seqLabel}\nFormato: 16:9 Widescreen (1792x1024)\n\nAs imagens geradas serão salvas automaticamente em minisseries/${cleanNumber}/M${cleanNumber}/.`);
-  if (!confirmStart) return;
-
-  window.activeDocqwenCampaignNumber = cleanNumber;
-  window.activeDocqwenJobActive = true;
-  window.showDocqwenTopbarTelemetry();
-  
-  const log = document.getElementById('docqwenMonitorLog');
-  const bar = document.getElementById('docqwenMonitorBar');
-  const percent = document.getElementById('docqwenMonitorPercent');
-  if (log) log.innerText = `Iniciando Qwen para Minissérie #${cleanNumber}...`;
-  if (bar) bar.style.width = '2%';
-  if (percent) percent.innerText = '2%';
-
-  // Atualiza visual do botão na esteira
-  if (block) {
-    const btn = block.querySelector('button[onclick*="startDocqwenAutomation"]');
-    if (btn) {
-      btn.dataset.originalHtml = btn.innerHTML;
-      btn.innerHTML = '⏳ GERANDO Qwen...';
-      btn.style.boxShadow = '0 0 15px #10b981';
-    }
-  }
-
-  try {
-    const res = await fetch('/api/automate-qwen/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        campaignNumber: cleanNumber,
-        sequences,
-        quality: 'standard'
-      })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) {
-      throw new Error(data.error || 'Falha ao iniciar geração no Qwen.');
-    }
-    if (typeof showToast === 'function') {
-      showToast(`⚡ Qwen iniciado para Minissérie #${cleanNumber}`, 'info');
-    }
-    window.pollDocqwenAutomationStatus(cleanNumber);
-  } catch (err) {
-    window.activeDocqwenJobActive = false;
-    if (log) log.innerText = 'ERRO Qwen: ' + err.message;
-    if (block) {
-      const btn = block.querySelector('button[onclick*="startDocqwenAutomation"]');
-      if (btn && btn.dataset.originalHtml) btn.innerHTML = btn.dataset.originalHtml;
-    }
-    alert('Erro Qwen: ' + err.message);
-  }
-};
-
-window.pollDocqwenAutomationStatus = function(targetCampaignNumber) {
-  if (window.activeDocqwenPollInterval) clearInterval(window.activeDocqwenPollInterval);
-  window.activeDocqwenPollInterval = setInterval(async () => {
-    const cNum = targetCampaignNumber || window.activeDocqwenCampaignNumber;
-    try {
-      const res = await fetch('/api/automate-qwen/status' + (cNum ? `?number=${encodeURIComponent(cNum)}` : ''));
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok || !data.status) return;
-      const job = data.status;
-
-      window.showDocqwenTopbarTelemetry();
-      const log = document.getElementById('docqwenMonitorLog');
-      const bar = document.getElementById('docqwenMonitorBar');
-      const percent = document.getElementById('docqwenMonitorPercent');
-
-      const block = document.getElementById('phase2-block-M' + String(cNum).padStart(2, '0'));
-      const btn = block ? block.querySelector('button[onclick*="startDocqwenAutomation"]') : null;
-
-      if (job.status === 'running') {
-        window.activeDocqwenJobActive = true;
-        if (log) log.innerText = job.log || 'Processando Qwen...';
-        const pct = Math.min(100, Math.max(0, job.percent || 0));
-        if (bar) bar.style.width = pct + '%';
-        if (percent) percent.innerText = pct + '%';
-        if (btn) {
-          btn.innerHTML = `⏳ GERANDO [${job.current}/${job.total}] (${pct}%)`;
-          btn.style.boxShadow = '0 0 15px #10b981';
-        }
-        if (cNum) window.refreshDocChatGPTThumbnails(cNum);
-      } else if (job.status === 'completed' || job.status === 'error' || job.status === 'cancelled') {
-        clearInterval(window.activeDocqwenPollInterval);
-        window.activeDocqwenJobActive = false;
-        
-        if (btn) {
-          btn.innerHTML = `⚡ GERAR QWEN M${cNum}`;
-          btn.style.boxShadow = '';
-        }
-
-        if (job.status === 'completed') {
-          if (log) log.innerText = job.log || 'Qwen finalizou a esteira com sucesso.';
-          if (bar) bar.style.width = '100%';
-          if (percent) percent.innerText = '100%';
-          if (typeof showToast === 'function') {
-            showToast(`✅ Qwen: ${job.completedSequences?.length || 0} imagens geradas e salvas com sucesso!`, 'success');
-          }
-          window.hideDocqwenTopbarTelemetry(6000);
-        } else if (job.status === 'error') {
-          if (log) log.innerText = 'ERRO Qwen: ' + (job.error || job.log);
-          if (typeof showToast === 'function') {
-            showToast(`❌ Qwen: ${job.error || job.log}`, 'error');
-          }
-          window.showDocqwenTopbarTelemetry();
-        } else {
-          if (log) log.innerText = 'Qwen cancelado pelo operador.';
-          window.hideDocqwenTopbarTelemetry(3000);
-        }
-        if (cNum) window.refreshDocChatGPTThumbnails(cNum);
-      }
-    } catch (err) {
-      console.warn('Status do Qwen indisponível:', err.message);
-    }
-  }, 1200);
-};
-
-window.cancelDocqwenRobot = async function() {
-  try {
-    await fetch('/api/automate-qwen/cancel', { method: 'POST' });
-    const log = document.getElementById('docqwenMonitorLog');
-    if (log) log.innerText = 'Cancelando Qwen...';
-  } catch (err) {
-    console.warn('Erro ao cancelar Qwen:', err);
-  }
-};
-
-window.isDocqwenRobotRunning = function() {
-  return Boolean(window.activeDocqwenJobActive);
 };
 
 window.refreshDocChatGPTThumbnails = function(cNum) {

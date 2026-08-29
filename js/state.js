@@ -114,13 +114,15 @@ const AppState = {
           }
         });
 
-        // LIMPEZA TOTAL DO BANCO DE ASSUNTOS (GENOMA CENTRAL V12 SOLICITADA PELO DIREITOR-GERAL):
-        if (!localStorage.getItem('vortex_purge_genome_v12')) {
+        // RESET TOTAL DO BANCO DE DADOS SOLICITADO PELO DIREITOR-GERAL (ESTADO ZERO ABSOLUTO):
+        if (!localStorage.getItem('vortex_purge_zero_absolute_v12_recriacao_v2')) {
           this.campaigns = [];
           this.suggestedSubjects = [];
           this.selectedCampaignId = null;
-          localStorage.setItem('vortex_purge_genome_v12', '1');
-          console.log('🧹 Banco de dados de assuntos limpo para inicialização do Genoma Central V12.');
+          localStorage.removeItem('VORTEX_LAST_THEME_INDEX');
+          window.VORTEX_LAST_THEME_INDEX = 0;
+          localStorage.setItem('vortex_purge_zero_absolute_v12_recriacao_v2', '1');
+          console.log('🧹 [VORTEX 12] Banco de dados 100% zerado e tema calibrado para iniciar no Tema 02.');
         }
 
         this.save();
