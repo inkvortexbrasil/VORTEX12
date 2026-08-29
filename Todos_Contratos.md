@@ -298,9 +298,11 @@ PROMPTS VISUAIS — 100% EM PORTUGUÊS DO BRASIL:
 - O prompt deve ser completo e diretamente utilizável por geradores modernos de imagens (ChatGPT, Gemini Imagen 3, Midjourney). Não use referências vagas como "como na cena anterior" ou "conforme descrito acima".
 - Não inclua `TITLE EXACT:`, cabeçalho técnico, markdown, sequência literal `\n` ou `\r`, nem barras de escape visíveis.
 
-INTEGRAÇÃO VISUAL E CENOGRÁFICA:
+INTEGRAÇÃO VISUAL E CENOGRÁFICA DO TÍTULO E DA MARCA:
 
-- De forma orgânica e harmoniosa com a cena, incorpore visualmente o título da cena e a assinatura "InkVortex Brasil" no cenário (em superfícies, placas, lousas, vidros, tecidos ou elementos do ambiente).
+- O título da cena DEVE ser inserido naturalmente dentro do corpo do prompt entre aspas simples, após a menção ao título integrado na cenografia (exemplo canônico: `com a inscrição do título 'E se você pudesse estampar qualquer desenho em qualquer tecido sem limites?' em letras elegantes e legíveis sobre uma lousa de vidro fosco ao lado da máquina`).
+- A assinatura 'InkVortex Brasil' também deve estar presente de forma orgânica (exemplo: `Assinatura discreta 'InkVortex Brasil' gravada em uma peça de madeira na mesa de trabalho`).
+- O prompt é um texto cinematográfico contínuo, único e autossuficiente, sem cabeçalhos ou campos destacados de título fora dele.
 - Liberdade criativa e poética plena para ambientar a narrativa com o mais alto padrão estético cinematográfico e riqueza de texturas.
 
 FORMATO DE SAÍDA:

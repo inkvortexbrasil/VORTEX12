@@ -51,10 +51,41 @@ function normalizeGPTTitle(scene, prompt) {
     .trim();
 }
 
+function ensureTitleInPrompt(prompt, title) {
+  if (!prompt || !title) return String(prompt || '').trim();
+  const cleanTitle = String(title).replace(/^["“]|["”]$/g, '').trim();
+  let res = String(prompt).trim();
+  
+  res = res.replace(/^\s*TITLE EXACT\s*:\s*["“].*?["”]\s*\r?\n\r?\n?/i, '').trim();
+
+  // Se o título exato já estiver contido entre aspas no prompt, preserva perfeitamente
+  if (res.includes(`'${cleanTitle}'`) || res.includes(`"${cleanTitle}"`)) {
+    return res;
+  }
+
+  // Caso a IA tenha escrito "inscrição do título em..." ou "inscrição do título está..."
+  if (/inscrição do título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
+    return res.replace(/(inscrição do título)\s+/i, `$1 '${cleanTitle}' `);
+  }
+  if (/do título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
+    return res.replace(/(do título)\s+/i, `$1 '${cleanTitle}' `);
+  }
+  if (/o título\s+(?:em|está|escrita|gravada|sobre|delicada|com)/i.test(res)) {
+    return res.replace(/(o título)\s+/i, `$1 '${cleanTitle}' `);
+  }
+
+  // Caso não haja menção cenográfica explícita ao título, insere antes da assinatura ou no fim
+  if (res.includes('Assinatura')) {
+    return res.replace(/(Assinatura\s+['"“]?InkVortex Brasil)/i, `Com a inscrição do título '${cleanTitle}' em letras elegantes e legíveis sobre uma superfície cenográfica do ambiente. $1`);
+  }
+
+  return `${res} Com a inscrição do título '${cleanTitle}' em letras elegantes e legíveis sobre uma superfície do cenário.`;
+}
+
 function composeGPTMainPrompt(title, visualPrompt, sceneIndex) {
   const prompt = String(visualPrompt || '').trim();
   if (!prompt) throw new Error(`A cena GPT ${sceneIndex + 1} não possui prompt visual.`);
-  return prompt.replace(/^\s*TITLE EXACT\s*:\s*["“].*?["”]\s*\r?\n\r?\n?/i, '').trim();
+  return ensureTitleInPrompt(prompt, title);
 }
 
 function normalizeGPTScene(scene, index) {
@@ -98,8 +129,7 @@ function writeGPTSourcePrompts({ ROOT, numStr, gptScenes }) {
   const jsonPath = path.join(promptsDir, `10_prompts_gpt_${numStr}.json`);
   const txtPath = path.join(promptsDir, `10_prompts_gpt_${numStr}.txt`);
   const text = prompts.map(item => {
-    let header = `GPT CENA #${String(item.gptSceneRef).padStart(2, '0')} [BLOCO ${item.block}] [POSIÇÃO 1]`;
-    if (item.title) header += `\nTítulo: ${item.title}`;
+    const header = `GPT CENA #${String(item.gptSceneRef).padStart(2, '0')} [BLOCO ${item.block}] [POSIÇÃO 1]`;
     return `${header}\nPrompt: ${item.fullPrompt}`;
   }).join('\n\n----------------------------------------\n\n');
 
@@ -246,8 +276,7 @@ function buildChatGPTQueue({ ROOT, numStr, gptScenes }) {
   const txtPath = path.join(promptsDir, `50_prompts_esteira_chatgpt_${numStr}.txt`);
   const text = queue.map(item => {
     const origin = item.source === 'gpt' ? `GPT CENA ${item.gptSceneRef}` : `COMPLEMENTAR ${item.sourceIndex} / GPT CENA ${item.gptSceneRef}`;
-    let header = `IMAGEM FINAL #${item.sceneNum} [${origin}] [BLOCO ${item.block}] [POSIÇÃO ${item.positionInBlock}]`;
-    if (item.title && item.source === 'gpt') header += `\nTítulo: ${item.title}`;
+    const header = `IMAGEM FINAL #${item.sceneNum} [${origin}] [BLOCO ${item.block}] [POSIÇÃO ${item.positionInBlock}]`;
     return `${header}\nPrompt: ${item.fullPrompt}`;
   }).join('\n\n----------------------------------------\n\n');
   fs.writeFileSync(jsonPath, JSON.stringify(queue, null, 2), 'utf8');
