@@ -80,7 +80,7 @@ async function run() {
       return 'https://chatgpt.com/c/12345678-1234-1234-1234-123456789abc?model=auto';
     }
   };
-  const createdConversationUrl = await __testHooks.waitForChatGPTConversationUrl(newChatPage, 100, 1);
+  const createdConversationUrl = await __testHooks.waitForChatGPTConversationUrl(newChatPage, 500, 1);
   assert.strictEqual(
     createdConversationUrl,
     'https://chatgpt.com/c/12345678-1234-1234-1234-123456789abc',

@@ -2551,25 +2551,28 @@ async function recoverChatGPTDownloadsCurrentTab({ numStr, mode = 'minisseries',
       .filter(pair => pair && Number.isInteger(pair.sequence) && pair.imageKey)
       .map(pair => [Number(pair.sequence), String(pair.imageKey)]));
 
+    const checkpoint = readChatGPTCheckpoint(numStr, mode);
+    const currentUrl = page.url();
+    const convGroup = (checkpoint.conversations && checkpoint.conversations[currentUrl]) ? checkpoint.conversations[currentUrl] : checkpoint;
+    const checkpointGenSequences = Object.keys(convGroup.generated || {})
+      .map(Number)
+      .filter(s => Number.isInteger(s) && s > 0 && !(checkpoint.completed && checkpoint.completed[String(s)]))
+      .sort((a, b) => a - b);
+
     // Determina as sequencias que serao realmente resgatadas
     let targetSequencesForRescue = [];
-    if (Array.isArray(sequences) && sequences.length > 0 && sequences !== 'auto') {
-      targetSequencesForRescue = sequences.map(Number).filter(s => Number.isInteger(s) && s > 0);
-    } else if (exactPairs.length > 0) {
-      // Se detectou imagens com correspondencia no chat, resgata exatamente essas sequencias
+
+    // Prioridade 1: Imagens com correspondencia confirmada no chat pelo prompt/titulo
+    if (exactPairs.length > 0) {
       targetSequencesForRescue = exactPairs.map(p => Number(p.sequence)).sort((a, b) => a - b);
-    } else {
-      // Fallback: consulta posicoes registradas como geradas no checkpoint da conversa aberta
-      const checkpoint = readChatGPTCheckpoint(numStr, mode);
-      const currentUrl = page.url();
-      const convGroup = (checkpoint.conversations && checkpoint.conversations[currentUrl]) ? checkpoint.conversations[currentUrl] : checkpoint;
-      const genSequences = Object.keys(convGroup.generated || {})
-        .map(Number)
-        .filter(s => Number.isInteger(s) && s > 0 && !(checkpoint.completed && checkpoint.completed[String(s)]))
-        .sort((a, b) => a - b);
-      if (genSequences.length > 0) {
-        targetSequencesForRescue = genSequences;
-      }
+    }
+    // Prioridade 2: Posicoes geradas registradas no checkpoint para a conversa aberta
+    else if (checkpointGenSequences.length > 0) {
+      targetSequencesForRescue = checkpointGenSequences;
+    }
+    // Prioridade 3: Se o operador passou selecao manual e nao ha deteccao automatica no chat
+    else if (Array.isArray(sequences) && sequences.length > 0 && sequences !== 'auto') {
+      targetSequencesForRescue = sequences.map(Number).filter(s => Number.isInteger(s) && s > 0);
     }
 
     const recovery = robotManifest.beginRun({
