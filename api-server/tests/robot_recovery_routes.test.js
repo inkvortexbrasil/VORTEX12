@@ -94,6 +94,14 @@ async function callRoute({ root, url, body }) {
       /funções PROMPTS e FOTOS foram retiradas/
     );
 
+    const rescueRes = await callRoute({
+      root,
+      url: '/api/automate-chatgpt/rescue',
+      body: { number: '17', mode: 'minisseries', scenes: [1, 2] }
+    });
+    assert.strictEqual(rescueRes.status, 200);
+    assert(rescueRes.payload.jobId);
+
     console.log('robot-recovery-routes-ok');
   } finally {
     fs.rmSync(root, { recursive: true, force: true });

@@ -590,6 +590,7 @@ module.exports = function createChatGPTAutomationRouter(ctx) {
         const numStr = sanitizeNumericId(payload.number || payload.campaignId || '01');
         const jobId = `chatgpt-rescue-${numStr}-${Date.now()}`;
         const mode = payload.mode === 'flow' ? 'flow' : (payload.mode || 'minisseries');
+        const isFlow = mode === 'flow';
         const scenes = payload.scenes || [];
         const defaultPrompts = {
           prompts: readFinalChatGPTQueue(ROOT, numStr).queue
