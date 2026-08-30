@@ -10,7 +10,7 @@ function requireKeysSet() {
 }
 
 const API = {
-  async generateSubjects(customBrief = null) {
+  async generateSubjects(customBrief = null, options = {}) {
     // Monta o catálogo completo de assuntos já existentes no banco para a Mistral comparar e não repetir
     const existingCatalog = (AppState.campaigns || [])
       .map(c => ({
@@ -19,10 +19,18 @@ const API = {
       }))
       .filter(c => c.title);
 
+    const themeNumber = options.themeNumber || options.axisNumber;
+    const campaignNumber = options.campaignNumber;
+
     const res = await fetch('/api/generate-subjects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ brief: customBrief, existingCatalog })
+      body: JSON.stringify({
+        brief: customBrief,
+        existingCatalog,
+        themeNumber,
+        campaignNumber
+      })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro na geração de assuntos");
@@ -31,10 +39,11 @@ const API = {
 
   async saveSubject(campaignNumber, topic) {
     try {
+      const themeNumber = topic?.themeNumber || topic?.axisNumber;
       const res = await fetch('/api/minisseries/save-subject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaignNumber, topic })
+        body: JSON.stringify({ campaignNumber, topic, themeNumber })
       });
       const data = await res.json().catch(() => ({}));
       return data;

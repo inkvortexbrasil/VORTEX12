@@ -511,10 +511,10 @@ async function handleGenerateSubjects() {
     nextNumber = Math.max(...AppState.campaigns.map(c => Number(c.number) || 0)) + 1;
   }
 
-  // Abre a caixa de confirmação e seleção dos 20 temas de vanguarda
+  // Abre a caixa de confirmação e seleção dos 40 temas de vanguarda
   if (typeof window.openThemePickerModal === 'function') {
-    window.openThemePickerModal(nextNumber, (selectedBrief) => {
-      window.executeGenerateSubject(selectedBrief, nextNumber);
+    window.openThemePickerModal(nextNumber, (selectedBrief, targetNumber, themeObj) => {
+      window.executeGenerateSubject(selectedBrief, targetNumber || nextNumber, themeObj);
     });
   } else {
     window.executeGenerateSubject(null, nextNumber);
@@ -543,7 +543,7 @@ window.handleStartCurrentMinisserie = function() {
   window.handleGenerateAction('minisserie', campaign.id, true);
 };
 
-async function executeGenerateSubject(briefVal = null, targetNumber = null) {
+async function executeGenerateSubject(briefVal = null, targetNumber = null, themeObj = null) {
   if (AppState.isGeneratingSubjects) {
     console.warn("Geração de assuntos já em andamento. Ignorando clique duplicado.");
     return;
@@ -571,13 +571,16 @@ async function executeGenerateSubject(briefVal = null, targetNumber = null) {
   UI.renderIdeationGrid();
   
   try {
-    const rawSubjects = await API.generateSubjects(briefVal);
+    const themeNumber = themeObj?.number || (nextNumber ? (((nextNumber - 1) % 39) + 2) : 2);
+    const rawSubjects = await API.generateSubjects(briefVal, { themeNumber, campaignNumber: nextNumber });
     const subjectList = Array.isArray(rawSubjects) ? rawSubjects : [rawSubjects];
     const subject = subjectList[0];
 
     if (!subject || !subject.title) {
       throw new Error("A Inteligência retornou um formato inesperado sem título.");
     }
+    subject.themeNumber = themeNumber;
+    subject.axisNumber = String(themeNumber).padStart(2, '0');
     
     const batchTimestamp = Date.now();
     const newCampaign = {

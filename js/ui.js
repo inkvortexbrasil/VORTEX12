@@ -1878,7 +1878,7 @@ window.openThemePickerModal = function(nextNumber, onConfirm) {
 
       closeModal();
       if (typeof onConfirm === 'function') {
-        onConfirm(finalBrief, nextNumber);
+        onConfirm(finalBrief, nextNumber, selectedTheme);
       }
     };
   }

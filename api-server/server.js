@@ -19,6 +19,7 @@ const robotManifest = require('./robot_manifest');
 const { TECH_THEMES } = require('./utils/tech_themes');
 const systemZipService = require('./services/system_zip_service');
 const socialMixerService = require('./services/social_mixer_service');
+const assuntosEixos = require('./utils/assuntos_eixos');
 
 
 
@@ -2314,11 +2315,24 @@ async function handleApi(req, res) {
       const payload = await readBody(req);
       const customBrief = (payload.brief || '').trim();
       const catalog = payload.existingCatalog || [];
+      const rawCampaignNumber = payload.campaignNumber || payload.number;
+      const axis = assuntosEixos.resolveAxisNumber(payload.themeNumber || payload.axisNumber || payload.themeId, rawCampaignNumber);
       
       const defaultTheme = (TECH_THEMES && TECH_THEMES.length > 0) ? TECH_THEMES[0].briefing : 'Inovação e tecnologia de ponta na indústria gráfica e têxtil InkVortex Brasil';
-      const userPrompt = `ASSUNTO / BRIEFING: ${customBrief || defaultTheme}
-CATÁLOGO DE TÓPICOS JÁ EXISTENTES (NÃO REPETIR):
-${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
+      
+      let userPrompt = `ASSUNTO / BRIEFING: ${customBrief || defaultTheme}\nEIXO TECNOLÓGICO: #${axis}`;
+
+      // Pesquisa histórica ultra rápida focada estritamente no eixo selecionado (D:\VORTEX12_FILES\minisseries\assuntos\<axis>)
+      const previousTitles = assuntosEixos.getSubjectHistory(axis);
+      if (previousTitles.length > 0) {
+        userPrompt += `\n\nTÍTULOS E ABORDAGENS ANTERIORES JÁ EXPLORADOS NESTE EIXO #${axis} (PROIBIDO REPETIR O TÍTULO OU O MESMO GANCHO):
+${previousTitles.map(t => `- "${t.title}" (Minissérie #${t.campaignNumber || '??'})`).join('\n')}
+
+DIRETIVA DE INOVAÇÃO OBRIGATÓRIA: Crie uma perspectiva 100% inédita para este eixo tecnológico, com um novo título provocativo e uma nova abordagem prática que ainda não foi explorada nas rodadas anteriores.`;
+      } else if (catalog.length > 0) {
+        userPrompt += `\n\nCATÁLOGO GERAL DE TÓPICOS JÁ EXISTENTES (NÃO REPETIR):
+${catalog.slice(0, 15).map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
+      }
 
       const resGen = await generateStage({
         taskName: 'themes',
@@ -2342,8 +2356,14 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
           throw new Error("A Inteligência enviou um formato inesperado. Texto Puro Gerado:\n\n" + resGen.rawText);
         }
       }
+
+      subjects = subjects.map(s => ({
+        ...s,
+        axisNumber: axis,
+        themeNumber: parseInt(axis, 10)
+      }));
       
-      send(res, 200, { ok: true, subjects });
+      send(res, 200, { ok: true, subjects, axisNumber: axis });
     } catch(err) {
       sendApiError(res, err);
     }
@@ -2552,11 +2572,22 @@ ${catalog.map(c => `- ${c.title} (${c.groupSubject || ''})`).join('\n')}`;
       const rawNumber = payload.campaignNumber || payload.campaignNum || payload.number;
       const topic = payload.topic || payload.subject || {};
       const saved = miniseriesWorkspaceService.saveMiniseriesSubject(ROOT, rawNumber, topic);
+
+      // Grava o novo título gerado no histórico do eixo em D:\VORTEX12_FILES\minisseries\assuntos\<axis>\
+      const axis = assuntosEixos.resolveAxisNumber(payload.themeNumber || topic.axisNumber || topic.themeId, rawNumber);
+      if (topic.title) {
+        assuntosEixos.recordSubjectHistory(axis, {
+          campaignNumber: saved.campaignNumber || rawNumber,
+          title: topic.title
+        });
+      }
+
       send(res, 200, {
         ok: true,
         campaignNum: saved.campaignNumber,
         jsonPath: saved.jsonPath,
-        txtPath: saved.txtPath
+        txtPath: saved.txtPath,
+        axisNumber: axis
       });
     } catch(err) {
       sendApiError(res, err);
